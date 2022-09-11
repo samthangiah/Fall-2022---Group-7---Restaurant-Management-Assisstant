@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<title>Serving Staff Page</title>
+<head>
+<style>
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+  text-align: left;
+}
+</style>
+</head>
+<body>
+<h1>Serving Staff Page</h1>
+<p>
+    Logged in as {name}
+    <a href="/">Log out</a>
+</p>
+<a href="/">Clock in / out</a>
+<p>Outgoing orders:</p>
+<table style="width:100%">
+    <tr>
+        <th>Order ID</th>
+        <th>Date</th>
+        <th>Price</th>
+        <th>Customer ID</th>
+        <th>Menu Items</th>
+        <th>Special Instructions</th>
+        <th>Location</th>
+    </tr>
+    <tr th:each="order : ${orders}">
+        <td th:text="${order.id}"></td>
+        <td th:text="${order.date}"></td>
+        <td th:text="${order.price}"></td>
+        <td th:text="${order.customer}">
+            <a href="/serverviewcustinfo/{id}(id=${order.customer})">View info and rewards</a>
+            </td>
+        <td th:text="${order.items}"></td>
+        <td th:text="${order.instructions}"></td>
+        <td th:text="${order.location}"></td>
+    </tr>
+</table>
+<p>Current menu:</p>
+<table>
+    <tr>
+        <th>Menu Item</th>
+        <th>Entree</th>
+        <th>Side Dish</th>
+        <th>Price</th>
+        <th>Availability</th>
+        <th>Quantity</th>
+    </tr>
+    <tr th:each="item : ${menu}">
+        <td th:text="${item.name}"></td>
+        <td th:text="${item.entree}"></td>
+        <td th:text="${item.sides}">
+            <a href="@{/updatemenuitem/{id}(id=${item.id})}">Edit</a>
+        </td>
+        <td th:text="${item.price}">
+            <a href="@{/updatemenuitem/{id}(id=${item.id})}">Edit</a>
+            </td>
+        <td th:text="${item.availability}">
+            <a href="@{/updatemenuitem/{id}(id=${item.id})}">Edit</a>
+        </td>
+        <td th:text="${item.quantity}">
+            <a href="@{/updatemenuitem/{id}(id=${item.id})}">Edit</a>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

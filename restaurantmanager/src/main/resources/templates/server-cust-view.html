@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="ISO-8859-1">
+<title>Serving Staff Customer View</title>
+<style>
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+  text-align: left;
+}
+</style>
+</head>
+<body>
+            <table style="width:100%">
+                <thead>
+                    <tr>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Email</th>
+                        <th>Order History</th>
+                        <th>Rewards Member</th>
+                        <th>Rewards Available</th>
+                        <th>Location</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <tr th:each="customer : ${customers}">
+                    <td th:text="${customer.firstName}"></td>
+                    <td th:text="${customer.lastName}"></td>
+                    <td th:text="${customer.email}"></td>
+                    <td th:text="${customer.orderHistory}"></td>
+                    <td th:text="${customer.rewardsMember}"></td>
+                    <td th:text="${customer.rewardsAvailable}"></td>
+                    <td th:text="${customer.Location}"></td>
+                </tr>
+            </tbody>
+        </table>
+
+    <p><a href="/servingstaffview"> Return to Serving Staff Page</a></p>
+
+</body>
+</html>
