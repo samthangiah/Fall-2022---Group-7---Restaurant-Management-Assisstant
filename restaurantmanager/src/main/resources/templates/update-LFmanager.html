@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="ISO-8859-1">
+<title>Update Customer</title>
+</head>
+<body>
+<form action="#" 
+  th:action="@{/localadminmanupdate/{id}(id=${manager.id})}" 
+  th:object="${manager}" 
+  method="post">
+    <label for="name">Name</label>
+    <input type="text" th:field="*{firstName}" id="name" placeholder="Name">
+    <label for="email">Email</label>
+    <input type="text" th:field="*{email}" id="email" placeholder="Email">
+    <input type="submit" value="Update Manager">   
+</form>
+</body>
+</html>

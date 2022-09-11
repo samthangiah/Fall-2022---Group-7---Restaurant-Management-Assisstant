@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="ISO-8859-1">
+<title>Local Admin</title>
+</head>
+<body>
+            <h2>Customers</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Edit</th>
+                        <th>Delete</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <tr th:each="customer : ${customers}">
+                    <td th:text="${customer.firstName}"></td>
+                    <td th:text="${customer.email}"></td>
+                    <td><a th:href="@{/localadmincustedit/{id}(id=${customer.id})}">Edit</a></td>
+                    <td><a th:href="@{/localadmincustdelete/{id}(id=${customer.id})}">Delete</a></td>
+                </tr>
+            </tbody>
+        </table>
+        
+    <p><a href="/custsignup">Add a new customer</a></p>
+    <p><a href="/localAdmin"> Return to Admin Page</a></p>
+
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="ISO-8859-1">
+<title>Local Admin</title>
+</head>
+<body>
+            <h2>Managers</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Edit</th>
+                        <th>Delete</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <tr th:each="manager : ${managers}">
+                    <td th:text="${manager.firstName}"></td>
+                    <td th:text="${manager.email}"></td>
+                    <td><a th:href="@{/localadminmanedit/{id}(id=${manager.id})}">Edit</a></td>
+                    <td><a th:href="@{/localadminmandelete/{id}(id=${manager.id})}">Delete</a></td>
+                </tr>
+            </tbody>
+        </table>
+        
+    <p><a href="/mansignup">Add a new Manager</a></p>
+    <p><a href="/localAdmin"> Return to Admin Page</a></p>
+
+</body>
+</html>
