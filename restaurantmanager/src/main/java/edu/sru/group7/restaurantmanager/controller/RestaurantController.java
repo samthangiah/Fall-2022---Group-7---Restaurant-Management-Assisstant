@@ -51,6 +51,11 @@ public class RestaurantController {
 		this.orderRepo = orderRepo;
 		this.menuRepo = menuRepo;
 	}
+    
+    @RequestMapping({"/"})
+    public String homePage() {
+    	return "index";
+    }
 
     @RequestMapping({"/localAdmin"})
     public String showAdminPage() {
