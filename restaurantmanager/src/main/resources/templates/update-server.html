@@ -2,17 +2,28 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="ISO-8859-1">
-<title>Update Customer</title>
+<title>Update Server</title>
 </head>
 <body>
 <form action="#" 
   th:action="@{/localadminserverupdate/{id}(id=${server.id})}" 
   th:object="${server}" 
   method="post">
-    <label for="name">Name</label>
-    <input type="text" th:field="*{firstName}" id="name" placeholder="Name">
+    <label for="firstname">First Name</label>
+    <input type="text" th:field="*{firstName}" id="firstname" placeholder="First Name">
+    <br>
+    <label for="lastname">Last Name</label>
+    <input type="text" th:field="*{lastName}" id="lastname" placeholder="Last Name">
+    <br>
     <label for="email">Email</label>
     <input type="text" th:field="*{email}" id="email" placeholder="Email">
+    <br>
+    <label for="password">Password</label>
+    <input type="text" th:field="*{password}" id="email" placeholder="Password">
+    <br>
+    <label for="location">Location</label>
+    <input type="text" th:field="*{location}" id="location" placeholder="Location">
+    <br>
     <input type="submit" value="Update Server">   
 </form>
 </body>

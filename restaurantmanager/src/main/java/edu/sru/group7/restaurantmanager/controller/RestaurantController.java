@@ -239,7 +239,7 @@ public class RestaurantController {
     public String updateMenuItem(@PathVariable("id") long id, @Validated Menu item, 
       BindingResult result, Model model) {
         if (result.hasErrors()) {
-            item.setId(id);
+            item.SetId(id);
             return "update-menu-item";
         }
         

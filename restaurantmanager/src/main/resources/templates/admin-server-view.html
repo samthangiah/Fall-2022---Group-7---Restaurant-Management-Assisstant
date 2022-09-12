@@ -4,13 +4,21 @@
 <meta charset="ISO-8859-1">
 <title>Local Admin</title>
 </head>
+<style>
+table, th, td {
+  border: 1px solid black;
+}
+</style>
 <body>
             <h2>Servers</h2>
             <table>
                 <thead>
                     <tr>
-                        <th>Name</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
                         <th>Email</th>
+                        <th>Password</th>
+                        <th>Location</th>
                         <th>Edit</th>
                         <th>Delete</th>
                     </tr>
@@ -18,7 +26,10 @@
                 <tbody>
                 <tr th:each="server : ${servers}">
                     <td th:text="${server.firstName}"></td>
+                    <td th:text="${server.lastName}"></td>
                     <td th:text="${server.email}"></td>
+                    <td th:text="${server.password}"></td>
+                    <td th:text="${server.location}"></td>
                     <td><a th:href="@{/localadminserveredit/{id}(id=${server.id})}">Edit</a></td>
                     <td><a th:href="@{/localadminserverdelete/{id}(id=${server.id})}">Delete</a></td>
                 </tr>
