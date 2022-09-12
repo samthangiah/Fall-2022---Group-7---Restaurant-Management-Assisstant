@@ -26,8 +26,8 @@ public class Menu {
         this.entree = entree;
         this.sides = sides;
         this.price = price;
-        this.availability;
-        this.quantity;
+        this.availability = availability;
+        this.quantity = quantity;
     }
     
     public void SetId(long id) {
