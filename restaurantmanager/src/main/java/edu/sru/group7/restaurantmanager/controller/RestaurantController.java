@@ -215,8 +215,8 @@ public class RestaurantController {
     
     @GetMapping("/servingstaffview")
     public String showServerView(Model model) {
-        model.addAttribute("orders", orderRepo.findAll())
-        model.addAttribute("menu", menuRepo.findAll())
+        model.addAttribute("orders", orderRepo.findAll());
+        model.addAttribute("menu", menuRepo.findAll());
         return "serving-staff-view";
     }
     
