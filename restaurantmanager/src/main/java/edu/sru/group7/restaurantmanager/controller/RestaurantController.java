@@ -10,11 +10,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import edu.sru.group7.restaurantmanager.domain.Admins;
 import edu.sru.group7.restaurantmanager.domain.Customers;
 import edu.sru.group7.restaurantmanager.domain.Managers;
 import edu.sru.group7.restaurantmanager.domain.Servers;
 import edu.sru.group7.restaurantmanager.domain.Orders;
 import edu.sru.group7.restaurantmanager.domain.Menu;
+import edu.sru.group7.restaurantmanager.repository.AdminRepository;
 import edu.sru.group7.restaurantmanager.repository.CustomerRepository;
 import edu.sru.group7.restaurantmanager.repository.ManagerRepository;
 import edu.sru.group7.restaurantmanager.repository.ServerRepository;
@@ -38,6 +40,9 @@ public class RestaurantController {
 	
 	@Autowired
 	private MenuRepository menuRepo;
+	
+	@Autowired
+	private AdminRepository adminRepo;
 
 	//create an UserRepository instance - instantiation (new) is done by Spring
     public RestaurantController(CustomerRepository customerRepo, 
@@ -56,10 +61,15 @@ public class RestaurantController {
     public String homePage() {
     	return "index";
     }
+    
+    @RequestMapping({"/HQ-admin-view"})
+    public String showHQAdminPage() {
+    	return "HQ-admin-view";
+    }
 
-    @RequestMapping({"/localAdmin"})
+    @RequestMapping({"/local-admin-view"})
     public String showAdminPage() {
-    	return "localAdmin";
+    	return "local-admin-view";
     }
 
     @RequestMapping({"/admin-man-view"})
@@ -79,6 +89,12 @@ public class RestaurantController {
         model.addAttribute("customers", customerRepo.findAll());
         return "admin-cust-view";
     }
+    
+    @RequestMapping({"/HQadmin-admin-view"})
+    public String showAdminList(Model model) {
+        model.addAttribute("admins", adminRepo.findAll());
+        return "HQadmin-admin-view";
+    }
 
   //Mapping for the /signup URL - calls the add-user HTML, to add a user
   	@RequestMapping({"/custsignup"})
@@ -95,7 +111,11 @@ public class RestaurantController {
     public String showManagerSignUpForm(Managers manager) {
         return "add-LFmanager";
     }
-
+  	
+  	@RequestMapping({"/adminsignup"})
+    public String showAdminSignUpForm(Admins admin) {
+        return "add-LFadmin";
+    }
 
   //Mapping for the /signup URL - to add a user
     @RequestMapping({"/addcustomer"})
@@ -126,6 +146,16 @@ public class RestaurantController {
 
         managerRepo.save(manager);
         return "redirect:/admin-man-view";
+    }
+    
+    @RequestMapping({"/addadmin"})
+    public String addAdmin(@Validated Admins admin, BindingResult result, Model model) {
+        if (result.hasErrors()) {
+            return "add-LFadmin";
+        }
+
+        adminRepo.save(admin);
+        return "redirect:/HQadmin-admin-view";
     }
 
   //Mapping for the /edit/user URL to edit a user 
@@ -164,7 +194,6 @@ public class RestaurantController {
             customer.setId(id);
             return "update-customer";
         }
-
         customerRepo.save(customer);
         return "redirect:/admin-cust-view";
     }
@@ -190,6 +219,18 @@ public class RestaurantController {
         }
 
         managerRepo.save(manager);
+        return "redirect:/admin-man-view";
+    }
+    
+    @PostMapping("/HQadminadminupdate/{id}")
+    public String updateAdmin(@PathVariable("id") long id, @Validated Admins admin, 
+      BindingResult result, Model model) {
+        if (result.hasErrors()) {
+            admin.setId(id);
+            return "update-LFadmin";
+        }
+
+        adminRepo.save(admin);
         return "redirect:/admin-man-view";
     }
 
