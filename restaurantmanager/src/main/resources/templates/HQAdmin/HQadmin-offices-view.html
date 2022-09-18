@@ -16,12 +16,19 @@ table, th, td {
 			<tr>
 				<th>ID</th>
 				<th>Address</th>
+				<th>State</th>
+				<th>City</th>
+				<th>ZIP Code</th>
+				
 			</tr>
 		</thead>
 		<tbody>
 			<tr th:each="office : ${offices}">
 				<td th:text="${office.id}"></td>
 				<td th:text="${office.address}"></td>
+				<td th:text="${office.state}"></td>
+				<td th:text="${office.city}"></td>
+				<td th:text="${office.zipcode}"></td>
 				<td><a th:href="@{/HQadminofficeedit/{id}(id=${office.id})}">Edit</a></td>
 				<td><a th:href="@{/HQadminofficedelete/{id}(id=${office.id})}">Delete</a></td>
 				

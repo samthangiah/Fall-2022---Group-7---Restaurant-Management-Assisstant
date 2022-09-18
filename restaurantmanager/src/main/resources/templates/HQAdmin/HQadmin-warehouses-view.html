@@ -16,12 +16,18 @@ table, th, td {
 			<tr>
 				<th>ID</th>
 				<th>Address</th>
+				<th>State</th>
+				<th>City</th>
+				<th>ZIP Code</th>
 			</tr>
 		</thead>
 		<tbody>
 			<tr th:each="warehouse : ${warehouses}">
 				<td th:text="${warehouse.id}"></td>
 				<td th:text="${warehouse.address}"></td>
+				<td th:text="${warehouse.state}"></td>
+				<td th:text="${warehouse.city}"></td>
+				<td th:text="${warehouse.zipcode}"></td>
 				<td><a th:href="@{/HQadminwarehouseedit/{id}(id=${warehouse.id})}">Edit</a></td>
 				<td><a th:href="@{/HQadminwarehousedelete/{id}(id=${warehouse.id})}">Delete</a></td>
 				

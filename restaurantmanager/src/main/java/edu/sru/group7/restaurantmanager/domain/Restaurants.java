@@ -14,10 +14,18 @@ public class Restaurants extends Locations {
 	
 	private String address;
 	
-	public Restaurants(long id, String address) {
+	private String state;
+	
+	private String zipcode;
+	
+	private String city;
+	
+	public Restaurants(long id, String address, String zipcode, String city) {
 		super();
 		this.id = id;
 		this.address = address;
+		this.zipcode = zipcode;
+		this.city = city;
 	}
 
 	public Restaurants() {
@@ -44,6 +52,30 @@ public class Restaurants extends Locations {
 	public void setAddress(String address) {
 		this.address = address;
 		
+	}
+
+	public String getState() {
+		return state;
+	}
+
+	public void setState(String state) {
+		this.state = state;
+	}
+
+	public String getZipcode() {
+		return zipcode;
+	}
+
+	public void setZipcode(String zipcode) {
+		this.zipcode = zipcode;
+	}
+
+	public String getCity() {
+		return city;
+	}
+
+	public void setCity(String city) {
+		this.city = city;
 	}
 
 	
