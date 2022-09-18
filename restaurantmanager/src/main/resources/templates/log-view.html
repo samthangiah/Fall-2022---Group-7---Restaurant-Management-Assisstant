@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="ISO-8859-1">
+<title>Log view</title>
+</head>
+<body>
+            <h2>Log Entries</h2>
+            <table>
+                <thead>
+                    <tr>
+				<th>Log entry ID</th>
+                        <th>Location</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>User ID</th>
+				<th>Action</th>
+				<th>Action ID</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <tr th:each="entry : ${log}">
+			  <td th:text="${entry.id}"></td>
+                    <td th:text="${entry.location}"></td>
+                    <td th:text="${entry.date}"></td>
+                    <td th:text="${entry.time}"></td>
+                    <td th:text="${entry.userId}"></td>
+                    <td th:text="${entry.action}"></td>
+                    <td th:text="${entry.actionId}"></td>
+                </tr>
+            </tbody>
+        </table>
+</body>
+</html>
