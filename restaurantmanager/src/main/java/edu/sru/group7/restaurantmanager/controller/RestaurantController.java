@@ -12,12 +12,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import edu.sru.group7.restaurantmanager.domain.Admins;
 import edu.sru.group7.restaurantmanager.domain.Customers;
+import edu.sru.group7.restaurantmanager.domain.Offices;
+import edu.sru.group7.restaurantmanager.domain.Restaurants;
+import edu.sru.group7.restaurantmanager.domain.Warehouses;
 import edu.sru.group7.restaurantmanager.domain.Managers;
 import edu.sru.group7.restaurantmanager.domain.Servers;
 import edu.sru.group7.restaurantmanager.domain.Orders;
 import edu.sru.group7.restaurantmanager.domain.Menu;
 import edu.sru.group7.restaurantmanager.repository.AdminRepository;
 import edu.sru.group7.restaurantmanager.repository.CustomerRepository;
+import edu.sru.group7.restaurantmanager.repository.OfficeRepository;
+import edu.sru.group7.restaurantmanager.repository.RestaurantRepository;
+import edu.sru.group7.restaurantmanager.repository.WarehouseRepository;
 import edu.sru.group7.restaurantmanager.repository.ManagerRepository;
 import edu.sru.group7.restaurantmanager.repository.ServerRepository;
 import edu.sru.group7.restaurantmanager.repository.OrderRepository;
@@ -43,85 +49,153 @@ public class RestaurantController {
 	
 	@Autowired
 	private AdminRepository adminRepo;
+	
+	@Autowired 
+	private OfficeRepository officeRepo;
+	
+	@Autowired 
+	private WarehouseRepository warehouseRepo;
+	
+	@Autowired 
+	private RestaurantRepository restaurantRepo;
 
 	//create an UserRepository instance - instantiation (new) is done by Spring
-    public RestaurantController(CustomerRepository customerRepo, 
+    public RestaurantController(RestaurantRepository restaurantRepo,
+    							WarehouseRepository warehouseRepo,
+    							OfficeRepository officeRepo,
+    							CustomerRepository customerRepo, 
     							ManagerRepository managerRepo,
     							ServerRepository serverRepo, 
     							OrderRepository orderRepo,
     							MenuRepository menuRepo) {
+    	this.restaurantRepo = restaurantRepo;
+    	this.warehouseRepo = warehouseRepo;
 		this.customerRepo = customerRepo;
 		this.managerRepo = managerRepo;
 		this.serverRepo = serverRepo;
+		this.officeRepo = officeRepo;
 		this.orderRepo = orderRepo;
 		this.menuRepo = menuRepo;
 	}
     
+    //index page
     @RequestMapping({"/"})
     public String homePage() {
     	return "index";
     }
     
+    //HQ admin home page
     @RequestMapping({"/HQ-admin-view"})
     public String showHQAdminPage() {
-    	return "HQ-admin-view";
+    	return "HQAdmin/HQ-admin-view";
     }
-
+    
+    //HQ admin all 3 locations view
+    @RequestMapping({"/HQadmin-locations-view"})
+    public String showLocationsPage() {
+    	return "HQAdmin/HQadmin-locations-view";
+    }
+    
+    //local admin home page
     @RequestMapping({"/local-admin-view"})
     public String showAdminPage() {
-    	return "local-admin-view";
+    	return "LocalAdmin/local-admin-view";
     }
-
+    
+    //local admin manager view
     @RequestMapping({"/admin-man-view"})
     public String showManList(Model model) {
     	model.addAttribute("managers", managerRepo.findAll());
-    	return "admin-man-view";
+    	return "LocalAdmin/admin-man-view";
     }
-
+    
+    //local admin server view
     @RequestMapping({"/admin-server-view"})
     public String showServerList(Model model) {
     	model.addAttribute("servers", serverRepo.findAll());
-    	return "admin-server-view";
+    	return "LocalAdmin/admin-server-view";
     }
-
+    
+    //local admin customer view
     @RequestMapping({"/admin-cust-view"})
     public String showUserList(Model model) {
         model.addAttribute("customers", customerRepo.findAll());
-        return "admin-cust-view";
+        return "LocalAdmin/admin-cust-view";
     }
     
+    //HQ admin local admins view
     @RequestMapping({"/HQadmin-admin-view"})
     public String showAdminList(Model model) {
         model.addAttribute("admins", adminRepo.findAll());
-        return "HQadmin-admin-view";
+        return "HQAdmin/HQadmin-admin-view";
+    }
+    
+    //HQ admin offices view
+    @RequestMapping({"/HQadmin-offices-view"})
+    public String showOfficesList(Model model) {
+        model.addAttribute("offices", officeRepo.findAll());
+        return "HQAdmin/HQadmin-offices-view";
+    }
+    
+    //HQ admin restaurants view
+    @RequestMapping({"/HQadmin-restaurants-view"})
+    public String showRestaurantList(Model model) {
+        model.addAttribute("restaurants", restaurantRepo.findAll());
+        return "HQAdmin/HQadmin-restaurants-view";
+    }
+    
+    //HQ admin warehouses view
+    @RequestMapping({"/HQadmin-warehouses-view"})
+    public String showWarehouseList(Model model) {
+        model.addAttribute("warehouses", warehouseRepo.findAll());
+        return "HQAdmin/HQadmin-warehouses-view";
     }
 
-  //Mapping for the /signup URL - calls the add-user HTML, to add a user
+    //add customer view
   	@RequestMapping({"/custsignup"})
       public String showCustSignUpForm(Customers customer) {
-          return "add-customer";
+          return "LocalAdmin/add-customer";
       }
-
+  	
+  	//add server view
   	@RequestMapping({"/serversignup"})
     public String showServerSignUpForm(Servers server) {
-        return "add-server";
-    }
-
-  	@RequestMapping({"/mansignup"})
-    public String showManagerSignUpForm(Managers manager) {
-        return "add-LFmanager";
+        return "LocalAdmin/add-server";
     }
   	
+  	//add manager view
+  	@RequestMapping({"/mansignup"})
+    public String showManagerSignUpForm(Managers manager) {
+        return "LocalAdmin/add-LFmanager";
+    }
+  	
+  	//add local admin view
   	@RequestMapping({"/adminsignup"})
     public String showAdminSignUpForm(Admins admin) {
-        return "add-LFadmin";
+        return "HQAdmin/add-LFadmin";
     }
-
+  	
+  	@RequestMapping({"/officesignup"})
+    public String showOfficeSignUpForm(Offices office) {
+        return "HQAdmin/add-office";
+    }
+  	
+  	@RequestMapping({"/restaurantsignup"})
+    public String showRestaurantSignUpForm(Restaurants restaurant) {
+        return "HQAdmin/add-restaurant";
+    }
+  	
+  	@RequestMapping({"/warehousesignup"})
+    public String showWarehouseSignUpForm(Warehouses warehouse) {
+        return "HQAdmin/add-warehouse";
+    }
+  	
+  	
   //Mapping for the /signup URL - to add a user
     @RequestMapping({"/addcustomer"})
     public String addCust(@Validated Customers customers, BindingResult result, Model model) {
         if (result.hasErrors()) {
-            return "add-customer";
+            return "LocalAdmin/add-customer";
         }
 
         customerRepo.save(customers);
@@ -131,7 +205,7 @@ public class RestaurantController {
     @RequestMapping({"/addserver"})
     public String addServer(@Validated Servers server, BindingResult result, Model model) {
         if (result.hasErrors()) {
-            return "add-server";
+            return "LocalAdmin/add-server";
         }
 
         serverRepo.save(server);
@@ -141,7 +215,7 @@ public class RestaurantController {
     @RequestMapping({"/addmanager"})
     public String addManager(@Validated Managers manager, BindingResult result, Model model) {
         if (result.hasErrors()) {
-            return "add-LFmanager";
+            return "LocalAdmin/add-LFmanager";
         }
 
         managerRepo.save(manager);
@@ -151,11 +225,77 @@ public class RestaurantController {
     @RequestMapping({"/addadmin"})
     public String addAdmin(@Validated Admins admin, BindingResult result, Model model) {
         if (result.hasErrors()) {
-            return "add-LFadmin";
+            return "HQAdmin/add-LFadmin";
         }
 
         adminRepo.save(admin);
         return "redirect:/HQadmin-admin-view";
+    }
+    
+    @RequestMapping({"/addoffice"})
+    public String addOffice(@Validated Offices office, BindingResult result, Model model) {
+        if (result.hasErrors()) {
+            return "HQAdmin/add-office";
+        }
+
+        officeRepo.save(office);
+        return "redirect:/HQadmin-offices-view";
+    }
+    
+    @RequestMapping({"/addrestaurant"})
+    public String addRestaurant(@Validated Restaurants restaurant, BindingResult result, Model model) {
+        if (result.hasErrors()) {
+            return "HQAdmin/add-restaurant";
+        }
+
+        restaurantRepo.save(restaurant);
+        return "redirect:/HQadmin-restaurants-view";
+    }
+    
+    @RequestMapping({"/addwarehouse"})
+    public String addWarehouse(@Validated Warehouses warehouse, BindingResult result, Model model) {
+        if (result.hasErrors()) {
+            return "HQAdmin/add-warehouse";
+        }
+
+        warehouseRepo.save(warehouse);
+        return "redirect:/HQadmin-warehouses-view";
+    }
+    
+    @GetMapping("/HQadminadminedit/{id}")
+    public String showUpdateAdminForm(@PathVariable("id") long id, Model model) {
+        Admins admin = adminRepo.findById(id)
+          .orElseThrow(() -> new IllegalArgumentException("Invalid admin Id:" + id));
+
+        model.addAttribute("admin", admin);
+        return "HQadmin/update-LFadmin";
+    }
+    
+    @GetMapping("/HQadminofficeedit/{id}")
+    public String showUpdateOfficeForm(@PathVariable("id") long id, Model model) {
+        Offices office = officeRepo.findById(id)
+          .orElseThrow(() -> new IllegalArgumentException("Invalid office Id:" + id));
+
+        model.addAttribute("office", office);
+        return "HQadmin/update-office";
+    }
+    
+    @GetMapping("/HQadminrestaurantedit/{id}")
+    public String showUpdateRestaurantForm(@PathVariable("id") long id, Model model) {
+        Restaurants restaurant = restaurantRepo.findById(id)
+          .orElseThrow(() -> new IllegalArgumentException("Invalid restaurant Id:" + id));
+
+        model.addAttribute("restaurant", restaurant);
+        return "HQadmin/update-restaurant";
+    }
+    
+    @GetMapping("/HQadminwarehouseedit/{id}")
+    public String showUpdateWarehouseForm(@PathVariable("id") long id, Model model) {
+        Warehouses warehouse = warehouseRepo.findById(id)
+          .orElseThrow(() -> new IllegalArgumentException("Invalid warehouse Id:" + id));
+
+        model.addAttribute("warehouse", warehouse);
+        return "HQadmin/update-warehouse";
     }
 
   //Mapping for the /edit/user URL to edit a user 
@@ -165,7 +305,7 @@ public class RestaurantController {
           .orElseThrow(() -> new IllegalArgumentException("Invalid customer Id:" + id));
 
         model.addAttribute("customer", customer);
-        return "update-customer";
+        return "LocalAdmin/update-customer";
     }
 
     @GetMapping("/localadminserveredit/{id}")
@@ -174,7 +314,7 @@ public class RestaurantController {
           .orElseThrow(() -> new IllegalArgumentException("Invalid server Id:" + id));
 
         model.addAttribute("server", server);
-        return "update-server";
+        return "LocalAdmin/update-server";
     }
 
     @GetMapping("/localadminmanedit/{id}")
@@ -183,7 +323,7 @@ public class RestaurantController {
           .orElseThrow(() -> new IllegalArgumentException("Invalid manager Id:" + id));
 
         model.addAttribute("manager", manager);
-        return "update-LFmanager";
+        return "LocalAdmin/update-LFmanager";
     }
 
     //Mapping for the /update/id URL to update a user 
@@ -192,7 +332,7 @@ public class RestaurantController {
       BindingResult result, Model model) {
         if (result.hasErrors()) {
             customer.setId(id);
-            return "update-customer";
+            return "LocalAdmin/update-customer";
         }
         customerRepo.save(customer);
         return "redirect:/admin-cust-view";
@@ -203,7 +343,7 @@ public class RestaurantController {
       BindingResult result, Model model) {
         if (result.hasErrors()) {
             server.setId(id);
-            return "update-server";
+            return "LocalAdmin/update-server";
         }
 
         serverRepo.save(server);
@@ -215,7 +355,7 @@ public class RestaurantController {
       BindingResult result, Model model) {
         if (result.hasErrors()) {
             manager.setId(id);
-            return "update-LFmanager";
+            return "LocalAdmin/update-LFmanager";
         }
 
         managerRepo.save(manager);
@@ -227,11 +367,47 @@ public class RestaurantController {
       BindingResult result, Model model) {
         if (result.hasErrors()) {
             admin.setId(id);
-            return "update-LFadmin";
+            return "HQAdmin/update-LFadmin";
         }
 
         adminRepo.save(admin);
-        return "redirect:/admin-man-view";
+        return "redirect:/HQadmin-admin-view";
+    }
+    
+    @PostMapping("/HQadminofficeupdate/{id}")
+    public String updateOffice(@PathVariable("id") long id, @Validated Offices office, 
+      BindingResult result, Model model) {
+        if (result.hasErrors()) {
+            office.setId(id);
+            return "HQAdmin/update-office";
+        }
+
+        officeRepo.save(office);
+        return "redirect:/HQadmin-offices-view";
+    }
+    
+    @PostMapping("/HQadminwarehouseupdate/{id}")
+    public String updateWarehouse(@PathVariable("id") long id, @Validated Warehouses warehouse, 
+      BindingResult result, Model model) {
+        if (result.hasErrors()) {
+        	warehouse.setId(id);
+            return "HQAdmin/update-warehouse";
+        }
+
+        warehouseRepo.save(warehouse);
+        return "redirect:/HQadmin-warehouses-view";
+    }
+    
+    @PostMapping("/HQadminrestaurantupdate/{id}")
+    public String updateRestaurant(@PathVariable("id") long id, @Validated Restaurants restaurant, 
+      BindingResult result, Model model) {
+        if (result.hasErrors()) {
+        	restaurant.setId(id);
+            return "HQAdmin/update-restaurant";
+        }
+
+        restaurantRepo.save(restaurant);
+        return "redirect:/HQadmin-restaurants-view";
     }
 
     //Mapping for the /delete/id URL to delete a user     
@@ -257,6 +433,38 @@ public class RestaurantController {
           .orElseThrow(() -> new IllegalArgumentException("Invalid manager Id:" + id));
         managerRepo.delete(manager);
         return "redirect:/admin-man-view";
+    }
+    
+    @GetMapping("/HQadminofficedelete/{id}")
+    public String deleteOffice(@PathVariable("id") long id, Model model) {
+    	Offices office = officeRepo.findById(id)
+          .orElseThrow(() -> new IllegalArgumentException("Invalid office Id:" + id));
+        officeRepo.delete(office);
+        return "redirect:/HQadmin-offices-view";
+    }
+    
+    @GetMapping("/HQadminrestaurantdelete/{id}")
+    public String deleteRestaurant(@PathVariable("id") long id, Model model) {
+    	Restaurants restaurant = restaurantRepo.findById(id)
+          .orElseThrow(() -> new IllegalArgumentException("Invalid restaurant Id:" + id));
+    	restaurantRepo.delete(restaurant);
+        return "redirect:/HQadmin-restaurants-view";
+    }
+    
+    @GetMapping("/HQadminwarehousedelete/{id}")
+    public String deleteWarehouse(@PathVariable("id") long id, Model model) {
+    	Warehouses warehouse = warehouseRepo.findById(id)
+          .orElseThrow(() -> new IllegalArgumentException("Invalid warehouse Id:" + id));
+    	warehouseRepo.delete(warehouse);
+        return "redirect:/HQadmin-warehouses-view";
+    }
+    
+    @GetMapping("/HQadminadmindelete/{id}")
+    public String deleteAdmin(@PathVariable("id") long id, Model model) {
+    	Admins admin = adminRepo.findById(id)
+          .orElseThrow(() -> new IllegalArgumentException("Invalid admin Id:" + id));
+    	adminRepo.delete(admin);
+        return "redirect:/HQadmin-admin-view";
     }
     
     @GetMapping("/servingstaffview")

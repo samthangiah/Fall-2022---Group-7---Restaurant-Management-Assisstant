@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="ISO-8859-1">
+<title>HQ Admin</title>
+</head>
+<style>
+table, th, td {
+	border: 1px solid black;
+}
+</style>
+<body>
+	<h2>Warehouses</h2>
+	<table>
+		<thead>
+			<tr>
+				<th>ID</th>
+				<th>Address</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr th:each="warehouse : ${warehouses}">
+				<td th:text="${warehouse.id}"></td>
+				<td th:text="${warehouse.address}"></td>
+				<td><a th:href="@{/HQadminwarehouseedit/{id}(id=${warehouse.id})}">Edit</a></td>
+				<td><a th:href="@{/HQadminwarehousedelete/{id}(id=${warehouse.id})}">Delete</a></td>
+				
+			</tr>
+		</tbody>
+	</table>
+
+	<p>
+		<a href="/warehousesignup">Add a new Warehouse</a>
+	</p>
+	<p>
+		<a href="/HQ-admin-view"> Return to HQ Admin Page</a>
+	</p>
+
+</body>
+</html>
