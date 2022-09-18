@@ -19,6 +19,7 @@ import edu.sru.group7.restaurantmanager.domain.Managers;
 import edu.sru.group7.restaurantmanager.domain.Servers;
 import edu.sru.group7.restaurantmanager.domain.Orders;
 import edu.sru.group7.restaurantmanager.domain.Menu;
+import edu.sru.group7.restaurantmanager.domain.Log;
 import edu.sru.group7.restaurantmanager.repository.AdminRepository;
 import edu.sru.group7.restaurantmanager.repository.CustomerRepository;
 import edu.sru.group7.restaurantmanager.repository.OfficeRepository;
@@ -28,10 +29,17 @@ import edu.sru.group7.restaurantmanager.repository.ManagerRepository;
 import edu.sru.group7.restaurantmanager.repository.ServerRepository;
 import edu.sru.group7.restaurantmanager.repository.OrderRepository;
 import edu.sru.group7.restaurantmanager.repository.MenuRepository;
+import edu.sru.group7.restaurantmanager.repository.LogRepository;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Controller
 public class RestaurantController {
-
+    
+    DateTimeFormatter date = DateTimeFormatter.ofPattern("ISO_LOCAL_DATE");
+    DateTimeFormatter time = DateTimeFormatter.ofPattern("ISO_LOCAL_TIME");
+    
 	@Autowired
 	private CustomerRepository customerRepo;
 
@@ -46,6 +54,9 @@ public class RestaurantController {
 	
 	@Autowired
 	private MenuRepository menuRepo;
+	
+	@Autowired
+    private LogRepository logRepo;
 	
 	@Autowired
 	private AdminRepository adminRepo;
@@ -67,7 +78,8 @@ public class RestaurantController {
     							ManagerRepository managerRepo,
     							ServerRepository serverRepo, 
     							OrderRepository orderRepo,
-    							MenuRepository menuRepo) {
+    							MenuRepository menuRepo,
+    							LogRepository logRepo) {
     	this.restaurantRepo = restaurantRepo;
     	this.warehouseRepo = warehouseRepo;
 		this.customerRepo = customerRepo;
@@ -76,6 +88,7 @@ public class RestaurantController {
 		this.officeRepo = officeRepo;
 		this.orderRepo = orderRepo;
 		this.menuRepo = menuRepo;
+		this.logRepo = logRepo;
 	}
     
     //index page
@@ -197,7 +210,22 @@ public class RestaurantController {
         if (result.hasErrors()) {
             return "LocalAdmin/add-customer";
         }
-
+        
+        Log log = new Log();
+	    log.date = date.format(LocalDateTime.now());
+	    log.time = time.format(LocalDateTime.now());
+	    if (0==0 /*check if user is logged in once login is implemented*/ ) {
+		    log.location = ""; //get user location from customer table
+		    log.userid = ""; //get userid from customer table
+	    }
+	    else {
+		    log.location = customers.location;
+		    log.userId = "Guest";
+	    }
+	    log.action = "Create new customer account";
+	    log.actionId = customers.id;
+	    logRepo.save(log);
+        
         customerRepo.save(customers);
         return "redirect:/admin-cust-view";
     }
@@ -207,6 +235,21 @@ public class RestaurantController {
         if (result.hasErrors()) {
             return "LocalAdmin/add-server";
         }
+        
+        Log log = new Log();
+	    log.date = date.format(LocalDateTime.now());
+	    log.time = time.format(LocalDateTime.now());
+	    if (0==0 /*check if user is logged in once login is implemented*/ ) {
+		    log.location = ""; //get user location from customer table
+		    log.userid = ""; //get userid from customer table
+	    }
+	    else {
+		    log.location = server.location;
+		    log.userId = "Guest";
+	    }
+	    log.action = "Create new server account";
+	    log.actionId = server.id;
+	    logRepo.save(log);
 
         serverRepo.save(server);
         return "redirect:/admin-server-view";
@@ -217,6 +260,21 @@ public class RestaurantController {
         if (result.hasErrors()) {
             return "LocalAdmin/add-LFmanager";
         }
+        
+        Log log = new Log();
+	    log.date = date.format(LocalDateTime.now());
+	    log.time = time.format(LocalDateTime.now());
+	    if (0==0 /*check if user is logged in once login is implemented*/ ) {
+		    log.location = ""; //get user location from customer table
+		    log.userid = ""; //get userid from customer table
+	    }
+	    else {
+		    log.location = manager.location;
+		    log.userId = "Guest";
+	    }
+	    log.action = "Create new manager account";
+	    log.actionId = manager.id;
+	    logRepo.save(log);
 
         managerRepo.save(manager);
         return "redirect:/admin-man-view";
@@ -227,6 +285,21 @@ public class RestaurantController {
         if (result.hasErrors()) {
             return "HQAdmin/add-LFadmin";
         }
+        
+        Log log = new Log();
+	    log.date = date.format(LocalDateTime.now());
+	    log.time = time.format(LocalDateTime.now());
+	    if (0==0 /*check if user is logged in once login is implemented*/ ) {
+		    log.location = ""; //get user location from customer table
+		    log.userid = ""; //get userid from customer table
+	    }
+	    else {
+		    log.location = admin.location;
+		    log.userId = "Guest";
+	    }
+	    log.action = "Create new admin account";
+	    log.actionId = admin.id;
+	    logRepo.save(log);
 
         adminRepo.save(admin);
         return "redirect:/HQadmin-admin-view";
@@ -237,6 +310,17 @@ public class RestaurantController {
         if (result.hasErrors()) {
             return "HQAdmin/add-office";
         }
+        
+        Log log = new Log();
+	    log.date = date.format(LocalDateTime.now());
+	    log.time = time.format(LocalDateTime.now());
+	    if (0==0 /*check if user is logged in once login is implemented*/ ) {
+		    log.location = ""; //get user location from customer table
+		    log.userid = ""; //get userid from customer table
+	    }
+	    log.action = "Add new office";
+	    log.actionId = office.id;
+	    logRepo.save(log);
 
         officeRepo.save(office);
         return "redirect:/HQadmin-offices-view";
@@ -247,6 +331,17 @@ public class RestaurantController {
         if (result.hasErrors()) {
             return "HQAdmin/add-restaurant";
         }
+        
+        Log log = new Log();
+	    log.date = date.format(LocalDateTime.now());
+	    log.time = time.format(LocalDateTime.now());
+	    if (0==0 /*check if user is logged in once login is implemented*/ ) {
+		    log.location = ""; //get user location from customer table
+		    log.userid = ""; //get userid from customer table
+	    }
+	    log.action = "Add new restaurant";
+	    log.actionId = restaurant.id;
+	    logRepo.save(log);
 
         restaurantRepo.save(restaurant);
         return "redirect:/HQadmin-restaurants-view";
@@ -257,6 +352,17 @@ public class RestaurantController {
         if (result.hasErrors()) {
             return "HQAdmin/add-warehouse";
         }
+        
+        Log log = new Log();
+	    log.date = date.format(LocalDateTime.now());
+	    log.time = time.format(LocalDateTime.now());
+	    if (0==0 /*check if user is logged in once login is implemented*/ ) {
+		    log.location = ""; //get user location from customer table
+		    log.userid = ""; //get userid from customer table
+	    }
+	    log.action = "Add new warehouse";
+	    log.actionId = warehouse.id;
+	    logRepo.save(log);
 
         warehouseRepo.save(warehouse);
         return "redirect:/HQadmin-warehouses-view";
@@ -334,6 +440,18 @@ public class RestaurantController {
             customer.setId(id);
             return "LocalAdmin/update-customer";
         }
+        
+        Log log = new Log();
+	    log.date = date.format(LocalDateTime.now());
+	    log.time = time.format(LocalDateTime.now());
+	    if (0==0 /*check if user is logged in once login is implemented*/ ) {
+		    log.location = ""; //get user location from customer table
+		    log.userid = ""; //get userid from customer table
+	    }
+	    log.action = "Update customer account";
+	    log.actionId = customer.id;
+	    logRepo.save(log);
+        
         customerRepo.save(customer);
         return "redirect:/admin-cust-view";
     }
@@ -345,6 +463,17 @@ public class RestaurantController {
             server.setId(id);
             return "LocalAdmin/update-server";
         }
+        
+        Log log = new Log();
+	    log.date = date.format(LocalDateTime.now());
+	    log.time = time.format(LocalDateTime.now());
+	    if (0==0 /*check if user is logged in once login is implemented*/ ) {
+		    log.location = ""; //get user location from customer table
+		    log.userid = ""; //get userid from customer table
+	    }
+	    log.action = "Update server account";
+	    log.actionId = server.id;
+	    logRepo.save(log);
 
         serverRepo.save(server);
         return "redirect:/admin-server-view";
@@ -357,6 +486,17 @@ public class RestaurantController {
             manager.setId(id);
             return "LocalAdmin/update-LFmanager";
         }
+        
+        Log log = new Log();
+	    log.date = date.format(LocalDateTime.now());
+	    log.time = time.format(LocalDateTime.now());
+	    if (0==0 /*check if user is logged in once login is implemented*/ ) {
+		    log.location = ""; //get user location from customer table
+		    log.userid = ""; //get userid from customer table
+	    }
+	    log.action = "Update manager account";
+	    log.actionId = manager.id;
+	    logRepo.save(log);
 
         managerRepo.save(manager);
         return "redirect:/admin-man-view";
@@ -369,6 +509,17 @@ public class RestaurantController {
             admin.setId(id);
             return "HQAdmin/update-LFadmin";
         }
+        
+        Log log = new Log();
+	    log.date = date.format(LocalDateTime.now());
+	    log.time = time.format(LocalDateTime.now());
+	    if (0==0 /*check if user is logged in once login is implemented*/ ) {
+		    log.location = ""; //get user location from customer table
+		    log.userid = ""; //get userid from customer table
+	    }
+	    log.action = "Update admin account";
+	    log.actionId = admin.id;
+	    logRepo.save(log);
 
         adminRepo.save(admin);
         return "redirect:/HQadmin-admin-view";
@@ -381,6 +532,17 @@ public class RestaurantController {
             office.setId(id);
             return "HQAdmin/update-office";
         }
+        
+        Log log = new Log();
+	    log.date = date.format(LocalDateTime.now());
+	    log.time = time.format(LocalDateTime.now());
+	    if (0==0 /*check if user is logged in once login is implemented*/ ) {
+		    log.location = ""; //get user location from customer table
+		    log.userid = ""; //get userid from customer table
+	    }
+	    log.action = "Update office information";
+	    log.actionId = office.id;
+	    logRepo.save(log);
 
         officeRepo.save(office);
         return "redirect:/HQadmin-offices-view";
@@ -393,6 +555,17 @@ public class RestaurantController {
         	warehouse.setId(id);
             return "HQAdmin/update-warehouse";
         }
+        
+        Log log = new Log();
+	    log.date = date.format(LocalDateTime.now());
+	    log.time = time.format(LocalDateTime.now());
+	    if (0==0 /*check if user is logged in once login is implemented*/ ) {
+		    log.location = ""; //get user location from customer table
+		    log.userid = ""; //get userid from customer table
+	    }
+	    log.action = "Update warehouse information";
+	    log.actionId = warehouse.id;
+	    logRepo.save(log);
 
         warehouseRepo.save(warehouse);
         return "redirect:/HQadmin-warehouses-view";
@@ -405,6 +578,17 @@ public class RestaurantController {
         	restaurant.setId(id);
             return "HQAdmin/update-restaurant";
         }
+        
+        Log log = new Log();
+	    log.date = date.format(LocalDateTime.now());
+	    log.time = time.format(LocalDateTime.now());
+	    if (0==0 /*check if user is logged in once login is implemented*/ ) {
+		    log.location = ""; //get user location from customer table
+		    log.userid = ""; //get userid from customer table
+	    }
+	    log.action = "Update restaurant information";
+	    log.actionId = restaurant.id;
+	    logRepo.save(log);
 
         restaurantRepo.save(restaurant);
         return "redirect:/HQadmin-restaurants-view";
@@ -415,6 +599,18 @@ public class RestaurantController {
     public String deleteCust(@PathVariable("id") long id, Model model) {
         Customers customer = customerRepo.findById(id)
           .orElseThrow(() -> new IllegalArgumentException("Invalid customer Id:" + id));
+        
+        Log log = new Log();
+	    log.date = date.format(LocalDateTime.now());
+	    log.time = time.format(LocalDateTime.now());
+	    if (0==0 /*check if user is logged in once login is implemented*/ ) {
+		    log.location = ""; //get user location from customer table
+		    log.userid = ""; //get userid from customer table
+	    }
+	    log.action = "Delete customer account";
+	    log.actionId = customer.id;
+	    logRepo.save(log);
+        
         customerRepo.delete(customer);
         return "redirect:/admin-cust-view";
     }
@@ -423,6 +619,18 @@ public class RestaurantController {
     public String deleteServer(@PathVariable("id") long id, Model model) {
         Servers server = serverRepo.findById(id)
           .orElseThrow(() -> new IllegalArgumentException("Invalid server Id:" + id));
+        
+        Log log = new Log();
+	    log.date = date.format(LocalDateTime.now());
+	    log.time = time.format(LocalDateTime.now());
+	    if (0==0 /*check if user is logged in once login is implemented*/ ) {
+		    log.location = ""; //get user location from customer table
+		    log.userid = ""; //get userid from customer table
+	    }
+	    log.action = "Delete server account";
+	    log.actionId = server.id;
+	    logRepo.save(log);
+        
         serverRepo.delete(server);
         return "redirect:/admin-server-view";
     }
@@ -431,6 +639,18 @@ public class RestaurantController {
     public String deleteManager(@PathVariable("id") long id, Model model) {
         Managers manager = managerRepo.findById(id)
           .orElseThrow(() -> new IllegalArgumentException("Invalid manager Id:" + id));
+        
+        Log log = new Log();
+	    log.date = date.format(LocalDateTime.now());
+	    log.time = time.format(LocalDateTime.now());
+	    if (0==0 /*check if user is logged in once login is implemented*/ ) {
+		    log.location = ""; //get user location from customer table
+		    log.userid = ""; //get userid from customer table
+	    }
+	    log.action = "Delete manager account";
+	    log.actionId = manager.id;
+	    logRepo.save(log);
+        
         managerRepo.delete(manager);
         return "redirect:/admin-man-view";
     }
@@ -439,6 +659,18 @@ public class RestaurantController {
     public String deleteOffice(@PathVariable("id") long id, Model model) {
     	Offices office = officeRepo.findById(id)
           .orElseThrow(() -> new IllegalArgumentException("Invalid office Id:" + id));
+        
+        Log log = new Log();
+	    log.date = date.format(LocalDateTime.now());
+	    log.time = time.format(LocalDateTime.now());
+	    if (0==0 /*check if user is logged in once login is implemented*/ ) {
+		    log.location = ""; //get user location from customer table
+		    log.userid = ""; //get userid from customer table
+	    }
+	    log.action = "Delete office";
+	    log.actionId = office.id;
+	    logRepo.save(log);
+        
         officeRepo.delete(office);
         return "redirect:/HQadmin-offices-view";
     }
@@ -447,6 +679,18 @@ public class RestaurantController {
     public String deleteRestaurant(@PathVariable("id") long id, Model model) {
     	Restaurants restaurant = restaurantRepo.findById(id)
           .orElseThrow(() -> new IllegalArgumentException("Invalid restaurant Id:" + id));
+        
+        Log log = new Log();
+	    log.date = date.format(LocalDateTime.now());
+	    log.time = time.format(LocalDateTime.now());
+	    if (0==0 /*check if user is logged in once login is implemented*/ ) {
+		    log.location = ""; //get user location from customer table
+		    log.userid = ""; //get userid from customer table
+	    }
+	    log.action = "Delete restaurant";
+	    log.actionId = restaurant.id;
+	    logRepo.save(log);
+        
     	restaurantRepo.delete(restaurant);
         return "redirect:/HQadmin-restaurants-view";
     }
@@ -455,6 +699,18 @@ public class RestaurantController {
     public String deleteWarehouse(@PathVariable("id") long id, Model model) {
     	Warehouses warehouse = warehouseRepo.findById(id)
           .orElseThrow(() -> new IllegalArgumentException("Invalid warehouse Id:" + id));
+        
+        Log log = new Log();
+	    log.date = date.format(LocalDateTime.now());
+	    log.time = time.format(LocalDateTime.now());
+	    if (0==0 /*check if user is logged in once login is implemented*/ ) {
+		    log.location = ""; //get user location from customer table
+		    log.userid = ""; //get userid from customer table
+	    }
+	    log.action = "Delete warehouse";
+	    log.actionId = warehouse.id;
+	    logRepo.save(log);
+        
     	warehouseRepo.delete(warehouse);
         return "redirect:/HQadmin-warehouses-view";
     }
@@ -463,6 +719,18 @@ public class RestaurantController {
     public String deleteAdmin(@PathVariable("id") long id, Model model) {
     	Admins admin = adminRepo.findById(id)
           .orElseThrow(() -> new IllegalArgumentException("Invalid admin Id:" + id));
+        
+        Log log = new Log();
+	    log.date = date.format(LocalDateTime.now());
+	    log.time = time.format(LocalDateTime.now());
+	    if (0==0 /*check if user is logged in once login is implemented*/ ) {
+		    log.location = ""; //get user location from customer table
+		    log.userid = ""; //get userid from customer table
+	    }
+	    log.action = "Delete admin account";
+	    log.actionId = admin.id;
+	    logRepo.save(log);
+        
     	adminRepo.delete(admin);
         return "redirect:/HQadmin-admin-view";
     }
@@ -497,8 +765,38 @@ public class RestaurantController {
             return "update-menu-item";
         }
         
+        Log log = new Log();
+	    log.date = date.format(LocalDateTime.now());
+	    log.time = time.format(LocalDateTime.now());
+	    if (0==0 /*check if user is logged in once login is implemented*/ ) {
+		    log.location = ""; //get user location from customer table
+		    log.userid = ""; //get userid from customer table
+	    }
+	    log.action = "Update menu item";
+	    log.actionId = item.id;
+	    logRepo.save(log);
+        
         menuRepo.save(item);
         return "redirect:/serving-staff-view";
+    }
+    
+    @GetMapping("/logview/{id}") //get userid currently logged in from customer table
+    public String showLog(@PathVariable("id") long id, Model model) {
+	    Customers cust = customerRepo.findById(id);
+	    List<Log> fullLog = logRepo.findAll();
+	    if (cust.location == "HQ") {
+		    model.addAttribute("log", fullLog);
+	    }
+	    else {
+		    List<Log> localLog = new ArrayList<Log>();
+		    for (Log i : fullLog) {
+			    if (i.location == cust.location) {
+				    localLog.add(i);
+			    }
+		    }
+		    model.addAttribute("log", localLog);
+	    }
+	    return "log-view";
     }
     
 }
