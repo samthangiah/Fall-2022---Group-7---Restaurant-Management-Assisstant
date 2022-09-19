@@ -115,7 +115,14 @@ public class RestaurantController {
     	return "LocalAdmin/local-admin-view";
     }
     
+
+    @RequestMapping({"/order-placement/cust-order"})
+    public String showCustOrderPage() {
+    	return"cust-order";
+    }
+
     //local admin manager view
+
     @RequestMapping({"/admin-man-view"})
     public String showManList(Model model) {
     	model.addAttribute("managers", managerRepo.findAll());
