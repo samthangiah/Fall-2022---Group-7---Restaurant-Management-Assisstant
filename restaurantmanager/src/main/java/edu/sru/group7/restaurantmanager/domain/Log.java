@@ -12,7 +12,7 @@ public class Log {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private long id;
 
-	private String location;
+	private int location;
 	
 	private String date;
 
@@ -23,8 +23,13 @@ public class Log {
 	private String action;
 
 	private long actionId;
+	
+	public Log() {
+		super();
+	}
 
-	public Log(long id, String location, String date, String time, long userId, String action, long actionId) {
+	public Log(long id, int location, String date, String time, long userId, String action, long actionId) {
+		super();
 		this.id = id;
 		this.location = location;
 		this.date = date;
@@ -42,11 +47,11 @@ public class Log {
 		this.id = id;
 	}
 
-	public String GetLocation() {
+	public int GetLocation() {
 		return location;
 	}
 
-	public void SetLocation(String location) {
+	public void SetLocation(int location) {
 		this.location = location;
 	}
 
