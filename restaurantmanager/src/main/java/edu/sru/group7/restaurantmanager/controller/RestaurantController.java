@@ -56,6 +56,11 @@ public class RestaurantController {
     public String showAdminPage() {
     	return "localAdmin";
     }
+    
+    @RequestMapping({"/order-placement/cust-order"})
+    public String showCustOrderPage() {
+    	return"cust-order";
+    }
 
     @RequestMapping({"/admin-man-view"})
     public String showManList(Model model) {
