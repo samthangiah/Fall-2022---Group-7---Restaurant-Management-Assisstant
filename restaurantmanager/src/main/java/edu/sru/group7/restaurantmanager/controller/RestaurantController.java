@@ -38,8 +38,8 @@ import java.util.*;
 @Controller
 public class RestaurantController {
     
-    DateTimeFormatter date = DateTimeFormatter.ofPattern("ISO_LOCAL_DATE");
-    DateTimeFormatter time = DateTimeFormatter.ofPattern("ISO_LOCAL_TIME");
+    DateTimeFormatter date = DateTimeFormatter.ofPattern("YYYY-DD-MM");
+    DateTimeFormatter time = DateTimeFormatter.ofPattern("HH:MM:SS");
     
 	@Autowired
 	private CustomerRepository customerRepo;
@@ -713,13 +713,13 @@ public class RestaurantController {
     public String showServerView(Model model) {
         model.addAttribute("orders", orderRepo.findAll());
         model.addAttribute("menu", menuRepo.findAll());
-        return "serving-staff-view";
+        return "LocalServingStaff/serving-staff-view";
     }
     
     @GetMapping("/serverviewcustinfo/{id}")
     public String showCustInfo(@PathVariable("id") long id, Model model) {
         model.addAttribute("customers", customerRepo.findById(id));
-        return "server-cust-view";
+        return "LocalServingStaff/server-cust-view";
     }
     
     @GetMapping("/updatemenuitem/{id}")
@@ -728,7 +728,7 @@ public class RestaurantController {
           .orElseThrow(() -> new IllegalArgumentException("Invalid menu Id: " + id));
         
         model.addAttribute("item", item);
-        return "update-menu-item";
+        return "LocalServingStaff/update-menu-item";
     }
     
     @PostMapping("/updatemenuitem/{id}")
@@ -736,7 +736,7 @@ public class RestaurantController {
       BindingResult result, Model model) {
         if (result.hasErrors()) {
             item.SetId(id);
-            return "update-menu-item";
+            return "LocalServingStaff/update-menu-item";
         }
         
         Log log = new Log();
