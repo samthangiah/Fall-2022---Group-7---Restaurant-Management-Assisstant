@@ -15,12 +15,12 @@ public class Orders {
     private String customer;
     private String items;
     private String instructions;
-    private String location;
+    private int location;
     
     public Orders() {
     }
     
-    public Orders(long id, String date, float price, String customer, String items, String instructions, String location) {
+    public Orders(long id, String date, float price, String customer, String items, String instructions, int location) {
         this.id = id;
         this.date = date;
         this.price = price;
@@ -29,60 +29,61 @@ public class Orders {
         this.instructions = instructions;
         this.location = location;
     }
+
+	public long getId() {
+		return id;
+	}
+
+	public void setId(long id) {
+		this.id = id;
+	}
+
+	public String getDate() {
+		return date;
+	}
+
+	public void setDate(String date) {
+		this.date = date;
+	}
+
+	public float getPrice() {
+		return price;
+	}
+
+	public void setPrice(float price) {
+		this.price = price;
+	}
+
+	public String getCustomer() {
+		return customer;
+	}
+
+	public void setCustomer(String customer) {
+		this.customer = customer;
+	}
+
+	public String getItems() {
+		return items;
+	}
+
+	public void setItems(String items) {
+		this.items = items;
+	}
+
+	public String getInstructions() {
+		return instructions;
+	}
+
+	public void setInstructions(String instructions) {
+		this.instructions = instructions;
+	}
+
+	public int getLocation() {
+		return location;
+	}
+
+	public void setLocation(int location) {
+		this.location = location;
+	}
     
-    public void SetId(long id) {
-        this.id = id;
-    }
-    
-    public long GetId() {
-        return id;
-    }
-    
-    public void SetDate(String date) {
-        this.date = date;
-    }
-    
-    public String GetDate() {
-        return date;
-    }
-    
-    public void SetPrice(float price) {
-        this.price = price;
-    }
-    
-    public float GetPrice() {
-        return price;
-    }
-    
-    public void SetCustomer(String customer) {
-        this.customer = customer;
-    }
-    
-    public String GetCustomer() {
-        return customer;
-    }
-    
-    public void SetItems(String items) {
-        this.items = items;
-    }
-    
-    public String GetItems() {
-        return items;
-    }
-    
-    public void SetInstructions(String instructions) {
-        this.instructions = instructions;
-    }
-    
-    public String GetInstructions() {
-        return instructions;
-    }
-    
-    public void SetLocation(String location) {
-        this.location = location;
-    }
-    
-    public String GetLocation() {
-        return location;
-    }
 }
