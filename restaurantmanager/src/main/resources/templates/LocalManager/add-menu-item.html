@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="ISO-8859-1">
+<title>Add Menu Item</title>
+</head>
+<body>
+<form action="#" th:action="@{/addmenuitem}" th:object="${menu}" method="post">
+    <label for="name">Item Name</label>
+    <input type="text" th:field="*{name}" id="name" placeholder="Item Name" required>
+    <label for="entree">Entree</label>
+    <input type="text" th:field="*{entree}" id="entree" placeholder="Entree" required>
+    <br>
+    <label for="sides">Sides</label>
+    <input type="text" th:field="*{sides}" id="sides" placeholder="Sides" required>
+    <br>
+    <label for="price">Price</label>
+    <input type="text" th:field="*{price}" id="price" placeholder="Price" required>
+    <br>
+    <label for="availability">Availability (true or false)</label>
+    <input type="text" th:field="*{availability}" id="availability" placeholder="Availability">
+    <label for="quantity">Quantity</label>
+    <input type="text" th:field="*{quantity}" id="quantity" placeholder="Quantity">
+    <br>
+    <input type="submit" value="Add Menu Item">  
+</form>
+</body>
+</html>

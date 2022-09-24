@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="ISO-8859-1">
+<title>Local Manager</title>
+</head>
+<style>
+table, th, td {
+  border: 1px solid black;
+}
+</style>
+<body>
+	<h2>Current Menu:</h2>
+    	<table>
+        	<thead>
+            	<tr>
+        			<th>Item ID</th>
+        			<th>Item Name</th>
+        			<th>Entree</th>
+        			<th>Side Dish</th>
+        			<th>Price</th>
+        			<th>Availability</th>
+        			<th>Quantity</th>
+        			<th></th>
+        			<th></th>
+    			</tr>
+    		</thead>
+    		<tbody>
+    			<tr th:each="item : ${menu}">
+    				<td th:text="${item.id}"></td>
+        			<td th:text="${item.name}"></td>
+        			<td th:text="${item.entree}"></td>
+        			<td th:text="${item.sides}"></td>
+        			<td th:text="${item.price}"></td>
+        			<td th:text="${item.availability}"></td>
+        			<td th:text="${item.quantity}"></td>
+        			<td><a th:href="@{/localmanagereditmenu/{id}(id=${item.id})}">Edit</a></td>
+        			<td><a th:href="@{/localmanagerdeletemenu/{id}(id=${item.id})}">Delete</a></td>
+    			</tr>
+    		</tbody>
+		</table>
+		<p><a href="/localmanageraddmenu">Add new menu item</a></p>
+</body>
+</html>
