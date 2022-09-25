@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="ISO-8859-1">
+<title>Update Menu Item</title>
+</head>
+<body>
+<form action="#" 
+  th:action="@{/localmanagerupdatemenu/{id}(id=${item.id})}" 
+  th:object="${item}" 
+  method="post">
+  	<label for="name">Item Name</label>
+    <input type="text" th:field="*{name}" id="name" placeholder="Name">
+    <label for="entree">Entree</label>
+    <input type="text" th:field="*{entree}" id="entree" placeholder="Entree">
+    <label for="sides">Sides</label>
+    <input type="text" th:field="*{sides}" id="sides" placeholder="Sides">
+    <label for="price">Price</label>
+    <input type="text" th:field="*{price}" id="price" placeholder="Price">
+    <label for="availability">Availability</label>
+    <input type="text" th:field="*{availability}" id="availability" placeholder="Availability">
+    <label for="quantity">Quantity</label>
+    <input type="text" th:field="*{quantity}" id="quantity" placeholder="Quantity">
+    <input type="submit" value="Update Menu Item">   
+</form>
+</body>
+</html>

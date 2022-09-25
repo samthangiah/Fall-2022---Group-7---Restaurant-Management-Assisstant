@@ -38,8 +38,8 @@ import java.util.*;
 @Controller
 public class RestaurantController {
     
-    DateTimeFormatter date = DateTimeFormatter.ofPattern("YYYY-DD-MM");
-    DateTimeFormatter time = DateTimeFormatter.ofPattern("HH:MM:SS");
+    DateTimeFormatter date = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    DateTimeFormatter time = DateTimeFormatter.ofPattern("HH:mm:ss");
     
 	@Autowired
 	private CustomerRepository customerRepo;
@@ -845,6 +845,198 @@ public class RestaurantController {
 		    model.addAttribute("log", (Iterable<Log>) localLog);
 	    }
 	    return "log-view";
+    }
+    
+    //local admin home page
+    @RequestMapping({"/local-manager-view"})
+    public String showManagerPage() {
+    	return "LocalManager/local-manager-view";
+    }
+    
+    @RequestMapping({"/manager-cust-view"})
+    public String localManShowUserList(Model model) {
+        model.addAttribute("customers", customerRepo.findAll());
+        return "LocalManager/manager-cust-view";
+    }
+    
+    @GetMapping("/localmanagercustedit/{id}")
+    public String localManShowUpdateCustForm(@PathVariable("id") long id, Model model) {
+        Customers customer = customerRepo.findById(id)
+        		.orElseThrow(() -> new IllegalArgumentException("Invalid customer Id:" + id));
+        
+        model.addAttribute("customer", customer);
+        return "LocalManager/update-customer";
+    }
+    
+    @PostMapping("/localmanagercustupdate/{id}")
+    public String localManUpdateCust(@PathVariable("id") long id, @Validated Customers customer, 
+      BindingResult result, Model model) {
+        if (result.hasErrors()) {
+            customer.setId(id);
+            return "LocalManager/update-customer";
+        }
+        
+        Log log = new Log();
+	    log.SetDate(date.format(LocalDateTime.now()));
+	    log.SetTime(time.format(LocalDateTime.now()));
+	    log.SetLocation(0); //get user location from customer table once login implemented
+	    log.SetUserId(0); //get userid from customer table
+	    log.SetAction("Update customer account");
+	    log.SetActionId(customer.getId());
+	    logRepo.save(log);
+        
+        customerRepo.save(customer);
+        return "redirect:/manager-cust-view";
+    }
+    
+    @GetMapping("/localmanagercustdelete/{id}")
+    public String localManDeleteCust(@PathVariable("id") long id, Model model) {
+        Customers customer = customerRepo.findById(id)
+          .orElseThrow(() -> new IllegalArgumentException("Invalid customer Id:" + id));
+        
+        Log log = new Log();
+	    log.SetDate(date.format(LocalDateTime.now()));
+	    log.SetTime(time.format(LocalDateTime.now()));
+	    log.SetLocation(0); //get user location from customer table once login implemented
+	    log.SetUserId(0); //get userid from customer table
+	    log.SetAction("Delete customer account");
+	    log.SetActionId(customer.getId());
+	    logRepo.save(log);
+        
+        customerRepo.delete(customer);
+        return "redirect:/manager-cust-view";
+    }
+    
+    @RequestMapping({"/manager-menu-view"})
+    public String localManShowMenu(Model model) {
+        model.addAttribute("menu", menuRepo.findAll());
+        return "LocalManager/manager-menu-view";
+    }
+    
+    @RequestMapping({"/localmanageraddmenu"})
+    public String showMenuAddForm(Menu menu) {
+        return "LocalManager/add-menu-item";
+    }
+  	
+    @RequestMapping({"/addmenuitem"})
+    public String addMenuItem(@Validated Menu menu, BindingResult result, Model model) {
+        if (result.hasErrors()) {
+            return "LocalManager/add-menu-item";
+        }
+        
+        Log log = new Log();
+	    log.SetDate(date.format(LocalDateTime.now()));
+	    log.SetTime(time.format(LocalDateTime.now()));
+		log.SetLocation(0); //get user location from customer table
+		log.SetUserId(0); //get userid from customer table
+	    log.SetAction("Create new menu item");
+	    log.SetActionId(menu.getId());
+	    logRepo.save(log);
+        
+        menuRepo.save(menu);
+        return "redirect:/manager-menu-view";
+    }
+    
+    @GetMapping("/localmanagereditmenu/{id}")
+    public String showLocalManUpdateMenuItemForm(@PathVariable("id") long id, Model model) {
+        Menu item = menuRepo.findById(id)
+          .orElseThrow(() -> new IllegalArgumentException("Invalid menu Id: " + id));
+        
+        model.addAttribute("item", item);
+        return "LocalManager/update-menu";
+    }
+    
+    @PostMapping("/localmanagerupdatemenu/{id}")
+    public String LocalManUpdateMenu(@PathVariable("id") long id, @Validated Menu item, 
+      BindingResult result, Model model) {
+        if (result.hasErrors()) {
+            item.setId(id);
+            return "LocalManager/update-menu";
+        }
+        
+        Log log = new Log();
+	    log.SetDate(date.format(LocalDateTime.now()));
+	    log.SetTime(time.format(LocalDateTime.now()));
+	    log.SetLocation(0); //get user location from customer table once login implemented
+	    log.SetUserId(0); //get userid from customer table
+	    log.SetAction("Update menu item");
+	    log.SetActionId(item.getId());
+	    logRepo.save(log);
+        
+        menuRepo.save(item);
+        return "redirect:/manager-menu-view";
+    }
+    
+    @GetMapping("/localmanagerdeletemenu/{id}")
+    public String deleteMenuItem(@PathVariable("id") long id, Model model) {
+        Menu item = menuRepo.findById(id)
+          .orElseThrow(() -> new IllegalArgumentException("Invalid Menu Id:" + id));
+        
+        Log log = new Log();
+	    log.SetDate(date.format(LocalDateTime.now()));
+	    log.SetTime(time.format(LocalDateTime.now()));
+	    log.SetLocation(0); //get user location from customer table once login implemented
+	    log.SetUserId(0); //get userid from customer table
+	    log.SetAction("Delete menu item");
+	    log.SetActionId(item.getId());
+	    logRepo.save(log);
+        
+        menuRepo.delete(item);
+        return "redirect:/manager-menu-view";
+    }
+    
+    @RequestMapping({"/manager-server-view"})
+    public String localManShowServers(Model model) {
+        model.addAttribute("servers", serverRepo.findAll());
+        return "LocalManager/manager-server-view";
+    }
+    
+    @GetMapping("/localmanagerserveredit/{id}")
+    public String showLocalManUpdateServerForm(@PathVariable("id") long id, Model model) {
+        Servers server = serverRepo.findById(id)
+          .orElseThrow(() -> new IllegalArgumentException("Invalid server Id:" + id));
+
+        model.addAttribute("server", server);
+        return "LocalManager/update-server";
+    }
+
+    @PostMapping("/localmanagerserverupdate/{id}")
+    public String localManUpdateServer(@PathVariable("id") long id, @Validated Servers server, 
+      BindingResult result, Model model) {
+        if (result.hasErrors()) {
+            server.setId(id);
+            return "LocalManager/update-server";
+        }
+        
+        Log log = new Log();
+	    log.SetDate(date.format(LocalDateTime.now()));
+	    log.SetTime(time.format(LocalDateTime.now()));
+	    log.SetLocation(0); //get user location from customer table once login implemented
+	    log.SetUserId(0); //get userid from customer table
+	    log.SetAction("Update server account");
+	    log.SetActionId(server.getId());
+	    logRepo.save(log);
+
+        serverRepo.save(server);
+        return "redirect:/manager-server-view";
+    }
+    
+    @GetMapping("/localmanagerserverdelete/{id}")
+    public String localManDeleteServer(@PathVariable("id") long id, Model model) {
+        Servers server = serverRepo.findById(id)
+          .orElseThrow(() -> new IllegalArgumentException("Invalid server Id:" + id));
+        
+        Log log = new Log();
+	    log.SetDate(date.format(LocalDateTime.now()));
+	    log.SetTime(time.format(LocalDateTime.now()));
+	    log.SetLocation(0); //get user location from customer table once login implemented
+	    log.SetUserId(0); //get userid from customer table
+	    log.SetAction("Delete server account");
+	    log.SetActionId(server.getId());
+	    logRepo.save(log);
+        
+        serverRepo.delete(server);
+        return "redirect:/manager-server-view";
     }
     
 }
