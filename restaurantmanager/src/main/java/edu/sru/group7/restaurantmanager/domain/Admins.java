@@ -1,5 +1,6 @@
 package edu.sru.group7.restaurantmanager.domain;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -16,6 +17,7 @@ public class Admins {
     
     private String lastName;
     
+    @Column(unique = true)
     private String email;
     
     private String password;
