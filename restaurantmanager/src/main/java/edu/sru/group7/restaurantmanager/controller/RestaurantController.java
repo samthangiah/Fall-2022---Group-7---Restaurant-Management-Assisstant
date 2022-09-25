@@ -121,7 +121,6 @@ public class RestaurantController {
     	return "LocalAdmin/local-admin-view";
     }
     
-
     @RequestMapping({"/order-placement/cust-order"})
     public String showCustOrderPage() {
     	return"cust-order";
@@ -215,7 +214,6 @@ public class RestaurantController {
     public String showWarehouseSignUpForm(Warehouses warehouse) {
         return "HQAdmin/add-warehouse";
     }
-  	
   	
   //Mapping for the /signup URL - to add a user
     @RequestMapping({"/addcustomer"})
@@ -722,6 +720,52 @@ public class RestaurantController {
         return "redirect:/HQadmin-admin-view";
     }
     
+    @GetMapping("/deleteorder/{id}")
+    public String deleteOrder(@PathVariable("id") long id, Model model) {
+    	Orders order = orderRepo.findById(id)
+          .orElseThrow(() -> new IllegalArgumentException("Invalid order Id:" + id));
+        
+        Log log = new Log();
+	    log.SetDate(date.format(LocalDateTime.now()));
+	    log.SetTime(time.format(LocalDateTime.now()));
+	    log.SetLocation(0); //get user location from customer table once login implemented
+	    log.SetUserId(0); //get userid from customer table
+	    log.SetAction("Delete order");
+	    log.SetActionId(order.getId());
+	    logRepo.save(log);
+        
+    	orderRepo.delete(order);
+        return "redirect:/servingstaffview";
+    }
+    
+    //For testing purposes
+    @GetMapping("/add-sample-order")
+    public String addSampleOrder() {
+    	orderRepo.deleteAll();
+    	menuRepo.deleteAll();
+    	
+    	Orders order = new Orders();
+    	Menu item = new Menu();
+    	
+    	order.setDate(date.format(LocalDateTime.now()));
+    	order.setPrice(0.00F);
+    	order.setCustomer("customer@email.com");
+    	order.setItems("items");
+    	order.setInstructions("instructions");
+    	order.setLocation(0);
+    	
+    	item.setName("name");
+    	item.setEntree("entree");
+    	item.setSides("sides");
+    	item.setPrice(0.00F);
+    	item.setAvailability(true);
+    	item.setQuantity(1);
+    	
+    	orderRepo.save(order);
+    	menuRepo.save(item);
+    	return "index";
+    }
+    
     @GetMapping("/servingstaffview")
     public String showServerView(Model model) {
         model.addAttribute("orders", orderRepo.findAll());
@@ -729,9 +773,27 @@ public class RestaurantController {
         return "LocalServingStaff/serving-staff-view";
     }
     
+    //I wrote this unintuitively but the pathvariable "id" is supposed to be the customer's email since 
+    //order.customer is a String and you can't just do customerRepo.findByEmail() or anything like that, it
+    //only works with id so I just loop through the customers for one with a matching email to get their id
     @GetMapping("/serverviewcustinfo/{id}")
-    public String showCustInfo(@PathVariable("id") long id, Model model) {
-        model.addAttribute("customers", customerRepo.findById(id));
+    public String showCustInfo(@PathVariable("id") String orderCust, Model model) {
+    	Iterable<Customers> custs = customerRepo.findAll();
+    	List<Customers> temp = new ArrayList<Customers>();
+    	boolean flag = false;
+    	for (Customers i : custs) {
+    		if (i.getEmail().equals(orderCust)) {
+    			System.out.println("test");
+    			temp.add(i);
+    			flag = true;
+    		}
+    	}
+    	if (!flag) {
+    		return "redirect:/servingstaffview";
+    	}
+    	else {
+    		model.addAttribute("customers", temp);
+    	}
         return "LocalServingStaff/server-cust-view";
     }
     
@@ -748,7 +810,7 @@ public class RestaurantController {
     public String updateMenuItem(@PathVariable("id") long id, @Validated Menu item, 
       BindingResult result, Model model) {
         if (result.hasErrors()) {
-            item.SetId(id);
+            item.setId(id);
             return "LocalServingStaff/update-menu-item";
         }
         
@@ -758,11 +820,11 @@ public class RestaurantController {
 	    log.SetLocation(0); //get user location from customer table once login implemented
 	    log.SetUserId(0); //get userid from customer table
 	    log.SetAction("Update menu item");
-	    log.SetActionId(item.GetId());
+	    log.SetActionId(item.getId());
 	    logRepo.save(log);
         
         menuRepo.save(item);
-        return "redirect:/serving-staff-view";
+        return "redirect:/servingstaffview";
     }
     
     @GetMapping("/logview/{id}") //get userid currently logged in from customer table

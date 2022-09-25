@@ -30,59 +30,59 @@ public class Menu {
         this.quantity = quantity;
     }
     
-    public void SetId(long id) {
+    public void setId(long id) {
         this.id = id;
     }
     
-    public long GetId() {
+    public long getId() {
         return id;
     }
     
-    public void SetName(String name) {
+    public void setName(String name) {
         this.name = name;
     }
     
-    public String GetName() {
+    public String getName() {
         return name;
     }
     
-    public void SetEntree(String entree) {
+    public void setEntree(String entree) {
         this.entree = entree;
     }
     
-    public String GetEntree() {
+    public String getEntree() {
         return entree;
     }
     
-    public void SetSides(String sides) {
+    public void setSides(String sides) {
         this.sides = sides;
     }
     
-    public String GetSides() {
+    public String getSides() {
         return sides;
     }
     
-    public void SetPrice(float price) {
+    public void setPrice(float price) {
         this.price = price;
     }
     
-    public float GetPrice() {
+    public float getPrice() {
         return price;
     }
     
-    public void SetAvailability(boolean availability) {
+    public void setAvailability(boolean availability) {
         this.availability = availability;
     }
     
-    public boolean GetAvailability() {
+    public boolean getAvailability() {
         return availability;
     }
     
-    public void SetQuantity(int quantity) {
+    public void setQuantity(int quantity) {
         this.quantity = quantity;
     }
     
-    public int GetQuantity() {
+    public int getQuantity() {
         return quantity;
     }
 }

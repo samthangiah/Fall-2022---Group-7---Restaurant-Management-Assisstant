@@ -6,9 +6,11 @@
 </head>
 <body>
 <form action="#" 
-  th:action="@{/UpdateMenuItem/{id}(id=${Menu.id})}" 
+  th:action="@{/updatemenuitem/{id}(id=${item.id})}" 
   th:object="${item}" 
   method="post">
+    <input type="hidden" th:field="*{name}" id="name" placeholder="Name">
+    <input type="hidden" th:field="*{entree}" id="entree" placeholder="Entree">
     <label for="sides">Sides</label>
     <input type="text" th:field="*{sides}" id="sides" placeholder="Sides">
     <label for="price">Price</label>

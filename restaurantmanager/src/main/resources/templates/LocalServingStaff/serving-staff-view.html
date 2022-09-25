@@ -19,52 +19,54 @@ table, th, td {
 <a href="/">Clock in / out</a>
 <p>Outgoing orders:</p>
 <table style="width:100%">
+	<thead>
     <tr>
         <th>Order ID</th>
+        <th></th>
         <th>Date</th>
         <th>Price</th>
         <th>Customer ID</th>
+        <th></th>
         <th>Menu Items</th>
         <th>Special Instructions</th>
         <th>Location</th>
     </tr>
+    </thead>
+    <tbody>
     <tr th:each="order : ${orders}">
         <td th:text="${order.id}"></td>
+        <td><a th:href="@{/deleteorder/{id}(id=${order.id})}">Delete order</a></td>
         <td th:text="${order.date}"></td>
         <td th:text="${order.price}"></td>
-        <td th:text="${order.customer}">
-            <a href="/serverviewcustinfo/{id}(id=${order.customer})">View info and rewards</a>
-            </td>
+        <td th:text="${order.customer}"></td>
+        <td><a th:href="@{/serverviewcustinfo/{id}(id=${order.customer})}">View info and rewards</a></td>
         <td th:text="${order.items}"></td>
         <td th:text="${order.instructions}"></td>
         <td th:text="${order.location}"></td>
     </tr>
+    </tbody>
 </table>
 <p>Current menu:</p>
 <table>
     <tr>
-        <th>Menu Item</th>
+    	<th>Item ID</th>
+        <th>Item Name</th>
         <th>Entree</th>
         <th>Side Dish</th>
         <th>Price</th>
         <th>Availability</th>
         <th>Quantity</th>
+        <th></th>
     </tr>
     <tr th:each="item : ${menu}">
+    	<td th:text="${item.id}"></td>
         <td th:text="${item.name}"></td>
         <td th:text="${item.entree}"></td>
-        <td th:text="${item.sides}">
-            <a href="@{/updatemenuitem/{id}(id=${item.id})}">Edit</a>
-        </td>
-        <td th:text="${item.price}">
-            <a href="@{/updatemenuitem/{id}(id=${item.id})}">Edit</a>
-            </td>
-        <td th:text="${item.availability}">
-            <a href="@{/updatemenuitem/{id}(id=${item.id})}">Edit</a>
-        </td>
-        <td th:text="${item.quantity}">
-            <a href="@{/updatemenuitem/{id}(id=${item.id})}">Edit</a>
-        </td>
+        <td th:text="${item.sides}"></td>
+        <td th:text="${item.price}"></td>
+        <td th:text="${item.availability}"></td>
+        <td th:text="${item.quantity}"></td>
+        <td><a th:href="@{/updatemenuitem/{id}(id=${item.id})}">Edit</a></td>
     </tr>
 </table>
 </body>
