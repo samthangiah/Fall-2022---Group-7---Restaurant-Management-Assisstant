@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="ISO-8859-1">
+<title>Local Admin</title>
+</head>
+<style>
+table, th, td {
+  border: 1px solid black;
+}
+</style>
+<body>
+            <h2>Servers</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Email</th>
+                        <th>Password</th>
+                        <th>Location</th>
+                        <th>Edit</th>
+                        <th>Delete</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <tr th:each="server : ${servers}">
+                    <td th:text="${server.firstName}"></td>
+                    <td th:text="${server.lastName}"></td>
+                    <td th:text="${server.email}"></td>
+                    <td th:text="${server.password}"></td>
+                    <td th:text="${server.location}"></td>
+                    <td><a th:href="@{/localadminserveredit/{id}(id=${server.id})}">Edit</a></td>
+                    <td><a th:href="@{/localadminserverdelete/{id}(id=${server.id})}">Delete</a></td>
+                </tr>
+            </tbody>
+        </table>
+        
+    <p><a href="/serversignup">Add a new Server</a></p>
+    <p><a href="/local-admin-view"> Return to Admin Page</a></p>
+
+</body>
+</html>

@@ -98,6 +98,11 @@ public class RestaurantController {
     	return "index";
     }
     
+    @RequestMapping({"/employeesignin"})
+    public String employeeSignIn() {
+    	return "employeesignin";
+    }
+    
     //HQ admin home page
     @RequestMapping({"/HQ-admin-view"})
     public String showHQAdminPage() {
@@ -294,6 +299,8 @@ public class RestaurantController {
             return "HQAdmin/add-LFadmin";
         }
         
+        try {
+        adminRepo.save(admin);
         Log log = new Log();
 	    log.SetDate(date.format(LocalDateTime.now()));
 	    log.SetTime(time.format(LocalDateTime.now()));
@@ -308,8 +315,14 @@ public class RestaurantController {
 	    log.SetAction("Create new admin account");
 	    log.SetActionId(admin.getId());
 	    logRepo.save(log);
-
-        adminRepo.save(admin);
+        }
+        catch (Exception e){
+        	result.rejectValue("email", null,
+                    "There is already an account registered with the same email");
+        	return "HQAdmin/add-LFadmin";
+        }
+        
+        
         return "redirect:/HQadmin-admin-view";
     }
     
