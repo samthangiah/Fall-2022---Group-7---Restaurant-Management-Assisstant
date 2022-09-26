@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="ISO-8859-1">
+<title>HQ Manager</title>
+</head>
+<style>
+table, th, td {
+  border: 1px solid black;
+}
+</style>
+<body>
+            <h2>Restaurants</h2>
+            <table>
+                <thead>
+                    <tr>
+                    	<th>ID</th>
+                        <th>Address</th>
+                        <th>City</th>
+                        <th>State</th>
+                        <th>ZIP Code</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <tr th:each="restaurant : ${restaurants}">
+                    <td th:text="${restaurant.id}"></td>
+                    <td th:text="${restaurant.address}"></td>
+                    <td th:text="${restaurant.city}"></td>
+                    <td th:text="${restaurant.state}"></td>
+                    <td th:text="${restaurant.zipcode}"></td>
+                </tr>
+            </tbody>
+        </table>
+    <p><a href="/HQ-manager-view"> Return to Manager Page</a></p>
+</body>
+</html>
