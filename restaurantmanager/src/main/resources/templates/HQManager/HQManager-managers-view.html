@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="ISO-8859-1">
+<title>HQ Manager</title>
+</head>
+<style>
+table, th, td {
+  border: 1px solid black;
+}
+</style>
+<body>
+            <h2>Managers</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Email</th>
+                        <th>Location</th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                <tr th:each="manager : ${managers}">
+                    <td th:text="${manager.firstName}"></td>
+                    <td th:text="${manager.lastName}"></td>
+                    <td th:text="${manager.email}"></td>
+                    <td th:text="${manager.location}"></td>
+                    <td><a th:href="@{/HQmanagermanedit/{id}(id=${manager.id})}">Edit</a></td>
+                    <td><a th:href="@{/HQmanagermandelete/{id}(id=${manager.id})}">Delete</a></td>
+                </tr>
+            </tbody>
+        </table>
+    <p><a href="/HQmanageraddmanager"> Add new LF Manager</a></p>
+    <p><a href="/HQ-manager-view"> Return to Manager Page</a></p>
+</body>
+</html>

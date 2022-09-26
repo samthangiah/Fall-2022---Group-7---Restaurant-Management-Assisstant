@@ -763,7 +763,7 @@ public class RestaurantController {
     	
     	orderRepo.save(order);
     	menuRepo.save(item);
-    	return "index";
+    	return "employeesignin";
     }
     
     @GetMapping("/servingstaffview")
@@ -847,7 +847,7 @@ public class RestaurantController {
 	    return "log-view";
     }
     
-    //local admin home page
+    //local manager home page
     @RequestMapping({"/local-manager-view"})
     public String showManagerPage() {
     	return "LocalManager/local-manager-view";
@@ -1038,5 +1038,113 @@ public class RestaurantController {
         serverRepo.delete(server);
         return "redirect:/manager-server-view";
     }
+    
+    //HQ Manager home page
+    @RequestMapping({"/HQ-manager-view"})
+    public String showHQManagerPage() {
+    	return "HQManager/HQ-manager-view";
+    }
+    
+    @RequestMapping({"/HQmanager-managers-view"})
+    public String hqManShowManagers(Model model) {
+        model.addAttribute("managers", managerRepo.findAll());
+        return "HQManager/HQManager-managers-view";
+    }
+    
+    @GetMapping("/HQmanagermanedit/{id}")
+    public String showHQManUpdateManagerForm(@PathVariable("id") long id, Model model) {
+        Managers manager = managerRepo.findById(id)
+          .orElseThrow(() -> new IllegalArgumentException("Invalid manager Id:" + id));
+
+        model.addAttribute("manager", manager);
+        return "HQManager/update-LFmanager";
+    }
+    
+    @PostMapping("/hqmanagermanupdate/{id}")
+    public String hqManUpdateManager(@PathVariable("id") long id, @Validated Managers manager, 
+      BindingResult result, Model model) {
+        if (result.hasErrors()) {
+            manager.setId(id);
+            return "HQManager/update-LFmanager";
+        }
+        
+        Log log = new Log();
+	    log.SetDate(date.format(LocalDateTime.now()));
+	    log.SetTime(time.format(LocalDateTime.now()));
+	    log.SetLocation(0); //get user location from customer table once login implemented
+	    log.SetUserId(0); //get userid from customer table
+	    log.SetAction("Update manager account");
+	    log.SetActionId(manager.getId());
+	    logRepo.save(log);
+
+        managerRepo.save(manager);
+        return "redirect:/HQmanager-managers-view";
+    }
+    
+    @GetMapping("/HQmanagermandelete/{id}")
+    public String hqManDeleteManager(@PathVariable("id") long id, Model model) {
+        Managers manager = managerRepo.findById(id)
+          .orElseThrow(() -> new IllegalArgumentException("Invalid manager Id:" + id));
+        
+        Log log = new Log();
+	    log.SetDate(date.format(LocalDateTime.now()));
+	    log.SetTime(time.format(LocalDateTime.now()));
+	    log.SetLocation(0); //get user location from customer table once login implemented
+	    log.SetUserId(0); //get userid from customer table
+	    log.SetAction("Delete manager account");
+	    log.SetActionId(manager.getId());
+	    logRepo.save(log);
+        
+        managerRepo.delete(manager);
+        return "redirect:/HQmanager-managers-view";
+    }
+    
+    @RequestMapping({"/HQmanageraddmanager"})
+    public String showLFManagerAddForm(Managers manager) {
+        return "HQManager/add-LFmanager";
+    }
+  	
+    @RequestMapping({"/addlfmanager"})
+    public String addLFManager(@Validated Managers manager, BindingResult result, Model model) {
+        if (result.hasErrors()) {
+            return "HQManager/add-LFmanager";
+        }
+        
+        Log log = new Log();
+	    log.SetDate(date.format(LocalDateTime.now()));
+	    log.SetTime(time.format(LocalDateTime.now()));
+		log.SetLocation(0); //get user location from customer table
+		log.SetUserId(0); //get userid from customer table
+	    log.SetAction("Create new LF manager");
+	    log.SetActionId(manager.getId());
+	    logRepo.save(log);
+        
+        managerRepo.save(manager);
+        return "redirect:/HQmanager-managers-view";
+    }
+    
+    @RequestMapping({"/HQmanager-location-view"})
+    public String showHQManagerLocationPage() {
+    	return "HQManager/HQManager-locations-view";
+    }
+    
+    @RequestMapping({"/HQmanager-restaurants-view"})
+    public String hqManShowRestaurants(Model model) {
+        model.addAttribute("restaurants", restaurantRepo.findAll());
+        return "HQManager/HQManager-restaurants-view";
+    }
+    
+    @RequestMapping({"/HQmanager-offices-view"})
+    public String hqManShowOffices(Model model) {
+        model.addAttribute("offices", officeRepo.findAll());
+        return "HQManager/HQManager-offices-view";
+    }
+    
+    @RequestMapping({"/HQmanager-warehouses-view"})
+    public String hqManShowWarehouses(Model model) {
+        model.addAttribute("warehouses", warehouseRepo.findAll());
+        return "HQManager/HQManager-warehouses-view";
+    }
+    
     
 }
