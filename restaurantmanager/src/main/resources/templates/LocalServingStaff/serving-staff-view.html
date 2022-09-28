@@ -1,73 +1,136 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<title>Serving Staff Page</title>
-<head>
-<style>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>Serving Staff</title>
+        <!-- Favicon-->
+        <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+        <!-- Core theme CSS (includes Bootstrap)-->
+        <link href="css/styles.css" rel="stylesheet" />
+
+    </head>
+    <style>
 table, th, td {
-  border: 1px solid black;
-  border-collapse: collapse;
-  text-align: left;
+	border: 1px solid black;
 }
+.table-hover tbody tr:hover td {
+    background: #F1F1F1;
+}
+.table-striped>tbody>tr:nth-child(odd)>td, 
+.table-striped>tbody>tr:nth-child(odd)>th {
+   background-color: #00674E;
+   color: white; 
+ }
+ .table-striped>tbody>tr:nth-child(even)>td, 
+.table-striped>tbody>tr:nth-child(even)>th {
+	background-color: #FFFFFF;
+}
+.h2{
+	text-align: center;
+	color: #FFFFFF;
+}
+
 </style>
-</head>
-<body>
-<h1>Serving Staff Page</h1>
-<p>
-    Logged in as {name}
-    <a href="/">Log out</a>
-</p>
-<a href="/">Clock in / out</a>
-<p>Outgoing orders:</p>
-<table style="width:100%">
-	<thead>
-    <tr>
-        <th>Order ID</th>
-        <th></th>
-        <th>Date</th>
-        <th>Price</th>
-        <th>Customer ID</th>
-        <th></th>
-        <th>Menu Items</th>
-        <th>Special Instructions</th>
-        <th>Location</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="order : ${orders}">
-        <td th:text="${order.id}"></td>
-        <td><a th:href="@{/deleteorder/{id}(id=${order.id})}">Delete order</a></td>
-        <td th:text="${order.date}"></td>
-        <td th:text="${order.price}"></td>
-        <td th:text="${order.customer}"></td>
-        <td><a th:href="@{/serverviewcustinfo/{id}(id=${order.customer})}">View info and rewards</a></td>
-        <td th:text="${order.items}"></td>
-        <td th:text="${order.instructions}"></td>
-        <td th:text="${order.location}"></td>
-    </tr>
-    </tbody>
-</table>
-<p>Current menu:</p>
-<table>
-    <tr>
-    	<th>Item ID</th>
-        <th>Item Name</th>
-        <th>Entree</th>
-        <th>Side Dish</th>
-        <th>Price</th>
-        <th>Availability</th>
-        <th>Quantity</th>
-        <th></th>
-    </tr>
-    <tr th:each="item : ${menu}">
-    	<td th:text="${item.id}"></td>
-        <td th:text="${item.name}"></td>
-        <td th:text="${item.entree}"></td>
-        <td th:text="${item.sides}"></td>
-        <td th:text="${item.price}"></td>
-        <td th:text="${item.availability}"></td>
-        <td th:text="${item.quantity}"></td>
-        <td><a th:href="@{/updatemenuitem/{id}(id=${item.id})}">Edit</a></td>
-    </tr>
-</table>
-</body>
+    <body>
+        <div class="d-flex" id="wrapper">
+            <!-- Sidebar-->
+            <div class="border-end bg-white" id="sidebar-wrapper">
+                <div class="sidebar-heading border-bottom bg-light">Insert logo here?</div>
+            </div>
+            <!-- Page content wrapper-->
+            <div id="page-content-wrapper">
+                <!-- Top navigation-->
+                <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+                    <div class="container-fluid">
+                        <!--<button class="btn btn-primary" id="sidebarToggle">Toggle Options</button>-->
+                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+                        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                            <ul class="navbar-nav ms-auto mt-2 mt-lg-0">
+                                <li class="nav-item active"><a class="nav-link" href="/">Home</a></li>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Account</a>
+                                    <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                        <a class="dropdown-item" href="#!">(possibly something else)</a>
+                                        <a class="dropdown-item" href="#!">Change Password (WIP)</a>
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item" href="/employeesignin">Sign-out</a>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </nav>
+                <!-- Page content-->
+                <div class="container-fluid">
+                    <div class="container mt-3">
+                    <h2 class="h2">Outgoing Orders</h2>
+						<table class = "table table-striped table-hover">
+						<thead class="table-dark">
+    						<tr>
+        						<th>Order ID</th>
+        						<th></th>
+        						<th>Date</th>
+        						<th>Price</th>
+        						<th>Customer ID</th>
+        						<th></th>
+        						<th>Menu Items</th>
+        						<th>Special Instructions</th>
+        						<th>Location</th>
+    						</tr>
+    					</thead>
+    					<tbody>
+    						<tr th:each="order : ${orders}">
+        						<td th:text="${order.id}"></td>
+        						<td><a th:href="@{/deleteorder/{id}(id=${order.id})}">Delete order</a></td>
+        						<td th:text="${order.date}"></td>
+        						<td th:text="${order.price}"></td>
+        						<td th:text="${order.customer}"></td>
+        						<td><a th:href="@{/serverviewcustinfo/{id}(id=${order.customer})}">View info and rewards</a></td>
+        						<td th:text="${order.items}"></td>
+        						<td th:text="${order.instructions}"></td>
+        						<td th:text="${order.location}"></td>
+    						</tr>
+    					</tbody>
+					</table>
+						<h2 class="h2">Current Menu</h2>
+						<table class = "table table-striped table-hover">
+						<thead class="table-dark">
+							<tr>
+        						<th>Item ID</th>
+        						<th>Item Name</th>
+        						<th>Entree</th>
+        						<th>Side Dish</th>
+        						<th>Price</th>
+        						<th>Availability</th>
+        						<th>Quantity</th>
+        						<th></th>
+    						</tr>
+						</thead>
+		<tbody>
+			<tr th:each="item : ${menu}">
+    				<td th:text="${item.id}"></td>
+        			<td th:text="${item.name}"></td>
+        			<td th:text="${item.entree}"></td>
+        			<td th:text="${item.sides}"></td>
+        			<td th:text="${item.price}"></td>
+        			<td th:text="${item.availability}"></td>
+        			<td th:text="${item.quantity}"></td>
+        			<td><a th:href="@{/updatemenuitem/{id}(id=${item.id})}">Edit</a></td>
+    			</tr>
+		</tbody>
+		
+	</table>
+	</div>
+                    </div>
+                </div>
+            </div>
+        
+        <!-- Bootstrap core JS-->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- Core theme JS-->
+        <script src="js/scripts.js"></script>
+    </body>
 </html>

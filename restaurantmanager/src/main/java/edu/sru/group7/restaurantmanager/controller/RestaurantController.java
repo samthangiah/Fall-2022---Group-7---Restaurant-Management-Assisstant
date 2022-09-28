@@ -783,7 +783,6 @@ public class RestaurantController {
     	boolean flag = false;
     	for (Customers i : custs) {
     		if (i.getEmail().equals(orderCust)) {
-    			System.out.println("test");
     			temp.add(i);
     			flag = true;
     		}

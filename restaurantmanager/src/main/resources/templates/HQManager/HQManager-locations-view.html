@@ -1,23 +1,102 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-<meta charset="ISO-8859-1">
-<title>HQ Manager</title>
-</head>
-<body>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>HQ Manager</title>
+        <!-- Favicon-->
+        <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+        <!-- Core theme CSS (includes Bootstrap)-->
+        <link href="css/styles.css" rel="stylesheet" />
 
-            <h2>Locations View</h2>
-            <table>
-                <thead>
-                    <tr>
-                    	<th><a href="/HQmanager-restaurants-view">View Restaurants</a></th>
-                        <th><a href="/HQmanager-offices-view">View Offices</a></th>
-                        <th><a href="/HQmanager-warehouses-view">View Warehouses</a></th>
-                    </tr>
-                </thead>
-                <tbody>
-            </tbody>
-        </table>
-        <p><a href="/HQ-manager-view">Return to Manager Page</a></p>
-</body>
+    </head>
+    <style>
+table, th, td {
+	border: 1px solid black;
+}
+.table-hover tbody tr:hover td {
+    background: #F1F1F1;
+}
+.table-striped>tbody>tr:nth-child(odd)>td, 
+.table-striped>tbody>tr:nth-child(odd)>th {
+   background-color: #00674E;
+   color: white; 
+ }
+ .table-striped>tbody>tr:nth-child(even)>td, 
+.table-striped>tbody>tr:nth-child(even)>th {
+	background-color: #FFFFFF;
+}
+.h2{
+	text-align: center;
+	color: #FFFFFF;
+}
+.label{
+	color: white;
+	font-size: 1.5rem;
+}
+.mainmenuBtn{
+	margin: auto;
+	margin-left: auto;
+  	margin-right: auto;
+  	width: 100%;
+ 	border: 3px black;
+  	padding: 5rem 0;
+  	text-align: center;
+}
+
+</style>
+    <body>
+        <div class="d-flex" id="wrapper">
+            <!-- Sidebar-->
+            <div class="border-end bg-white" id="sidebar-wrapper">
+                <div class="sidebar-heading border-bottom bg-light">Insert logo here?</div>
+                <div class="list-group list-group-flush">
+                	<a class="list-group-item list-group-item-action list-group-item-light p-3" href="/HQ-manager-view">HQ Manager Home</a>
+                	<a class="list-group-item list-group-item-action list-group-item-light p-3" href="/HQmanager-managers-view">View Managers</a>
+                    <!-- <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/logview/{id}(id=${get customer.id from httpsession once login is implemented})">View Action Log (WIP)</a> -->
+                </div>
+            </div>
+            <!-- Page content wrapper-->
+            <div id="page-content-wrapper">
+                <!-- Top navigation-->
+                <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+                    <div class="container-fluid">
+                        <button class="btn btn-primary" id="sidebarToggle">Toggle Options</button>
+                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+                        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                            <ul class="navbar-nav ms-auto mt-2 mt-lg-0">
+                                <li class="nav-item active"><a class="nav-link" href="/">Home</a></li>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Account</a>
+                                    <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                        <a class="dropdown-item" href="#!">(possibly something else)</a>
+                                        <a class="dropdown-item" href="#!">Change Password (WIP)</a>
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item" href="/employeesignin">Sign-out</a>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </nav>
+                <!-- Page content-->
+                <div class="container-fluid">
+                    <div class="container mt-3">
+                    	<h2 class="h2">Locations View</h2>
+						<div class="mainmenuBtn">
+  							<a href="/HQmanager-restaurants-view" class="btn btn-primary" role="button">View Restaurants</a>
+  							<a href="/HQmanager-offices-view" class="btn btn-primary" role="button">View Offices</a>
+  							<a href="/HQmanager-warehouses-view" class="btn btn-primary" role="button">View Warehouses</a>
+						</div>
+					</div>
+                    </div>
+                </div>
+            </div>
+        <!-- Bootstrap core JS-->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- Core theme JS-->
+        <script src="js/scripts.js"></script>
+    </body>
 </html>
