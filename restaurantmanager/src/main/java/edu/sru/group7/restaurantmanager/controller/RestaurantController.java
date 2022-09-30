@@ -180,6 +180,7 @@ public class RestaurantController {
     	restaurantRepo.save(restaurant);
     	warehouseRepo.save(warehouse);
     	
+    	addSampleOrder();
     	
     	return "index";
     }
