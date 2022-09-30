@@ -95,6 +95,92 @@ public class RestaurantController {
     //index page
     @RequestMapping({"/"})
     public String homePage() {
+    	
+    	customerRepo.deleteAll();
+    	adminRepo.deleteAll();
+    	managerRepo.deleteAll();
+    	serverRepo.deleteAll();
+    	officeRepo.deleteAll();
+    	restaurantRepo.deleteAll();
+    	warehouseRepo.deleteAll();
+    	
+    	Customers customer = new Customers( 
+    			"John", 
+    			"Doe", 
+    			"customer@gmail.com", 
+    			"pass", 
+    			0, 
+    			true,
+    			100,
+    			1);
+    	Customers customer2 = new Customers( 
+    			"Jane", 
+    			"Doe", 
+    			"customer2@gmail.com", 
+    			"pass", 
+    			0, 
+    			true,
+    			100,
+    			1);
+    	
+    	Admins admin = new Admins("Darth",
+    			"Vader",
+    			"Administrator@email.com",
+    			"pass",
+    			1); //office is 1
+    	Managers manager = new Managers("Anakin",
+    			"Skywalker",
+    			"Manager@email.com",
+    			"pass",
+    			2); //restaurant is 2
+    	Managers manager2 = new Managers("Luke",
+    			"Skywalker",
+    			"Manager2@email.com",
+    			"pass",
+    			2);
+    	Servers server = new Servers("Obi-wan",
+    			"Kenobi",
+    			"server@email.com",
+    			"pass",
+    			2); // restaurant is 2
+    	Servers server2 = new Servers("Baby",
+    			"Yoda",
+    			"server2@email.com",
+    			"pass",
+    			2); // restaurant is 2
+    	
+    	//String address, String zipcode, String city
+    	
+    	Offices office = new Offices("100 Central Loop",
+    			"16057",
+    			"Slippery Rock",
+    			"PA");
+    	
+    	Restaurants restaurant = new Restaurants("100 Arrowhead Drive",
+    			"16057",
+    			"Slippery Rock",
+    			"PA");
+    	
+    	Warehouses warehouse = new Warehouses("150 Branchton Road",
+    			"16057",
+    			"Slippery Rock",
+    			"PA");
+    	
+    	
+    	
+    	
+    	customerRepo.save(customer);
+    	customerRepo.save(customer2);
+    	adminRepo.save(admin);
+    	managerRepo.save(manager);
+    	managerRepo.save(manager2);
+    	serverRepo.save(server);
+    	serverRepo.save(server2);
+    	officeRepo.save(office);
+    	restaurantRepo.save(restaurant);
+    	warehouseRepo.save(warehouse);
+    	
+    	
     	return "index";
     }
     

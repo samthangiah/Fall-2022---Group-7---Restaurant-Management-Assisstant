@@ -24,9 +24,8 @@ public class Admins {
     
     private int location;
 
-	public Admins(long id, String firstName, String lastName, String email, String password, int location) {
+	public Admins(String firstName, String lastName, String email, String password, int location) {
 		super();
-		this.id = id;
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.email = email;

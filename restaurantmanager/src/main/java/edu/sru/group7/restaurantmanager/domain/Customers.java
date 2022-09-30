@@ -32,10 +32,9 @@ public class Customers {
     
     public Customers() {}
 
-	public Customers(long id, String firstName, String lastName, String email, String password, int orderHistory,
+	public Customers(String firstName, String lastName, String email, String password, int orderHistory,
 			boolean rewardsMember, int rewardsAvailable, int location) {
 		super();
-		this.id = id;
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.email = email;

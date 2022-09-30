@@ -20,12 +20,12 @@ public class Restaurants extends Locations {
 	
 	private String city;
 	
-	public Restaurants(long id, String address, String zipcode, String city) {
+	public Restaurants(String address, String zipcode, String city, String state) {
 		super();
-		this.id = id;
 		this.address = address;
 		this.zipcode = zipcode;
 		this.city = city;
+		this.state = state;
 	}
 
 	public Restaurants() {

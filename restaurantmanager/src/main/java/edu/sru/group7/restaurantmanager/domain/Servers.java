@@ -22,9 +22,8 @@ public class Servers {
     
     private int location;
 
-	public Servers(long id, String firstName, String lastName, String email, String password, int location) {
+    public Servers(String firstName, String lastName, String email, String password, int location) {
 		super();
-		this.id = id;
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.email = email;
