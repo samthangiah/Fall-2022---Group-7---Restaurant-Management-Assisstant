@@ -44,7 +44,7 @@ table, th, td {
                     <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/HQadmin-admin-view">View Administrators</a>
                     <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/HQadmin-locations-view">View Locations</a>
                     <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/warehousesignup">Add New Warehouse</a>
-                    <!-- <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/logview/{id}(id=${get customer.id from httpsession once login is implemented})">View Action Log (WIP)</a> -->
+                    <a class="list-group-item list-group-item-action list-group-item-light p-3" th:href="@{/logview/{id}(id=${1})}">View Action Log</a>
                 </div>
             </div>
             <!-- Page content wrapper-->
@@ -63,7 +63,7 @@ table, th, td {
                                         <a class="dropdown-item" href="#!">(possibly something else)</a>
                                         <a class="dropdown-item" href="#!">Change Password (WIP)</a>
                                         <div class="dropdown-divider"></div>
-                                        <a class="dropdown-item" href="/employeesignin">Sign-out</a>
+                                        <a class="dropdown-item" href="/templogout">Sign-out</a>
                                     </div>
                                 </li>
                             </ul>

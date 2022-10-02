@@ -41,6 +41,8 @@ public class RestaurantController {
     DateTimeFormatter date = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     DateTimeFormatter time = DateTimeFormatter.ofPattern("HH:mm:ss");
     
+    private boolean isLoggedIn;
+    
 	@Autowired
 	private CustomerRepository customerRepo;
 
@@ -90,11 +92,45 @@ public class RestaurantController {
 		this.orderRepo = orderRepo;
 		this.menuRepo = menuRepo;
 		this.logRepo = logRepo;
+		isLoggedIn = false;
 	}
+    
+    public boolean GetIsLoggedIn() {
+    	return isLoggedIn;
+    }
+    
+    public void SetIsLoggedIn(boolean isLoggedIn) {
+    	this.isLoggedIn = isLoggedIn;
+    }
     
     //index page
     @RequestMapping({"/"})
     public String homePage() {
+    	
+    	//For testing purposes, delete later
+    	addSampleOrder();
+    	
+    	return "index";
+    }
+    
+    //temporary login page
+    @RequestMapping({"/templogin"})
+    public String tempLoginPage() {
+    	SetIsLoggedIn(true);
+    	return "tempcustlogin";
+    }
+    
+    //temporary login page
+    @RequestMapping({"/tempemployeelogin"})
+    public String tempEmployeeLoginPage() {
+    	SetIsLoggedIn(true);
+    	return "temploginpage";
+    }
+    
+    //temporary logout function
+    @RequestMapping({"/templogout"})
+    public String tempLogout() {
+    	SetIsLoggedIn(false);
     	return "index";
     }
     
@@ -127,7 +163,6 @@ public class RestaurantController {
     }
 
     //local admin manager view
-
     @RequestMapping({"/admin-man-view"})
     public String showManList(Model model) {
     	model.addAttribute("managers", managerRepo.findAll());
@@ -215,7 +250,7 @@ public class RestaurantController {
         return "HQAdmin/add-warehouse";
     }
   	
-  //Mapping for the /signup URL - to add a user
+    //Mapping for the /signup URL - to add a user
     @RequestMapping({"/addcustomer"})
     public String addCust(@Validated Customers customers, BindingResult result, Model model) {
         if (result.hasErrors()) {
@@ -223,18 +258,18 @@ public class RestaurantController {
         }
         
         Log log = new Log();
-	    log.SetDate(date.format(LocalDateTime.now()));
-	    log.SetTime(time.format(LocalDateTime.now()));
-	    if (0==0 /*check if user is logged in once login is implemented*/ ) {
-		    log.SetLocation(0); //get user location from customer table
-		    log.SetUserId(0); //get userid from customer table
+	    log.setDate(date.format(LocalDateTime.now()));
+	    log.setTime(time.format(LocalDateTime.now()));
+	    if (GetIsLoggedIn()) {
+	    	log.setLocation(getUserLocation());
+		    log.setUserId(getUserUID());
 	    }
 	    else {
-		    log.SetLocation(customers.getLocation());
-		    log.SetUserId(-1);
+		    log.setLocation(customers.getLocation());
+		    log.setUserId(-1);
 	    }
-	    log.SetAction("Create new customer account");
-	    log.SetActionId(customers.getId());
+	    log.setAction("Create new customer account");
+	    log.setActionId(customers.getId());
 	    logRepo.save(log);
         
         customerRepo.save(customers);
@@ -248,18 +283,12 @@ public class RestaurantController {
         }
         
         Log log = new Log();
-	    log.SetDate(date.format(LocalDateTime.now()));
-	    log.SetTime(time.format(LocalDateTime.now()));
-	    if (0==0 /*check if user is logged in once login is implemented*/ ) {
-		    log.SetLocation(0); //get user location from customer table
-		    log.SetUserId(0); //get userid from customer table
-	    }
-	    else {
-		    log.SetLocation(server.getLocation());
-		    log.SetUserId(-1);
-	    }
-	    log.SetAction("Create new server account");
-	    log.SetActionId(server.getId());
+	    log.setDate(date.format(LocalDateTime.now()));
+	    log.setTime(time.format(LocalDateTime.now()));
+	    log.setLocation(getUserLocation());
+		log.setUserId(getUserUID());
+	    log.setAction("Create new server account");
+	    log.setActionId(server.getId());
 	    logRepo.save(log);
 
         serverRepo.save(server);
@@ -273,18 +302,12 @@ public class RestaurantController {
         }
         
         Log log = new Log();
-	    log.SetDate(date.format(LocalDateTime.now()));
-	    log.SetTime(time.format(LocalDateTime.now()));
-	    if (0==0 /*check if user is logged in once login is implemented*/ ) {
-		    log.SetLocation(0); //get user location from customer table
-		    log.SetUserId(0); //get userid from customer table
-	    }
-	    else {
-		    log.SetLocation(manager.getLocation());
-		    log.SetUserId(-1);
-	    }
-	    log.SetAction("Create new manager account");
-	    log.SetActionId(manager.getId());
+	    log.setDate(date.format(LocalDateTime.now()));
+	    log.setTime(time.format(LocalDateTime.now()));
+	    log.setLocation(getUserLocation());
+		log.setUserId(getUserUID());
+	    log.setAction("Create new manager account");
+	    log.setActionId(manager.getId());
 	    logRepo.save(log);
 
         managerRepo.save(manager);
@@ -300,18 +323,12 @@ public class RestaurantController {
         try {
         adminRepo.save(admin);
         Log log = new Log();
-	    log.SetDate(date.format(LocalDateTime.now()));
-	    log.SetTime(time.format(LocalDateTime.now()));
-	    if (0==0 /*check if user is logged in once login is implemented*/ ) {
-		    log.SetLocation(0); //get user location from customer table
-		    log.SetUserId(0); //get userid from customer table
-	    }
-	    else {
-		    log.SetLocation(admin.getLocation());
-		    log.SetUserId(-1);
-	    }
-	    log.SetAction("Create new admin account");
-	    log.SetActionId(admin.getId());
+	    log.setDate(date.format(LocalDateTime.now()));
+	    log.setTime(time.format(LocalDateTime.now()));
+	    log.setLocation(1 /*HQ*/);
+		log.setUserId(getUserUID());
+	    log.setAction("Create new admin account");
+	    log.setActionId(admin.getId());
 	    logRepo.save(log);
         }
         catch (Exception e){
@@ -319,7 +336,6 @@ public class RestaurantController {
                     "There is already an account registered with the same email");
         	return "HQAdmin/add-LFadmin";
         }
-        
         
         return "redirect:/HQadmin-admin-view";
     }
@@ -331,12 +347,12 @@ public class RestaurantController {
         }
         
         Log log = new Log();
-	    log.SetDate(date.format(LocalDateTime.now()));
-	    log.SetTime(time.format(LocalDateTime.now()));
-	    log.SetLocation(0); //get user location from customer table once login implemented
-	    log.SetUserId(0); //get userid from customer table
-	    log.SetAction("Add new office");
-	    log.SetActionId(office.getId());
+	    log.setDate(date.format(LocalDateTime.now()));
+	    log.setTime(time.format(LocalDateTime.now()));
+	    log.setLocation(1 /*HQ*/);
+	    log.setUserId(getUserUID());
+	    log.setAction("Add new office");
+	    log.setActionId(office.getId());
 	    logRepo.save(log);
 
         officeRepo.save(office);
@@ -350,12 +366,12 @@ public class RestaurantController {
         }
         
         Log log = new Log();
-	    log.SetDate(date.format(LocalDateTime.now()));
-	    log.SetTime(time.format(LocalDateTime.now()));
-	    log.SetLocation(0); //get user location from customer table once login implemented
-	    log.SetUserId(0); //get userid from customer table
-	    log.SetAction("Add new restaurant");
-	    log.SetActionId(restaurant.getId());
+	    log.setDate(date.format(LocalDateTime.now()));
+	    log.setTime(time.format(LocalDateTime.now()));
+	    log.setLocation(1 /*HQ*/);
+	    log.setUserId(getUserUID());
+	    log.setAction("Add new restaurant");
+	    log.setActionId(restaurant.getId());
 	    logRepo.save(log);
 
         restaurantRepo.save(restaurant);
@@ -369,12 +385,12 @@ public class RestaurantController {
         }
         
         Log log = new Log();
-	    log.SetDate(date.format(LocalDateTime.now()));
-	    log.SetTime(time.format(LocalDateTime.now()));
-	    log.SetLocation(0); //get user location from customer table once login implemented
-	    log.SetUserId(0); //get userid from customer table
-	    log.SetAction("Add new warehouse");
-	    log.SetActionId(warehouse.getId());
+	    log.setDate(date.format(LocalDateTime.now()));
+	    log.setTime(time.format(LocalDateTime.now()));
+	    log.setLocation(1 /*HQ*/);
+	    log.setUserId(getUserUID());
+	    log.setAction("Add new warehouse");
+	    log.setActionId(warehouse.getId());
 	    logRepo.save(log);
 
         warehouseRepo.save(warehouse);
@@ -417,7 +433,7 @@ public class RestaurantController {
         return "HQadmin/update-warehouse";
     }
 
-  //Mapping for the /edit/user URL to edit a user 
+    //Mapping for the /edit/user URL to edit a user 
     @GetMapping("/localadmincustedit/{id}")
     public String showUpdateCustForm(@PathVariable("id") long id, Model model) {
         Customers customer = customerRepo.findById(id)
@@ -455,12 +471,12 @@ public class RestaurantController {
         }
         
         Log log = new Log();
-	    log.SetDate(date.format(LocalDateTime.now()));
-	    log.SetTime(time.format(LocalDateTime.now()));
-	    log.SetLocation(0); //get user location from customer table once login implemented
-	    log.SetUserId(0); //get userid from customer table
-	    log.SetAction("Update customer account");
-	    log.SetActionId(customer.getId());
+	    log.setDate(date.format(LocalDateTime.now()));
+	    log.setTime(time.format(LocalDateTime.now()));
+	    log.setLocation(getUserLocation());
+	    log.setUserId(getUserUID());
+	    log.setAction("Update customer account");
+	    log.setActionId(customer.getId());
 	    logRepo.save(log);
         
         customerRepo.save(customer);
@@ -476,12 +492,12 @@ public class RestaurantController {
         }
         
         Log log = new Log();
-	    log.SetDate(date.format(LocalDateTime.now()));
-	    log.SetTime(time.format(LocalDateTime.now()));
-	    log.SetLocation(0); //get user location from customer table once login implemented
-	    log.SetUserId(0); //get userid from customer table
-	    log.SetAction("Update server account");
-	    log.SetActionId(server.getId());
+	    log.setDate(date.format(LocalDateTime.now()));
+	    log.setTime(time.format(LocalDateTime.now()));
+	    log.setLocation(getUserLocation());
+	    log.setUserId(getUserUID());
+	    log.setAction("Update server account");
+	    log.setActionId(server.getId());
 	    logRepo.save(log);
 
         serverRepo.save(server);
@@ -497,12 +513,12 @@ public class RestaurantController {
         }
         
         Log log = new Log();
-	    log.SetDate(date.format(LocalDateTime.now()));
-	    log.SetTime(time.format(LocalDateTime.now()));
-	    log.SetLocation(0); //get user location from customer table once login implemented
-	    log.SetUserId(0); //get userid from customer table
-	    log.SetAction("Update manager account");
-	    log.SetActionId(manager.getId());
+	    log.setDate(date.format(LocalDateTime.now()));
+	    log.setTime(time.format(LocalDateTime.now()));
+	    log.setLocation(getUserLocation());
+	    log.setUserId(getUserUID());
+	    log.setAction("Update manager account");
+	    log.setActionId(manager.getId());
 	    logRepo.save(log);
 
         managerRepo.save(manager);
@@ -518,12 +534,12 @@ public class RestaurantController {
         }
         
         Log log = new Log();
-	    log.SetDate(date.format(LocalDateTime.now()));
-	    log.SetTime(time.format(LocalDateTime.now()));
-	    log.SetLocation(0); //get user location from customer table once login implemented
-	    log.SetUserId(0); //get userid from customer table
-	    log.SetAction("Update admin account");
-	    log.SetActionId(admin.getId());
+	    log.setDate(date.format(LocalDateTime.now()));
+	    log.setTime(time.format(LocalDateTime.now()));
+	    log.setLocation(getUserLocation());
+	    log.setUserId(getUserUID());
+	    log.setAction("Update admin account");
+	    log.setActionId(admin.getId());
 	    logRepo.save(log);
 
         adminRepo.save(admin);
@@ -539,12 +555,12 @@ public class RestaurantController {
         }
         
         Log log = new Log();
-	    log.SetDate(date.format(LocalDateTime.now()));
-	    log.SetTime(time.format(LocalDateTime.now()));
-	    log.SetLocation(0); //get user location from customer table once login implemented
-	    log.SetUserId(0); //get userid from customer table
-	    log.SetAction("Update office information");
-	    log.SetActionId(office.getId());
+	    log.setDate(date.format(LocalDateTime.now()));
+	    log.setTime(time.format(LocalDateTime.now()));
+	    log.setLocation(1 /*HQ*/);
+	    log.setUserId(getUserUID());
+	    log.setAction("Update office information");
+	    log.setActionId(office.getId());
 	    logRepo.save(log);
 
         officeRepo.save(office);
@@ -560,12 +576,12 @@ public class RestaurantController {
         }
         
         Log log = new Log();
-	    log.SetDate(date.format(LocalDateTime.now()));
-	    log.SetTime(time.format(LocalDateTime.now()));
-	    log.SetLocation(0); //get user location from customer table once login implemented
-	    log.SetUserId(0); //get userid from customer table
-	    log.SetAction("Update warehouse information");
-	    log.SetActionId(warehouse.getId());
+	    log.setDate(date.format(LocalDateTime.now()));
+	    log.setTime(time.format(LocalDateTime.now()));
+	    log.setLocation(1 /*HQ*/);
+	    log.setUserId(getUserUID());
+	    log.setAction("Update warehouse information");
+	    log.setActionId(warehouse.getId());
 	    logRepo.save(log);
 
         warehouseRepo.save(warehouse);
@@ -581,12 +597,12 @@ public class RestaurantController {
         }
         
         Log log = new Log();
-	    log.SetDate(date.format(LocalDateTime.now()));
-	    log.SetTime(time.format(LocalDateTime.now()));
-	    log.SetLocation(0); //get user location from customer table once login implemented
-	    log.SetUserId(0); //get userid from customer table
-	    log.SetAction("Update restaurant information");
-	    log.SetActionId(restaurant.getId());
+	    log.setDate(date.format(LocalDateTime.now()));
+	    log.setTime(time.format(LocalDateTime.now()));
+	    log.setLocation(1 /*HQ*/);
+	    log.setUserId(getUserUID());
+	    log.setAction("Update restaurant information");
+	    log.setActionId(restaurant.getId());
 	    logRepo.save(log);
 
         restaurantRepo.save(restaurant);
@@ -600,12 +616,12 @@ public class RestaurantController {
           .orElseThrow(() -> new IllegalArgumentException("Invalid customer Id:" + id));
         
         Log log = new Log();
-	    log.SetDate(date.format(LocalDateTime.now()));
-	    log.SetTime(time.format(LocalDateTime.now()));
-	    log.SetLocation(0); //get user location from customer table once login implemented
-	    log.SetUserId(0); //get userid from customer table
-	    log.SetAction("Delete customer account");
-	    log.SetActionId(customer.getId());
+	    log.setDate(date.format(LocalDateTime.now()));
+	    log.setTime(time.format(LocalDateTime.now()));
+	    log.setLocation(getUserLocation());
+	    log.setUserId(getUserUID());
+	    log.setAction("Delete customer account");
+	    log.setActionId(customer.getId());
 	    logRepo.save(log);
         
         customerRepo.delete(customer);
@@ -618,12 +634,12 @@ public class RestaurantController {
           .orElseThrow(() -> new IllegalArgumentException("Invalid server Id:" + id));
         
         Log log = new Log();
-	    log.SetDate(date.format(LocalDateTime.now()));
-	    log.SetTime(time.format(LocalDateTime.now()));
-	    log.SetLocation(0); //get user location from customer table once login implemented
-	    log.SetUserId(0); //get userid from customer table
-	    log.SetAction("Delete server account");
-	    log.SetActionId(server.getId());
+	    log.setDate(date.format(LocalDateTime.now()));
+	    log.setTime(time.format(LocalDateTime.now()));
+	    log.setLocation(getUserLocation());
+	    log.setUserId(getUserUID());
+	    log.setAction("Delete server account");
+	    log.setActionId(server.getId());
 	    logRepo.save(log);
         
         serverRepo.delete(server);
@@ -636,12 +652,12 @@ public class RestaurantController {
           .orElseThrow(() -> new IllegalArgumentException("Invalid manager Id:" + id));
         
         Log log = new Log();
-	    log.SetDate(date.format(LocalDateTime.now()));
-	    log.SetTime(time.format(LocalDateTime.now()));
-	    log.SetLocation(0); //get user location from customer table once login implemented
-	    log.SetUserId(0); //get userid from customer table
-	    log.SetAction("Delete manager account");
-	    log.SetActionId(manager.getId());
+	    log.setDate(date.format(LocalDateTime.now()));
+	    log.setTime(time.format(LocalDateTime.now()));
+	    log.setLocation(getUserLocation());
+	    log.setUserId(getUserUID());
+	    log.setAction("Delete manager account");
+	    log.setActionId(manager.getId());
 	    logRepo.save(log);
         
         managerRepo.delete(manager);
@@ -654,12 +670,12 @@ public class RestaurantController {
           .orElseThrow(() -> new IllegalArgumentException("Invalid office Id:" + id));
         
         Log log = new Log();
-	    log.SetDate(date.format(LocalDateTime.now()));
-	    log.SetTime(time.format(LocalDateTime.now()));
-	    log.SetLocation(0); //get user location from customer table once login implemented
-        log.SetUserId(0); //get userid from customer table
-	    log.SetAction("Delete office");
-	    log.SetActionId(office.getId());
+	    log.setDate(date.format(LocalDateTime.now()));
+	    log.setTime(time.format(LocalDateTime.now()));
+	    log.setLocation(1 /*HQ*/);
+        log.setUserId(getUserUID());
+	    log.setAction("Delete office");
+	    log.setActionId(office.getId());
 	    logRepo.save(log);
         
         officeRepo.delete(office);
@@ -672,12 +688,12 @@ public class RestaurantController {
           .orElseThrow(() -> new IllegalArgumentException("Invalid restaurant Id:" + id));
         
         Log log = new Log();
-	    log.SetDate(date.format(LocalDateTime.now()));
-	    log.SetTime(time.format(LocalDateTime.now()));
-	    log.SetLocation(0); //get user location from customer table once login implemented
-	    log.SetUserId(0); //get userid from customer table
-	    log.SetAction("Delete restaurant");
-	    log.SetActionId(restaurant.getId());
+	    log.setDate(date.format(LocalDateTime.now()));
+	    log.setTime(time.format(LocalDateTime.now()));
+	    log.setLocation(1 /*HQ*/);
+	    log.setUserId(getUserUID());
+	    log.setAction("Delete restaurant");
+	    log.setActionId(restaurant.getId());
 	    logRepo.save(log);
         
     	restaurantRepo.delete(restaurant);
@@ -690,12 +706,12 @@ public class RestaurantController {
           .orElseThrow(() -> new IllegalArgumentException("Invalid warehouse Id:" + id));
         
         Log log = new Log();
-	    log.SetDate(date.format(LocalDateTime.now()));
-	    log.SetTime(time.format(LocalDateTime.now()));
-	    log.SetLocation(0); //get user location from customer table once login implemented
-	    log.SetUserId(0); //get userid from customer table
-	    log.SetAction("Delete warehouse");
-	    log.SetActionId(warehouse.getId());
+	    log.setDate(date.format(LocalDateTime.now()));
+	    log.setTime(time.format(LocalDateTime.now()));
+	    log.setLocation(1 /*HQ*/);
+	    log.setUserId(getUserUID());
+	    log.setAction("Delete warehouse");
+	    log.setActionId(warehouse.getId());
 	    logRepo.save(log);
         
     	warehouseRepo.delete(warehouse);
@@ -708,12 +724,12 @@ public class RestaurantController {
           .orElseThrow(() -> new IllegalArgumentException("Invalid admin Id:" + id));
         
         Log log = new Log();
-	    log.SetDate(date.format(LocalDateTime.now()));
-	    log.SetTime(time.format(LocalDateTime.now()));
-	    log.SetLocation(0); //get user location from customer table once login implemented
-	    log.SetUserId(0); //get userid from customer table
-	    log.SetAction("Delete admin account");
-	    log.SetActionId(admin.getId());
+	    log.setDate(date.format(LocalDateTime.now()));
+	    log.setTime(time.format(LocalDateTime.now()));
+	    log.setLocation(1 /*HQ*/);
+	    log.setUserId(getUserUID());
+	    log.setAction("Delete admin account");
+	    log.setActionId(admin.getId());
 	    logRepo.save(log);
         
     	adminRepo.delete(admin);
@@ -726,12 +742,12 @@ public class RestaurantController {
           .orElseThrow(() -> new IllegalArgumentException("Invalid order Id:" + id));
         
         Log log = new Log();
-	    log.SetDate(date.format(LocalDateTime.now()));
-	    log.SetTime(time.format(LocalDateTime.now()));
-	    log.SetLocation(0); //get user location from customer table once login implemented
-	    log.SetUserId(0); //get userid from customer table
-	    log.SetAction("Delete order");
-	    log.SetActionId(order.getId());
+	    log.setDate(date.format(LocalDateTime.now()));
+	    log.setTime(time.format(LocalDateTime.now()));
+	    log.setLocation(getUserLocation());
+	    log.setUserId(getUserUID());
+	    log.setAction("Delete order");
+	    log.setActionId(order.getId());
 	    logRepo.save(log);
         
     	orderRepo.delete(order);
@@ -746,6 +762,7 @@ public class RestaurantController {
     	
     	Orders order = new Orders();
     	Menu item = new Menu();
+    	Customers cust = new Customers();
     	
     	order.setDate(date.format(LocalDateTime.now()));
     	order.setPrice(0.00F);
@@ -761,9 +778,50 @@ public class RestaurantController {
     	item.setAvailability(true);
     	item.setQuantity(1);
     	
+    	cust.setEmail("customer@email.com");
+    	cust.setId(5);
+    	cust.setFirstName("Test");
+    	cust.setLastName("Customer");
+    	cust.setLocation(2);
+    	cust.setPassword("password");
+    	cust.setRewardsAvailable(10);
+    	
     	orderRepo.save(order);
     	menuRepo.save(item);
+    	customerRepo.save(cust);
+    	
+    	addCustLocationsForSimulatedLogin();
+    	
     	return "employeesignin";
+    }
+    
+    //For testing purposes
+    public void addCustLocationsForSimulatedLogin() {
+    	customerRepo.deleteAll();
+    	
+    	Customers hqUser = new Customers();
+    	hqUser.setId(1);
+    	hqUser.setEmail("hquser@email.com");
+    	hqUser.setLocation(1);
+    	customerRepo.save(hqUser);
+    	
+    	Customers restaurant1User = new Customers();
+    	restaurant1User.setId(2);
+    	restaurant1User.setEmail("restaurantuser@email.com");
+    	restaurant1User.setLocation(2);
+    	customerRepo.save(restaurant1User);
+    	
+    	Customers office1User = new Customers();
+    	office1User.setId(3);
+    	office1User.setEmail("officeuser@email.com");
+    	office1User.setLocation(3);
+    	customerRepo.save(office1User);
+    	
+    	Customers warehouse1User = new Customers();
+    	warehouse1User.setId(4);
+    	warehouse1User.setEmail("warehouseuser@email.com");
+    	warehouse1User.setLocation(4);
+    	customerRepo.save(warehouse1User);
     }
     
     @GetMapping("/servingstaffview")
@@ -814,12 +872,12 @@ public class RestaurantController {
         }
         
         Log log = new Log();
-	    log.SetDate(date.format(LocalDateTime.now()));
-	    log.SetTime(time.format(LocalDateTime.now()));
-	    log.SetLocation(0); //get user location from customer table once login implemented
-	    log.SetUserId(0); //get userid from customer table
-	    log.SetAction("Update menu item");
-	    log.SetActionId(item.getId());
+	    log.setDate(date.format(LocalDateTime.now()));
+	    log.setTime(time.format(LocalDateTime.now()));
+	    log.setLocation(getUserLocation());
+	    log.setUserId(getUserUID());
+	    log.setAction("Update menu item");
+	    log.setActionId(item.getId());
 	    logRepo.save(log);
         
         menuRepo.save(item);
@@ -837,7 +895,7 @@ public class RestaurantController {
 	    else {
 		    List<Log> localLog = new ArrayList<Log>();
 		    for (Log i : fullLog) {
-			    if (i.GetLocation() == cust.getLocation()) {
+			    if (i.getLocation() == cust.getLocation()) {
 				    localLog.add(i);
 			    }
 		    }
@@ -876,12 +934,12 @@ public class RestaurantController {
         }
         
         Log log = new Log();
-	    log.SetDate(date.format(LocalDateTime.now()));
-	    log.SetTime(time.format(LocalDateTime.now()));
-	    log.SetLocation(0); //get user location from customer table once login implemented
-	    log.SetUserId(0); //get userid from customer table
-	    log.SetAction("Update customer account");
-	    log.SetActionId(customer.getId());
+	    log.setDate(date.format(LocalDateTime.now()));
+	    log.setTime(time.format(LocalDateTime.now()));
+	    log.setLocation(getUserLocation());
+	    log.setUserId(getUserUID());
+	    log.setAction("Update customer account");
+	    log.setActionId(customer.getId());
 	    logRepo.save(log);
         
         customerRepo.save(customer);
@@ -894,12 +952,12 @@ public class RestaurantController {
           .orElseThrow(() -> new IllegalArgumentException("Invalid customer Id:" + id));
         
         Log log = new Log();
-	    log.SetDate(date.format(LocalDateTime.now()));
-	    log.SetTime(time.format(LocalDateTime.now()));
-	    log.SetLocation(0); //get user location from customer table once login implemented
-	    log.SetUserId(0); //get userid from customer table
-	    log.SetAction("Delete customer account");
-	    log.SetActionId(customer.getId());
+	    log.setDate(date.format(LocalDateTime.now()));
+	    log.setTime(time.format(LocalDateTime.now()));
+	    log.setLocation(getUserLocation());
+	    log.setUserId(getUserUID());
+	    log.setAction("Delete customer account");
+	    log.setActionId(customer.getId());
 	    logRepo.save(log);
         
         customerRepo.delete(customer);
@@ -924,12 +982,12 @@ public class RestaurantController {
         }
         
         Log log = new Log();
-	    log.SetDate(date.format(LocalDateTime.now()));
-	    log.SetTime(time.format(LocalDateTime.now()));
-		log.SetLocation(0); //get user location from customer table
-		log.SetUserId(0); //get userid from customer table
-	    log.SetAction("Create new menu item");
-	    log.SetActionId(menu.getId());
+	    log.setDate(date.format(LocalDateTime.now()));
+	    log.setTime(time.format(LocalDateTime.now()));
+		log.setLocation(getUserLocation());
+		log.setUserId(getUserUID());
+	    log.setAction("Create new menu item");
+	    log.setActionId(menu.getId());
 	    logRepo.save(log);
         
         menuRepo.save(menu);
@@ -954,12 +1012,12 @@ public class RestaurantController {
         }
         
         Log log = new Log();
-	    log.SetDate(date.format(LocalDateTime.now()));
-	    log.SetTime(time.format(LocalDateTime.now()));
-	    log.SetLocation(0); //get user location from customer table once login implemented
-	    log.SetUserId(0); //get userid from customer table
-	    log.SetAction("Update menu item");
-	    log.SetActionId(item.getId());
+	    log.setDate(date.format(LocalDateTime.now()));
+	    log.setTime(time.format(LocalDateTime.now()));
+	    log.setLocation(getUserLocation());
+	    log.setUserId(getUserUID());
+	    log.setAction("Update menu item");
+	    log.setActionId(item.getId());
 	    logRepo.save(log);
         
         menuRepo.save(item);
@@ -972,12 +1030,12 @@ public class RestaurantController {
           .orElseThrow(() -> new IllegalArgumentException("Invalid Menu Id:" + id));
         
         Log log = new Log();
-	    log.SetDate(date.format(LocalDateTime.now()));
-	    log.SetTime(time.format(LocalDateTime.now()));
-	    log.SetLocation(0); //get user location from customer table once login implemented
-	    log.SetUserId(0); //get userid from customer table
-	    log.SetAction("Delete menu item");
-	    log.SetActionId(item.getId());
+	    log.setDate(date.format(LocalDateTime.now()));
+	    log.setTime(time.format(LocalDateTime.now()));
+	    log.setLocation(getUserLocation());
+	    log.setUserId(getUserUID());
+	    log.setAction("Delete menu item");
+	    log.setActionId(item.getId());
 	    logRepo.save(log);
         
         menuRepo.delete(item);
@@ -1008,12 +1066,12 @@ public class RestaurantController {
         }
         
         Log log = new Log();
-	    log.SetDate(date.format(LocalDateTime.now()));
-	    log.SetTime(time.format(LocalDateTime.now()));
-	    log.SetLocation(0); //get user location from customer table once login implemented
-	    log.SetUserId(0); //get userid from customer table
-	    log.SetAction("Update server account");
-	    log.SetActionId(server.getId());
+	    log.setDate(date.format(LocalDateTime.now()));
+	    log.setTime(time.format(LocalDateTime.now()));
+	    log.setLocation(getUserLocation());
+	    log.setUserId(getUserUID());
+	    log.setAction("Update server account");
+	    log.setActionId(server.getId());
 	    logRepo.save(log);
 
         serverRepo.save(server);
@@ -1026,12 +1084,12 @@ public class RestaurantController {
           .orElseThrow(() -> new IllegalArgumentException("Invalid server Id:" + id));
         
         Log log = new Log();
-	    log.SetDate(date.format(LocalDateTime.now()));
-	    log.SetTime(time.format(LocalDateTime.now()));
-	    log.SetLocation(0); //get user location from customer table once login implemented
-	    log.SetUserId(0); //get userid from customer table
-	    log.SetAction("Delete server account");
-	    log.SetActionId(server.getId());
+	    log.setDate(date.format(LocalDateTime.now()));
+	    log.setTime(time.format(LocalDateTime.now()));
+	    log.setLocation(getUserLocation());
+	    log.setUserId(getUserUID());
+	    log.setAction("Delete server account");
+	    log.setActionId(server.getId());
 	    logRepo.save(log);
         
         serverRepo.delete(server);
@@ -1068,12 +1126,12 @@ public class RestaurantController {
         }
         
         Log log = new Log();
-	    log.SetDate(date.format(LocalDateTime.now()));
-	    log.SetTime(time.format(LocalDateTime.now()));
-	    log.SetLocation(0); //get user location from customer table once login implemented
-	    log.SetUserId(0); //get userid from customer table
-	    log.SetAction("Update manager account");
-	    log.SetActionId(manager.getId());
+	    log.setDate(date.format(LocalDateTime.now()));
+	    log.setTime(time.format(LocalDateTime.now()));
+	    log.setLocation(1 /*HQ*/);
+	    log.setUserId(getUserUID());
+	    log.setAction("Update manager account");
+	    log.setActionId(manager.getId());
 	    logRepo.save(log);
 
         managerRepo.save(manager);
@@ -1086,12 +1144,12 @@ public class RestaurantController {
           .orElseThrow(() -> new IllegalArgumentException("Invalid manager Id:" + id));
         
         Log log = new Log();
-	    log.SetDate(date.format(LocalDateTime.now()));
-	    log.SetTime(time.format(LocalDateTime.now()));
-	    log.SetLocation(0); //get user location from customer table once login implemented
-	    log.SetUserId(0); //get userid from customer table
-	    log.SetAction("Delete manager account");
-	    log.SetActionId(manager.getId());
+	    log.setDate(date.format(LocalDateTime.now()));
+	    log.setTime(time.format(LocalDateTime.now()));
+	    log.setLocation(1 /*HQ*/);
+	    log.setUserId(getUserUID());
+	    log.setAction("Delete manager account");
+	    log.setActionId(manager.getId());
 	    logRepo.save(log);
         
         managerRepo.delete(manager);
@@ -1110,12 +1168,12 @@ public class RestaurantController {
         }
         
         Log log = new Log();
-	    log.SetDate(date.format(LocalDateTime.now()));
-	    log.SetTime(time.format(LocalDateTime.now()));
-		log.SetLocation(0); //get user location from customer table
-		log.SetUserId(0); //get userid from customer table
-	    log.SetAction("Create new LF manager");
-	    log.SetActionId(manager.getId());
+	    log.setDate(date.format(LocalDateTime.now()));
+	    log.setTime(time.format(LocalDateTime.now()));
+		log.setLocation(1 /*HQ*/);
+		log.setUserId(getUserUID());
+	    log.setAction("Create new LF manager");
+	    log.setActionId(manager.getId());
 	    logRepo.save(log);
         
         managerRepo.save(manager);
@@ -1145,5 +1203,14 @@ public class RestaurantController {
         return "HQManager/HQManager-warehouses-view";
     }
     
+    //TODO
+    public int getUserLocation() {
+    	return 0; //get user location from customer table once login implemented
+    }
+    
+    //TODO
+    public long getUserUID() {
+    	return 0; //get userid from customer table once login implemented
+    }
     
 }

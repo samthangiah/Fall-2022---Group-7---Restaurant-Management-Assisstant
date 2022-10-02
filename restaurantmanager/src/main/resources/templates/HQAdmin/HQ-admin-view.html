@@ -56,7 +56,7 @@ table, th, td {
                 	<a class="list-group-item list-group-item-action list-group-item-light p-3" href="/HQ-admin-view">HQ Admin Home</a>
                 	<a class="list-group-item list-group-item-action list-group-item-light p-3" href="/HQadmin-admin-view">View Administrators</a>
                     <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/HQadmin-locations-view">View Locations</a>
-                    <!-- <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/logview/{id}(id=${get customer.id from httpsession once login is implemented})">View Action Log (WIP)</a> -->
+                    <a class="list-group-item list-group-item-action list-group-item-light p-3" th:href="@{/logview/{id}(id=${1})}">View Action Log</a> <!-- Location 1 = HQ -->
                 </div>
             </div>
             <!-- Page content wrapper-->
@@ -75,7 +75,7 @@ table, th, td {
                                         <a class="dropdown-item" href="#!">(possibly something else)</a>
                                         <a class="dropdown-item" href="#!">Change Password (WIP)</a>
                                         <div class="dropdown-divider"></div>
-                                        <a class="dropdown-item" href="/employeesignin">Sign-out</a>
+                                        <a class="dropdown-item" href="/templogout">Sign-out</a>
                                     </div>
                                 </li>
                             </ul>
@@ -89,7 +89,7 @@ table, th, td {
 						<div class="mainmenuBtn">
   							<a href="/HQadmin-admin-view" class="btn btn-primary" role="button">View Administrators</a>
   							<a href="/HQadmin-locations-view" class="btn btn-primary" role="button">View Locations</a>
-  							<!--<a href="/logview/{id}(id=${get customer.id from httpsession once login is implemented})">-->View Action Log</a>
+  							<a th:href="@{/logview/{id}(id=${1})}" class="btn btn-primary" role="button">View Action Log</a>
 						</div>
 					</div>
                     </div>

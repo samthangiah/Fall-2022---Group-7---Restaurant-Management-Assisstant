@@ -39,59 +39,60 @@ public class Log {
 		this.actionId = actionId;
 	}
 
-	public long GetId() {
+	public long getId() {
 		return id;
 	}
 
-	public void SetId(long id) {
+	public void setId(long id) {
 		this.id = id;
 	}
 
-	public int GetLocation() {
+	public int getLocation() {
 		return location;
 	}
 
-	public void SetLocation(int location) {
+	public void setLocation(int location) {
 		this.location = location;
 	}
 
-	public String GetDate() {
+	public String getDate() {
 		return date;
 	}
 
-	public void SetDate(String date) {
+	public void setDate(String date) {
 		this.date = date;
 	}
 
-	public String GetTime() {
+	public String getTime() {
 		return time;
 	}
 
-	public void SetTime(String time) {
+	public void setTime(String time) {
 		this.time = time;
 	}
 
-	public long GetUserId() {
+	public long getUserId() {
 		return userId;
 	}
 
-	public void SetUserId(long userId) {
+	public void setUserId(long userId) {
 		this.userId = userId;
 	}
 
-	public String GetAction() {
+	public String getAction() {
 		return action;
 	}
 
-	public void SetAction(String action) {
+	public void setAction(String action) {
 		this.action = action;
 	}
 
-	public long GetActionId() {
+	public long getActionId() {
 		return actionId;
 	}
 
-	public void SetActionId(long actionId) {
+	public void setActionId(long actionId) {
 		this.actionId = actionId;
 	}
+
 }
