@@ -116,25 +116,6 @@ public class RestaurantController {
     	restaurantRepo.deleteAll();
     	warehouseRepo.deleteAll();
     	
-    	Customers customer = new Customers( 
-    			"John", 
-    			"Doe", 
-    			"customer@gmail.com", 
-    			"pass", 
-    			0, 
-    			true,
-    			100,
-    			1);
-    	Customers customer2 = new Customers( 
-    			"Jane", 
-    			"Doe", 
-    			"customer2@gmail.com", 
-    			"pass", 
-    			0, 
-    			true,
-    			100,
-    			1);
-    	
     	Admins admin = new Admins("Darth",
     			"Vader",
     			"Administrator@email.com",
@@ -178,8 +159,6 @@ public class RestaurantController {
     			"Slippery Rock",
     			"PA");
     	
-    	customerRepo.save(customer);
-    	customerRepo.save(customer2);
     	adminRepo.save(admin);
     	managerRepo.save(manager);
     	managerRepo.save(manager2);
@@ -883,24 +862,36 @@ public class RestaurantController {
     	Customers hqUser = new Customers();
     	hqUser.setId(1);
     	hqUser.setEmail("hquser@email.com");
+    	hqUser.setFirstName("John");
+    	hqUser.setLastName("Doe");
+    	hqUser.setPassword("pass");
     	hqUser.setLocation(1);
     	customerRepo.save(hqUser);
     	
     	Customers restaurant1User = new Customers();
     	restaurant1User.setId(2);
     	restaurant1User.setEmail("restaurantuser@email.com");
+    	restaurant1User.setFirstName("rest");
+    	restaurant1User.setLastName("Customer");
+    	restaurant1User.setPassword("pass");
     	restaurant1User.setLocation(2);
     	customerRepo.save(restaurant1User);
     	
     	Customers office1User = new Customers();
     	office1User.setId(3);
     	office1User.setEmail("officeuser@email.com");
+    	office1User.setFirstName("office");
+    	office1User.setLastName("Customer");
+    	office1User.setPassword("pass");
     	office1User.setLocation(3);
     	customerRepo.save(office1User);
     	
     	Customers warehouse1User = new Customers();
     	warehouse1User.setId(4);
     	warehouse1User.setEmail("warehouseuser@email.com");
+    	warehouse1User.setFirstName("warehouse");
+    	warehouse1User.setLastName("Customer");
+    	warehouse1User.setPassword("pass");
     	warehouse1User.setLocation(4);
     	customerRepo.save(warehouse1User);
     }
