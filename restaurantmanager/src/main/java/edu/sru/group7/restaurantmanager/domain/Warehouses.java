@@ -20,12 +20,12 @@ public class Warehouses extends Locations {
 	
 	private String city;
 	
-	public Warehouses(long id, String address, String zipcode, String city) {
+	public Warehouses(String address, String zipcode, String city, String state) {
 		super();
-		this.id = id;
 		this.address = address;
 		this.zipcode = zipcode;
 		this.city = city;
+		this.state = state;
 	}
 
 	public Warehouses() {

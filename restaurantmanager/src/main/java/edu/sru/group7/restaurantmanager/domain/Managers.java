@@ -22,9 +22,8 @@ public class Managers {
     
     private int location;
 
-	public Managers(long id, String firstName, String lastName, String email, String password, int location) {
+	public Managers(String firstName, String lastName, String email, String password, int location) {
 		super();
-		this.id = id;
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.email = email;
