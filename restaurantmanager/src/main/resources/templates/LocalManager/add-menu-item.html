@@ -46,7 +46,7 @@ input[type=text]:focus, input[type=password]:focus {
                 	<a class="list-group-item list-group-item-action list-group-item-light p-3" href="/manager-cust-view">View Customers</a>
                     <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/manager-menu-view">View Menu</a>
                     <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/manager-server-view">View Servers</a>
-                    <!-- <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/logview/{id}(id=${get customer.id from httpsession once login is implemented})">View Action Log (WIP)</a> -->
+                    <a class="list-group-item list-group-item-action list-group-item-light p-3" th:href="@{/logview/{id}(id=${2})}">View Action Log</a>
                 </div>
             </div>
             <!-- Page content wrapper-->
@@ -65,7 +65,7 @@ input[type=text]:focus, input[type=password]:focus {
                                         <a class="dropdown-item" href="#!">(possibly something else)</a>
                                         <a class="dropdown-item" href="#!">Change Password (WIP)</a>
                                         <div class="dropdown-divider"></div>
-                                        <a class="dropdown-item" href="/employeesignin">Sign-out</a>
+                                        <a class="dropdown-item" href="/templogout">Sign-out</a>
                                     </div>
                                 </li>
                             </ul>
