@@ -1,9 +1,17 @@
 package edu.sru.group7.restaurantmanager.domain;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 
 @Entity
 public class Restaurants extends Locations {
@@ -20,12 +28,23 @@ public class Restaurants extends Locations {
 	
 	private String city;
 	
-	public Restaurants(String address, String zipcode, String city, String state) {
+	@ManyToOne
+	@JoinColumn(name="admin_id")
+	private Admins admin;
+	
+	@OneToMany(cascade=CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "restaurant")
+    private List<Servers> servers = new ArrayList<>();
+	
+	@OneToMany(cascade=CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "restaurant")
+    private List<Managers> managers = new ArrayList<>();
+	
+	public Restaurants(String address, String zipcode, String city, String state, Admins admin) {
 		super();
 		this.address = address;
 		this.zipcode = zipcode;
 		this.city = city;
 		this.state = state;
+		this.admin = admin;
 	}
 
 	public Restaurants() {
@@ -77,7 +96,35 @@ public class Restaurants extends Locations {
 	public void setCity(String city) {
 		this.city = city;
 	}
+	
+	public Admins getAdmins() {
+		return admin;
+	}
 
+	public void setAdmins(Admins admins) {
+		this.admin = admins;
+	}
+
+	public List<Servers> getServers() {
+		return servers;
+	}
+
+	public void setServers(List<Servers> servers) {
+		this.servers = servers;
+	}
+
+	public List<Managers> getManagers() {
+		return managers;
+	}
+
+	public void setManagers(List<Managers> managers) {
+		this.managers = managers;
+	}
+
+	@Override
+	public String toString() {
+		return "id: " + id;
+	}
 	
 	
 	

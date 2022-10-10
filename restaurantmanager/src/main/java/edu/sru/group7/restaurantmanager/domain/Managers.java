@@ -4,6 +4,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
 @Entity
 public class Managers {
@@ -20,15 +22,17 @@ public class Managers {
     
     private String password;
     
-    private int location;
+    @ManyToOne
+	@JoinColumn(name="restaurant_id")
+	private Restaurants restaurant;
 
-	public Managers(String firstName, String lastName, String email, String password, int location) {
+	public Managers(String firstName, String lastName, String email, String password, Restaurants restaurant) {
 		super();
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.email = email;
 		this.password = password;
-		this.location = location;
+		this.restaurant = restaurant;
 	}
 
 	public Managers() {
@@ -75,13 +79,15 @@ public class Managers {
 		this.password = password;
 	}
 
-	public int getLocation() {
-		return location;
+	public Restaurants getRestaurant() {
+		return restaurant;
 	}
 
-	public void setLocation(int location) {
-		this.location = location;
+	public void setRestaurant(Restaurants restaurant) {
+		this.restaurant = restaurant;
 	}
+
+
     
     
 }

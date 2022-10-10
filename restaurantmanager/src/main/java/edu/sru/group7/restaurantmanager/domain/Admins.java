@@ -1,10 +1,19 @@
 package edu.sru.group7.restaurantmanager.domain;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 
 @Entity
 public class Admins {
@@ -22,15 +31,20 @@ public class Admins {
     
     private String password;
     
-    private int location;
+    @OneToMany(cascade=CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "admin")
+    private List<Restaurants> restaurant = new ArrayList<>();
+    
+    @ManyToOne
+    @JoinColumn(name = "office_id")
+	private Offices office;
 
-	public Admins(String firstName, String lastName, String email, String password, int location) {
+	public Admins(String firstName, String lastName, String email, String password,  Offices office) {
 		super();
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.email = email;
 		this.password = password;
-		this.location = location;
+		this.office = office;
 	}
 
 	public Admins() {
@@ -77,11 +91,27 @@ public class Admins {
 		this.password = password;
 	}
 
-	public int getLocation() {
-		return location;
+	public List<Restaurants> getRestaurant() {
+		return restaurant;
 	}
 
-	public void setLocation(int location) {
-		this.location = location;
+	public void setRestaurant(List<Restaurants> restaurant) {
+		this.restaurant = restaurant;
 	}
+
+	public Offices getOffice() {
+		return office;
+	}
+
+	public void setOffice(Offices office) {
+		this.office = office;
+	}
+	
+	@Override
+	public String toString() {
+		return "id: " + id;
+	}
+	
+	
 }
+

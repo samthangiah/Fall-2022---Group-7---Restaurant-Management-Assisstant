@@ -1,9 +1,16 @@
 package edu.sru.group7.restaurantmanager.domain;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 
 @Entity
 public class Offices extends Locations {
@@ -20,6 +27,13 @@ public class Offices extends Locations {
 	
 	private String city;
 	
+	@OneToMany(mappedBy = "office")
+    private List<Admins> admin = new ArrayList<>();
+
+	public Offices() {
+		super();
+	}
+	
 	public Offices(String address, String zipcode, String city, String state) {
 		super();
 		this.address = address;
@@ -27,9 +41,14 @@ public class Offices extends Locations {
 		this.city = city;
 		this.state = state;
 	}
-
-	public Offices() {
+	
+	public Offices(String address, String zipcode, String city, String state, List<Admins> admin) {
 		super();
+		this.address = address;
+		this.zipcode = zipcode;
+		this.city = city;
+		this.state = state;
+		this.admin = admin;
 	}
 	
 	@Override
@@ -78,7 +97,17 @@ public class Offices extends Locations {
 		this.city = city;
 	}
 
+	public List<Admins> getAdmin() {
+		return admin;
+	}
+
+	public void setAdmin(List<Admins> admin) {
+		this.admin = admin;
+	}
 	
-	
+	@Override
+	public String toString() {
+		return "id: " + id;
+	}
 	
 }

@@ -80,21 +80,25 @@ table, th, td {
 								<th>Last Name</th>
 								<th>Email</th>
 								<th>Password</th>
-								<th>Location</th>
+								<th>Restaurants</th>
+								<th>Office</th>
 								<th>Edit</th>
 								<th>Delete</th>
 							</tr>
 						</thead>
 		<tbody>
-			<tr th:each="admin : ${admins}">
+		 	<th:block th:each="admin : ${listAdmins}">
+			<tr>
 				<td th:text="${admin.firstName}"></td>
 				<td th:text="${admin.lastName}"></td>
 				<td th:text="${admin.email}"></td>
 				<td th:text="${admin.password}"></td>
-				<td th:text="${admin.location}"></td>
+				<td th:text="${admin.restaurant}">
+				<td th:text="${admin.office}">
 				<td><a th:href="@{/HQadminadminedit/{id}(id=${admin.id})}">Edit</a></td>
 				<td><a th:href="@{/HQadminadmindelete/{id}(id=${admin.id})}">Delete</a></td>
 			</tr>
+			</th:block>
 		</tbody>
 		
 	</table>

@@ -6,6 +6,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -116,40 +117,7 @@ public class RestaurantController {
     	restaurantRepo.deleteAll();
     	warehouseRepo.deleteAll();
     	
-    	Admins admin = new Admins("Darth",
-    			"Vader",
-    			"Administrator@email.com",
-    			"pass",
-    			1); //office is 1
-    	Managers manager = new Managers("Anakin",
-    			"Skywalker",
-    			"Manager@email.com",
-    			"pass",
-    			2); //restaurant is 2
-    	Managers manager2 = new Managers("Luke",
-    			"Skywalker",
-    			"Manager2@email.com",
-    			"pass",
-    			2);
-    	Servers server = new Servers("Obi-wan",
-    			"Kenobi",
-    			"server@email.com",
-    			"pass",
-    			2); // restaurant is 2
-    	Servers server2 = new Servers("Baby",
-    			"Yoda",
-    			"server2@email.com",
-    			"pass",
-    			2); // restaurant is 2
-    	
-    	//String address, String zipcode, String city
-    	
     	Offices office = new Offices("100 Central Loop",
-    			"16057",
-    			"Slippery Rock",
-    			"PA");
-    	
-    	Restaurants restaurant = new Restaurants("100 Arrowhead Drive",
     			"16057",
     			"Slippery Rock",
     			"PA");
@@ -159,18 +127,96 @@ public class RestaurantController {
     			"Slippery Rock",
     			"PA");
     	
+    	List<Admins> listadmins = new ArrayList<>();
+    	
+    	officeRepo.save(office);
+    	
+    	warehouseRepo.save(warehouse);
+    	
+    	Admins admin = new Admins("Darth",
+    			"Vader",
+    			"Administrator@email.com",
+    			"pass",
+    			office); 
+    	
+    	Admins admin2 = new Admins("Kylo",
+    			"Ren",
+    			"Administrator2@email.com",
+    			"pass",
+    			office);
+    	
+    	listadmins.add(admin);
+    	listadmins.add(admin2);
+    	
+    	//String address, String zipcode, String city
+    	
     	adminRepo.save(admin);
+    	adminRepo.save(admin2);
+    	
+    	Restaurants restaurant = new Restaurants("100 Arrowhead Drive",
+    			"16057",
+    			"Slippery Rock",
+    			"PA",
+    			admin2);
+    	
+    	Restaurants restaurant2 = new Restaurants("1 Vineyard Circle",
+    			"16057",
+    			"Slippery Rock",
+    			"PA",
+    			admin);
+    	
+    	restaurantRepo.save(restaurant);
+    	restaurantRepo.save(restaurant2);
+    	
+    	Offices office2 = new Offices("1620 East Maiden",
+    			"16057",
+    			"Slippery Rock",
+    			"PA",
+    			listadmins);
+    	
+    	Managers manager = new Managers("Anakin",
+    			"Skywalker",
+    			"Manager@email.com",
+    			"pass",
+    			restaurant); //restaurant is 2
+    	Managers manager2 = new Managers("Luke",
+    			"Skywalker",
+    			"Manager2@email.com",
+    			"pass",
+    			restaurant2);
+    	
+    	Servers server = new Servers("Obi-wan",
+    			"Kenobi",
+    			"server@email.com",
+    			"pass",
+    			restaurant); 
+    	Servers server2 = new Servers("Baby",
+    			"Yoda",
+    			"server2@email.com",
+    			"pass",
+    			restaurant2); 
+    	
     	managerRepo.save(manager);
     	managerRepo.save(manager2);
     	serverRepo.save(server);
     	serverRepo.save(server2);
-    	officeRepo.save(office);
-    	restaurantRepo.save(restaurant);
-    	warehouseRepo.save(warehouse);
+    	
+    	officeRepo.save(office2);
+    	
     	
     	addSampleOrder();
     	
     	return "index";
+    }
+    
+    @ModelAttribute
+    public void addAttributes(Model model) {
+    	List<Restaurants> listrestaurants = (List<Restaurants>) restaurantRepo.findAll();
+    	model.addAttribute("listRestaurants", listrestaurants);
+    	List<Admins> listadmins = (List<Admins>) adminRepo.findAll();
+    	model.addAttribute("listAdmins", listadmins);
+    	List<Offices> listoffices = (List<Offices>) officeRepo.findAll();
+    	model.addAttribute("listOffices", listoffices);
     }
     
     //temporary login page
