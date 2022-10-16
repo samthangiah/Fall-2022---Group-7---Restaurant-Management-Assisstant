@@ -44,7 +44,7 @@ input[type=text]:focus, input[type=password]:focus {
                 <div class="list-group list-group-flush">
                 	<a class="list-group-item list-group-item-action list-group-item-light p-3" href="/HQ-manager-view">HQ Manager Home</a>
                     <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/HQmanager-location-view">View Locations</a>
-                    <a class="list-group-item list-group-item-action list-group-item-light p-3" th:href="@{/logview/{id}(id=${1})}">View Action Log</a>
+                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/hqlogview">View Action Log</a>
                 </div>
             </div>
             <!-- Page content wrapper-->
@@ -56,12 +56,11 @@ input[type=text]:focus, input[type=password]:focus {
                         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
                         <div class="collapse navbar-collapse" id="navbarSupportedContent">
                             <ul class="navbar-nav ms-auto mt-2 mt-lg-0">
-                                <li class="nav-item active"><a class="nav-link" href="/">Home</a></li>
+                                <li class="nav-item active"><a class="nav-link" href="/loggedinhome">Home</a></li>
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Account</a>
                                     <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                        <a class="dropdown-item" href="#!">(possibly something else)</a>
-                                        <a class="dropdown-item" href="#!">Change Password (WIP)</a>
+                                        <a class="dropdown-item" href="/changeuserpass">Change Password</a>
                                         <div class="dropdown-divider"></div>
                                         <a class="dropdown-item" href="/templogout">Sign-out</a>
                                     </div>
