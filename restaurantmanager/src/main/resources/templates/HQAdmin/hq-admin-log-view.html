@@ -5,34 +5,32 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
         <meta name="description" content="" />
         <meta name="author" content="" />
-        <title>Add Menu Item</title>
+        <title>Log view</title>
         <!-- Favicon-->
         <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
         <!-- Core theme CSS (includes Bootstrap)-->
-        <link href="css/styles.css" rel="stylesheet" />
+        <link href="../css/styles.css" rel="stylesheet" />
 
     </head>
     <style>
-input[type=text], input[type=password],input[type=email] {
-  width: 100%;
-  padding: 15px;
-  margin: 5px 0 22px 0;
-  display: inline-block;
-  border: none;
-  background: #f1f1f1;
+table, th, td {
+	border: 1px solid black;
 }
-
-input[type=text]:focus, input[type=password]:focus {
-  background-color: #ddd;
-  outline: none;
+.table-hover tbody tr:hover td {
+    background: #F1F1F1;
+}
+.table-striped>tbody>tr:nth-child(odd)>td, 
+.table-striped>tbody>tr:nth-child(odd)>th {
+   background-color: #00674E;
+   color: white; 
+ }
+ .table-striped>tbody>tr:nth-child(even)>td, 
+.table-striped>tbody>tr:nth-child(even)>th {
+	background-color: #FFFFFF;
 }
 .h2{
 	text-align: center;
 	color: #FFFFFF;
-}
-.label{
-	color: white;
-	font-size: 1.5rem;
 }
 
 </style>
@@ -42,11 +40,9 @@ input[type=text]:focus, input[type=password]:focus {
             <div class="border-end bg-white" id="sidebar-wrapper">
                 <div class="sidebar-heading border-bottom bg-light">Insert logo here?</div>
                 <div class="list-group list-group-flush">
-                	<a class="list-group-item list-group-item-action list-group-item-light p-3" href="/local-manager-view">Local Manager Home</a>
-                	<a class="list-group-item list-group-item-action list-group-item-light p-3" href="/manager-cust-view">View Customers</a>
-                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/manager-menu-view">View Menu</a>
-                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/manager-server-view">View Servers</a>
-                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/logview">View Action Log</a>
+                	<a class="list-group-item list-group-item-action list-group-item-light p-3" href="/HQ-admin-view">HQ Admin Home</a>
+                	<a class="list-group-item list-group-item-action list-group-item-light p-3" href="/HQadmin-admin-view">View Administrators</a>
+                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/HQadmin-locations-view">View Locations</a>
                 </div>
             </div>
             <!-- Page content wrapper-->
@@ -54,7 +50,7 @@ input[type=text]:focus, input[type=password]:focus {
                 <!-- Top navigation-->
                 <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
                     <div class="container-fluid">
-                        <button class="btn btn-primary" id="sidebarToggle">Toggle Options</button>
+                        <!--<button class="btn btn-primary" id="sidebarToggle">Toggle Options</button>-->
                         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
                         <div class="collapse navbar-collapse" id="navbarSupportedContent">
                             <ul class="navbar-nav ms-auto mt-2 mt-lg-0">
@@ -74,31 +70,40 @@ input[type=text]:focus, input[type=password]:focus {
                 <!-- Page content-->
                 <div class="container-fluid">
                     <div class="container mt-3">
-                    	<h2 class="h2">Add New Menu Item</h2>
-						<form action="#" th:action="@{/addmenuitem}" th:object="${menu}" method="post">
-    						<label for="name">Item Name</label>
-    						<input type="text" th:field="*{name}" id="name" placeholder="Item Name" required>
-    						<label for="entree">Entree</label>
-    						<input type="text" th:field="*{entree}" id="entree" placeholder="Entree" required>
-    						<br>
-    						<label for="sides">Sides</label>
-    						<input type="text" th:field="*{sides}" id="sides" placeholder="Sides" required>
-    						<br>
-    						<label for="price">Price</label>
-    						<input type="text" th:field="*{price}" id="price" placeholder="Price" required>
-    						<br>
-    						<label for="availability">Availability (true or false)</label>
-    						<input type="text" th:field="*{availability}" id="availability" placeholder="Availability">
-    						<label for="quantity">Quantity</label>
-    						<input type="text" th:field="*{quantity}" id="quantity" placeholder="Quantity">
-    						<br>
-    						<input type="submit" value="Add Menu Item">  
-						</form>
-					</div>
+						<h2 class="h2">Log Entries</h2>
+						<table class = "table table-striped table-hover">
+                		<thead class="table-dark">
+                    		<tr>
+								<th>Log entry ID</th>
+                        		<th>Location</th>
+                        		<th>Date</th>
+                        		<th>Time</th>
+                        		<th>User ID</th>
+								<th>Action</th>
+								<th>Action ID</th>
+                    		</tr>
+                		</thead>
+                		<tbody>
+                			<tr th:each="entry : ${log}">
+			  					<td th:text="${entry.id}"></td>
+                    			<td th:text="${entry.location}"></td>
+                    			<td th:text="${entry.date}"></td>
+                    			<td th:text="${entry.time}"></td>
+                    			<td th:text="${entry.userId}"></td>
+                    			<td th:text="${entry.action}"></td>
+                    			<td th:text="${entry.actionId}"></td>
+                			</tr>
+            			</tbody>
+        				</table>
+
+        			</div>
                 </div>
+                <div class="btn-group">
+  						<a href="/HQ-admin-view" class="btn btn-primary" role="button">Return to HQ Admin Page</a>
+					</div>
             </div>
         </div>
-        
+
         <!-- Bootstrap core JS-->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
         <!-- Core theme JS-->

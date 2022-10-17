@@ -9,10 +9,32 @@ import org.springframework.stereotype.Repository;
 
 import edu.sru.group7.restaurantmanager.security.ApplicationUserRole;
 
+import edu.sru.group7.restaurantmanager.domain.Customers;
+import edu.sru.group7.restaurantmanager.repository.CustomerRepository;
+import edu.sru.group7.restaurantmanager.domain.Admins;
+import edu.sru.group7.restaurantmanager.repository.AdminRepository;
+import edu.sru.group7.restaurantmanager.domain.Managers;
+import edu.sru.group7.restaurantmanager.repository.ManagerRepository;
+import edu.sru.group7.restaurantmanager.domain.Servers;
+import edu.sru.group7.restaurantmanager.repository.ServerRepository;
+
+
 @Repository("fake")
 public class FakeApplicationUserDaoService implements ApplicationUserDao {
 
 	private final PasswordEncoder passwordEncoder;
+	
+	@Autowired
+	private CustomerRepository customerRepo;
+	
+	@Autowired
+	private AdminRepository adminRepo;
+	
+	@Autowired
+	private ManagerRepository managerRepo;
+	
+	@Autowired
+	private ServerRepository serverRepo;
 	
 	@Autowired
 	public FakeApplicationUserDaoService(PasswordEncoder passwordEncoder) {
@@ -30,18 +52,65 @@ public class FakeApplicationUserDaoService implements ApplicationUserDao {
 
 	private List<ApplicationUser> getApplicationUsers() {
 		List<ApplicationUser> applicationUsers = com.google.common.collect.Lists.newArrayList(
-						new ApplicationUser(
-								"sam",
-								passwordEncoder.encode("thangiah"),
-								ApplicationUserRole.ADMIN.getGrantedAuthorities(),
-								true,
-								true,
-								true,
-								true
-								)
-						);
+				new ApplicationUser(
+					"sam",
+					passwordEncoder.encode("thangiah"),
+					ApplicationUserRole.HQADMIN.getGrantedAuthorities(),
+					true,
+					true,
+					true,
+					true));
 		
+		applicationUsers.add(new ApplicationUser(
+					"hqmanager",
+					passwordEncoder.encode("password"),
+					ApplicationUserRole.HQMANAGER.getGrantedAuthorities(),
+					true,
+					true,
+					true,
+					true));
 		
+		//Loading from databases as ApplicationUsers
+		for (Customers customer : customerRepo.findAll()) {
+			applicationUsers.add(new ApplicationUser(
+					customer.getEmail(),
+					passwordEncoder.encode(customer.getPassword()),
+					ApplicationUserRole.CUSTOMER.getGrantedAuthorities(),
+					true,
+					true,
+					true,
+					true));
+		}
+		for (Admins admin : adminRepo.findAll()) {
+			applicationUsers.add(new ApplicationUser(
+					admin.getEmail(),
+					passwordEncoder.encode(admin.getPassword()),
+					ApplicationUserRole.ADMIN.getGrantedAuthorities(),
+					true,
+					true,
+					true,
+					true));
+		}
+		for (Managers manager : managerRepo.findAll()) {
+			applicationUsers.add(new ApplicationUser(
+					manager.getEmail(),
+					passwordEncoder.encode(manager.getPassword()),
+					ApplicationUserRole.MANAGER.getGrantedAuthorities(),
+					true,
+					true,
+					true,
+					true));
+		}
+		for (Servers server : serverRepo.findAll()) {
+			applicationUsers.add(new ApplicationUser(
+					server.getEmail(),
+					passwordEncoder.encode(server.getPassword()),
+					ApplicationUserRole.SERVER.getGrantedAuthorities(),
+					true,
+					true,
+					true,
+					true));
+		}
 		
 		return applicationUsers;
 	}

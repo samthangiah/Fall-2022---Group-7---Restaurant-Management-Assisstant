@@ -3,17 +3,13 @@ package edu.sru.group7.restaurantmanager.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import
-org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import
-org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.
-EnableWebSecurity; import
-org.springframework.security.config.annotation.web.configuration.
-WebSecurityConfigurerAdapter; import
-org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity; 
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter; 
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import edu.sru.group7.restaurantmanager.authentication.ApplicationUserService;
 
@@ -34,12 +30,48 @@ WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity http) throws Exception { 
 		http
 			.authorizeRequests() 
-			.antMatchers("/", "/index", "/css/*", "/js/*", "/img/*", "/assets/*").permitAll()
-			.antMatchers("/tempemployeelogin").hasRole(ApplicationUserRole.ADMIN.name())
+			.antMatchers("/", "/index", "/css/*", "/js/*", "/img/*", "/assets/*", "/403", "/login", "/showlogin", 
+					"/employeelogin", "/showemployeelogin", "/custregistrationpage", "/addregisteredcustomer", "/add-sample-order").permitAll()
+			
+			.antMatchers("/loggedinhome", "/templogout", "/changeuserpass", "/updateuserpass/*").hasRole(ApplicationUserRole.CUSTOMER.name())
+			
+			.antMatchers("/HQ-admin-view", "/HQadmin-locations-view", "/HQadmin-admin-view", "/HQadmin-offices-view",
+					"/HQadmin-restaurants-view", "/HQadmin-warehouses-view", "/adminsignup", "/officesignup",
+					"/restaurantsignup", "/warehousesignup", "/addadmin", "/addoffice", "/addrestaurant",
+					"/addwarehouse", "/HQadminadminedit/*", "/HQadminofficeedit/*", "/HQadminrestaurantedit/*",
+					"/HQadminwarehouseedit/*", "/HQadminadminupdate/*", "/HQadminofficeupdate/*", "/HQadminwarehouseupdate/*",
+					"/HQadminrestaurantupdate/*", "/HQadminofficedelete/*", "/HQadminrestaurantdelete/*",
+					"/HQadminwarehousedelete/*", "/HQadminadmindelete/*", "/hqlogadminview").hasRole(ApplicationUserRole.HQADMIN.name())
+			
+			.antMatchers("/local-admin-view", "/order-placement/cust-order", "/admin-man-view", "/admin-server-view",
+					"/admin-cust-view", "/custsignup", "/serversignup", "/mansignup", "/addcustomer",
+					"/addserver", "/addmanager", "/localadmincustedit/*", "/localadminserveredit/*",
+					"/localadminmanedit/*", "/localadmincustupdate/*", "/localadminserverupdate/*",
+					"/localadminmanupdate/*", "/localadmincustdelete/*", "/localadminserverdelete/*",
+					"/localadminmandelete/*", "/logadminview").hasRole(ApplicationUserRole.ADMIN.name())
+			
+			.antMatchers("/deleteorder/*", "/servingstaffview", "/serverviewcustinfo/*", "/updatemenuitem/*").hasRole(ApplicationUserRole.SERVER.name())
+			
+			.antMatchers("/servingstaffviewview", "/logview", "/local-manager-view", "/manager-cust-view",
+					"/localmanagercustedit/*", "/localmanagercustupdate/*", "/localmanagercustdelete/*",
+					"/manager-menu-view", "/localmanageraddmenu", "/addmenuitem", "/localmanagereditmenu/*",
+					"/localmanagerupdatemenu/*", "/localmanagerdeletemenu/*", "/manager-server-view",
+					"/localmanagerserveredit/*", "/localmanagerserverupdate/*", "/localmanagerserverdelete/*").hasRole(ApplicationUserRole.MANAGER.name())
+			
+			.antMatchers("/hqlogview", "/local-manager-view-view", "/HQ-manager-view", "/HQmanager-managers-view",
+					"/HQmanagermanedit/*", "/HQmanagermanupdate/*", "/HQmanagermandelete/*", "/HQmanageraddmanager",
+					"/addlfmanager", "/HQmanager-restaurants-view", "/HQmanager-offices-view", 
+					"/HQmanager-warehouses-view").hasAnyRole(ApplicationUserRole.HQMANAGER.name())
+			
 			.anyRequest() 
 			.authenticated() 
 			.and() 
-			.formLogin();
+			.formLogin()
+			.and()
+			.logout()
+				.logoutUrl("/templogout")
+				.clearAuthentication(true)
+				.invalidateHttpSession(true);
 	}
 	
 	@Override
@@ -56,6 +88,4 @@ WebSecurityConfigurerAdapter {
 		
 	}
 
-
 }
-
