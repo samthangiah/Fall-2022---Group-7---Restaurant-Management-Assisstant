@@ -35,9 +35,19 @@ import edu.sru.group7.restaurantmanager.repository.OrderRepository;
 import edu.sru.group7.restaurantmanager.repository.MenuRepository;
 import edu.sru.group7.restaurantmanager.repository.LogRepository;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 
 @Controller
 public class RestaurantController {
@@ -107,6 +117,96 @@ public class RestaurantController {
     	this.isLoggedIn = isLoggedIn;
     }
     
+    
+    static String checkStringType(XSSFCell testCell)
+	{
+		if(testCell.getCellType() == CellType.NUMERIC)
+		{
+			return Integer.toString((int)testCell.getNumericCellValue());
+		}
+		if(testCell.getCellType() == CellType.BLANK)
+		{
+			return null;
+		}
+		return testCell.getStringCellValue();
+	}
+	static int checkIntType(XSSFCell testCell)
+	{
+		if(testCell.getCellType() == CellType.STRING)
+		{
+			return Integer.parseInt(testCell.getStringCellValue());
+		}
+		if(testCell.getCellType() == CellType.BLANK)
+		{
+			return (Integer) null;
+		}
+		return (int)testCell.getNumericCellValue();
+	}
+	
+	static float checkFloatType(XSSFCell testCell)
+	{
+		if(testCell.getCellType() == CellType.STRING)
+		{
+			return Integer.parseInt(testCell.getStringCellValue());
+		}
+		if(testCell.getCellType() == CellType.BLANK)
+		{
+			return (Float) null;
+		}
+		return (float) testCell.getNumericCellValue();
+	}
+	
+	public void LoadMenu() throws IOException {
+		// TODO Auto-generated method stub
+		
+		/*File test=new File("check.txt");
+		if (test.createNewFile()) {
+		    System.out.println("File created: " + test.getName());
+		  }*/
+		
+		
+		FileInputStream thisxls;
+		 XSSFWorkbook wb;
+		 XSSFSheet sheet;
+		 XSSFRow curRow;
+ 
+		 
+
+		thisxls = new FileInputStream("src/main/resources/Menu.xlsx");
+		wb = new XSSFWorkbook(thisxls);
+		 sheet = wb.getSheetAt(0);
+		 
+		 
+		 int count = 0;
+		 
+		 curRow = sheet.getRow(count);
+		 
+		 Menu menus = new Menu();
+		 
+		 while(curRow.getRowNum() < sheet.getLastRowNum())
+		 {
+			 count++;
+			 curRow = sheet.getRow(count);
+				menus.setId(checkIntType(curRow.getCell(0))); 
+				System.out.println("Got ID");
+				menus.setName(checkStringType(curRow.getCell(1)));
+				System.out.println("Got Name");
+				menus.setEntree(checkStringType(curRow.getCell(2)));
+				System.out.println("Got Entree");
+				menus.setSides(checkStringType(curRow.getCell(3)));
+				System.out.println("Got Sides");
+				menus.setPrice(checkFloatType(curRow.getCell(4)));
+				System.out.println("Got Price");
+				menus.setAvailability(true);
+				System.out.println("Got Availability");
+				menus.setQuantity(checkIntType(curRow.getCell(6)));
+				System.out.println("Got Quantity");
+				menuRepo.save(menus);
+			 
+		 }
+	}
+    
+    
     //index page
     @RequestMapping({"/"})
     public String homePage() {
@@ -119,6 +219,7 @@ public class RestaurantController {
     	officeRepo.deleteAll();
     	restaurantRepo.deleteAll();
     	warehouseRepo.deleteAll();
+    	menuRepo.deleteAll();
     	
     	Offices office = new Offices("100 Central Loop",
     			"16057",
@@ -208,6 +309,12 @@ public class RestaurantController {
     	
     	
     	addSampleOrder();
+    	try {
+			LoadMenu();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     	
     	return "index";
     }
@@ -949,7 +1056,6 @@ public class RestaurantController {
 			menuRepo.deleteAll();
 
 			Orders order = new Orders();
-			Menu item = new Menu();
 			Customers cust = new Customers();
 
 			order.setDate(date.format(LocalDateTime.now()));
@@ -959,13 +1065,6 @@ public class RestaurantController {
 			order.setInstructions("instructions");
 			order.setLocation(0);
 
-			item.setName("name");
-			item.setEntree("entree");
-			item.setSides("sides");
-			item.setPrice(0.00F);
-			item.setAvailability(true);
-			item.setQuantity(1);
-
 			cust.setEmail("customer@email.com");
 			cust.setFirstName("Test");
 			cust.setLastName("Customer");
@@ -974,7 +1073,6 @@ public class RestaurantController {
 			cust.setRewardsAvailable(10);
 
 			orderRepo.save(order);
-			menuRepo.save(item);
 			customerRepo.save(cust);
 
 			return "employeesignin";
