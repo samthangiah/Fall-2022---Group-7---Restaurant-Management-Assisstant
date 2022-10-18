@@ -29,6 +29,7 @@ import edu.sru.group7.restaurantmanager.repository.CustomerRepository;
 import edu.sru.group7.restaurantmanager.repository.OfficeRepository;
 import edu.sru.group7.restaurantmanager.repository.RestaurantRepository;
 import edu.sru.group7.restaurantmanager.repository.WarehouseRepository;
+import edu.sru.group7.restaurantmanager.security.ApplicationUserRole;
 import edu.sru.group7.restaurantmanager.repository.ManagerRepository;
 import edu.sru.group7.restaurantmanager.repository.ServerRepository;
 import edu.sru.group7.restaurantmanager.repository.OrderRepository;
@@ -283,6 +284,7 @@ public class RestaurantController {
     			"Manager@email.com",
     			"pass",
     			restaurant); //restaurant is 2
+    	
     	Managers manager2 = new Managers("Luke",
     			"Skywalker",
     			"Manager2@email.com",
@@ -294,6 +296,7 @@ public class RestaurantController {
     			"server@email.com",
     			"pass",
     			restaurant); 
+    	
     	Servers server2 = new Servers("Baby",
     			"Yoda",
     			"server2@email.com",
@@ -315,6 +318,28 @@ public class RestaurantController {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+    	
+    	//Customer objects for hardcoded logins
+    	Customers samThangiah = new Customers("sam",
+    			"thangiah",
+    			"sam",
+    			"thangiah",
+    			0,
+    			false,
+    			0,
+    			1);
+    	
+    	Customers hqManager = new Customers("hq",
+    			"manager",
+    			"hqmanager@email.com",
+    			"pass",
+    			0,
+    			false,
+    			0,
+    			1);
+
+    	customerRepo.save(samThangiah);
+    	customerRepo.save(hqManager);
     	
     	return "index";
     }
@@ -344,6 +369,7 @@ public class RestaurantController {
     @RequestMapping({"/employeelogin"})
     public String tempEmployeeLoginPage() {
     	SetIsLoggedIn(true);
+    	
     	return "redirect:/temploginpage";
     }
     
@@ -356,22 +382,78 @@ public class RestaurantController {
     public String logout() {
     	SetIsLoggedIn(false);
     	//Clears authentication and invalidates HTTPsession through ApplicationSecurityConfig
-    	return "redirect:/";
+    	return "redirect:/temploginpage";
     }
     
     public Customers getLoggedInUser() {
     	ApplicationUser user = (ApplicationUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    	Iterable<Customers> custs = customerRepo.findAll();
-    	for (Customers i : custs) {
+    	for (Customers i : customerRepo.findAll()) {
     		if (i.getEmail().equals(user.getUsername())) {
     			return i;
     		}
     	}
+    	for (Servers i : serverRepo.findAll()) {
+    		if (i.getEmail().equals(user.getUsername())) {
+    			return new Customers(i.getFirstName(),
+    					i.getLastName(),
+    					i.getEmail(),
+    					i.getPassword(),
+    					0,
+    					false,
+    					0,
+    					(int)i.getRestaurant().getId());
+    		}
+    	}
+    	for (Managers i : managerRepo.findAll()) {
+    		if (i.getEmail().equals(user.getUsername())) {
+    			return new Customers(i.getFirstName(),
+    					i.getLastName(),
+    					i.getEmail(),
+    					i.getPassword(),
+    					0,
+    					false,
+    					0,
+    					(int)i.getRestaurant().getId());
+    		}
+    	}
+    	for (Admins i : adminRepo.findAll()) {
+    		if (i.getEmail().equals(user.getUsername())) {
+    			return new Customers(i.getFirstName(),
+    					i.getLastName(),
+    					i.getEmail(),
+    					i.getPassword(),
+    					0,
+    					false,
+    					0,
+    					(int)i.getOffice().getId());
+    		}
+    	}
+    	
     	return null;
     }
     
     @GetMapping("/temploginpage")
 	public String staffLoginPage() {
+    	ApplicationUser user = (ApplicationUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    	//Redirect user to staff page of highest authority
+    	if (user.getAuthorities().toString().contains("ROLE_HQADMIN")) {
+    		return "redirect:/HQ-admin-view";
+		}
+    	if (user.getAuthorities().toString().contains("ROLE_HQMANAGER")) {
+    		return "redirect:/HQ-manager-view";
+		}
+    	if (user.getAuthorities().toString().contains("ROLE_ADMIN")) {
+    		return "redirect:/local-admin-view";
+		}
+    	if (user.getAuthorities().toString().contains("ROLE_MANAGER")) {
+    		return "redirect:/local-manager-view";
+		}
+    	if (user.getAuthorities().toString().contains("ROLE_SERVER")) {
+    		return "redirect:/servingstaffview";
+		}
+    	if (user.getAuthorities().toString().contains("ROLE_CUSTOMER")) {
+    		return "redirect:/loggedinhome";
+		}
 		return "temploginpage";
 	}
     
@@ -1176,19 +1258,19 @@ public class RestaurantController {
 				}
 			}
 			model.addAttribute("log", (Iterable<Log>) localLog);
-			return "log-admin-view";
+			return "LocalAdmin/log-admin-view";
 		}
 
 		@GetMapping("/hqlogview")
 		public String showHQLog(Model model) {
 			model.addAttribute("log", logRepo.findAll());
-			return "hq-log-view";
+			return "HQManager/hq-log-view";
 		}
 
 		@GetMapping("/hqlogadminview")
 		public String showHQAdminLog(Model model) {
 			model.addAttribute("log", logRepo.findAll());
-			return "hq-admin-log-view";
+			return "HQAdmin/hq-admin-log-view";
 		}
 
 		// local manager home page
