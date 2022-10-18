@@ -62,8 +62,8 @@ public class FakeApplicationUserDaoService implements ApplicationUserDao {
 					true));
 		
 		applicationUsers.add(new ApplicationUser(
-					"hqmanager",
-					passwordEncoder.encode("password"),
+					"hqmanager@email.com",
+					passwordEncoder.encode("pass"),
 					ApplicationUserRole.HQMANAGER.getGrantedAuthorities(),
 					true,
 					true,
