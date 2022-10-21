@@ -1,7 +1,6 @@
 package edu.sru.group7.restaurantmanager.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -31,19 +30,19 @@ import edu.sru.group7.restaurantmanager.repository.InventoryRepository;
 import edu.sru.group7.restaurantmanager.repository.OfficeRepository;
 import edu.sru.group7.restaurantmanager.repository.RestaurantRepository;
 import edu.sru.group7.restaurantmanager.repository.WarehouseRepository;
-import edu.sru.group7.restaurantmanager.security.ApplicationUserRole;
 import edu.sru.group7.restaurantmanager.repository.ManagerRepository;
 import edu.sru.group7.restaurantmanager.repository.ServerRepository;
 import edu.sru.group7.restaurantmanager.repository.OrderRepository;
 import edu.sru.group7.restaurantmanager.repository.MenuRepository;
 import edu.sru.group7.restaurantmanager.repository.LogRepository;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -218,7 +217,7 @@ public class RestaurantController {
 		 }
 	}
 	
-public void loadIngredients(String filepath, Restaurants id) throws IOException {
+	public void loadIngredients(String filepath, Restaurants id) throws IOException {
 		
 		FileInputStream thisxls;
 		 XSSFWorkbook wb;
@@ -278,15 +277,14 @@ public void loadIngredients(String filepath, Restaurants id) throws IOException 
 		 
 	 }
 	}
-    
-    
-    //index page
-    @RequestMapping({"/"})
-    public String homePage() {
-    	
-    	//For testing purposes, delete later
-    	customerRepo.deleteAll();
-    	inventoryRepo.deleteAll();
+	
+	@PostConstruct
+	public void loadData() {
+		
+		System.out.println("--------------------------------------------------------------------------------------------------------------------------------------------------------" + "\n");
+		System.out.println("STARTING TO CREATE THE DATABASE" + "\n" + "\n");
+		
+		customerRepo.deleteAll();
     	adminRepo.deleteAll();
     	managerRepo.deleteAll();
     	serverRepo.deleteAll();
@@ -417,6 +415,18 @@ public void loadIngredients(String filepath, Restaurants id) throws IOException 
     	customerRepo.save(samThangiah);
     	customerRepo.save(hqManager);
     	
+    	System.out.println("---------------------------------------------------------------------------------------------------------------------------");
+		System.out.println("DATABASE CREATED" + "\n" + "\n");
+		
+	}
+    
+    
+    //index page
+    @RequestMapping({"/"})
+    public String homePage() {
+    	
+    	//For testing purposes, delete later
+    	
     	return "index";
     }
     
@@ -428,6 +438,8 @@ public void loadIngredients(String filepath, Restaurants id) throws IOException 
     	model.addAttribute("listAdmins", listadmins);
     	List<Offices> listoffices = (List<Offices>) officeRepo.findAll();
     	model.addAttribute("listOffices", listoffices);
+    	List<Menu> listmenu = (List<Menu>) menuRepo.findAll();
+    	model.addAttribute("listMenu", listmenu);
     }
     
     //403 Error page
@@ -506,6 +518,11 @@ public void loadIngredients(String filepath, Restaurants id) throws IOException 
     	}
     	
     	return null;
+    }
+    
+    @RequestMapping({"/showmenu"})
+    public String showMenu() {
+    	return "Customer/menupage";
     }
     
     @GetMapping("/temploginpage")
@@ -1365,6 +1382,16 @@ public void loadIngredients(String filepath, Restaurants id) throws IOException 
 		@RequestMapping({ "/local-manager-view" })
 		public String showManagerPage() {
 			return "LocalManager/local-manager-view";
+		}
+		
+		@RequestMapping({"/manager-inventory-view"})
+		public String showInventoryView(Model model) {
+			
+			int user = getUserLocation();
+			
+			model.addAttribute("inventory", inventoryRepo.findInventoryRestaurant(user));
+			
+			return "LocalManager/manager-inventory-view";
 		}
 
 		@RequestMapping({ "/local-manager-view-view" })

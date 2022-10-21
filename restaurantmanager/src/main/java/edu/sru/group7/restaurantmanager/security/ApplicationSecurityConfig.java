@@ -31,7 +31,8 @@ WebSecurityConfigurerAdapter {
 		http
 			.authorizeRequests() 
 			.antMatchers("/", "/index", "/css/*", "/js/*", "/img/*", "/assets/*", "/403", "/login", "/showlogin", 
-					"/employeelogin", "/showemployeelogin", "/custregistrationpage", "/addregisteredcustomer", "/add-sample-order").permitAll()
+					"/employeelogin", "/showemployeelogin", "/custregistrationpage", "/addregisteredcustomer", "/add-sample-order",
+					"/showmenu").permitAll()
 			
 			.antMatchers("/loggedinhome", "/templogout", "/changeuserpass", "/updateuserpass/*").hasAnyRole(ApplicationUserRole.CUSTOMER.name(),
 					ApplicationUserRole.ADMIN.name(), ApplicationUserRole.HQADMIN.name(), ApplicationUserRole.MANAGER.name(),
@@ -60,7 +61,8 @@ WebSecurityConfigurerAdapter {
 					"/localmanagercustedit/*", "/localmanagercustupdate/*", "/localmanagercustdelete/*",
 					"/manager-menu-view", "/localmanageraddmenu", "/addmenuitem", "/localmanagereditmenu/*",
 					"/localmanagerupdatemenu/*", "/localmanagerdeletemenu/*", "/manager-server-view",
-					"/localmanagerserveredit/*", "/localmanagerserverupdate/*", "/localmanagerserverdelete/*").hasAnyRole(ApplicationUserRole.MANAGER.name(),
+					"/localmanagerserveredit/*", "/localmanagerserverupdate/*", "/localmanagerserverdelete/*",
+					"/manager-inventory-view").hasAnyRole(ApplicationUserRole.MANAGER.name(),
 							ApplicationUserRole.HQMANAGER.name(), ApplicationUserRole.ADMIN.name(), ApplicationUserRole.HQADMIN.name())
 			
 			.antMatchers("/hqlogview", "/local-manager-view-view", "/HQ-manager-view", "/HQmanager-managers-view",
