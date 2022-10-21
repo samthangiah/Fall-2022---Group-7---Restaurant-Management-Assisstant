@@ -215,6 +215,7 @@ public class RestaurantController {
 				menuRepo.save(menus);
 			 
 		 }
+		 wb.close();
 	}
 	
 	public void loadIngredients(String filepath, Restaurants id) throws IOException {
@@ -245,6 +246,7 @@ public class RestaurantController {
 				inventoryRepo.save(inventory);
 			 
 		 }
+		 wb.close();
 	}
 
 	public void loadIngredients(String filepath, Warehouses id) throws IOException {
@@ -276,6 +278,7 @@ public class RestaurantController {
 			inventoryRepo.save(inventory);
 		 
 	 }
+	 wb.close();
 	}
 	
 	@PostConstruct
