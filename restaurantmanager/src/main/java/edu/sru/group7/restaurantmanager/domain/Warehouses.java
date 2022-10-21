@@ -1,9 +1,15 @@
 package edu.sru.group7.restaurantmanager.domain;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 
 @Entity
 public class Warehouses extends Locations {
@@ -19,6 +25,9 @@ public class Warehouses extends Locations {
 	private String zipcode;
 	
 	private String city;
+	
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "warehouse_id")
+	private List<Inventory> inventory = new ArrayList<>();
 	
 	public Warehouses(String address, String zipcode, String city, String state) {
 		super();

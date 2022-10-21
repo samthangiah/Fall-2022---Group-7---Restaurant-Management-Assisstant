@@ -32,6 +32,9 @@ public class Restaurants extends Locations {
 	@JoinColumn(name="admin_id")
 	private Admins admin;
 	
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "restaurant_id")
+	private List<Inventory> inventory = new ArrayList<>();
+	
 	@OneToMany(cascade=CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "restaurant")
     private List<Servers> servers = new ArrayList<>();
 	

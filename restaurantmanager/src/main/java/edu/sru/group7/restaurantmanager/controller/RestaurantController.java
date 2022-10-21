@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import edu.sru.group7.restaurantmanager.authentication.ApplicationUser;
 import edu.sru.group7.restaurantmanager.domain.Admins;
 import edu.sru.group7.restaurantmanager.domain.Customers;
+import edu.sru.group7.restaurantmanager.domain.Inventory;
 import edu.sru.group7.restaurantmanager.domain.Offices;
 import edu.sru.group7.restaurantmanager.domain.Restaurants;
 import edu.sru.group7.restaurantmanager.domain.Warehouses;
@@ -26,6 +27,7 @@ import edu.sru.group7.restaurantmanager.domain.Menu;
 import edu.sru.group7.restaurantmanager.domain.Log;
 import edu.sru.group7.restaurantmanager.repository.AdminRepository;
 import edu.sru.group7.restaurantmanager.repository.CustomerRepository;
+import edu.sru.group7.restaurantmanager.repository.InventoryRepository;
 import edu.sru.group7.restaurantmanager.repository.OfficeRepository;
 import edu.sru.group7.restaurantmanager.repository.RestaurantRepository;
 import edu.sru.group7.restaurantmanager.repository.WarehouseRepository;
@@ -87,10 +89,18 @@ public class RestaurantController {
 	
 	@Autowired 
 	private RestaurantRepository restaurantRepo;
+	
+	@Autowired
+	private InventoryRepository inventoryRepo;
+	
+	private final String menuFP = "src/main/resources/Menu.xlsx";
+	
+	private final String ingredientFP = "src/main/resources/Ingredients.xlsx";
 
 	//create an UserRepository instance - instantiation (new) is done by Spring
     public RestaurantController(RestaurantRepository restaurantRepo,
     							WarehouseRepository warehouseRepo,
+    							InventoryRepository inventoryRepo,
     							OfficeRepository officeRepo,
     							CustomerRepository customerRepo, 
     							ManagerRepository managerRepo,
@@ -100,6 +110,7 @@ public class RestaurantController {
     							LogRepository logRepo) {
     	this.restaurantRepo = restaurantRepo;
     	this.warehouseRepo = warehouseRepo;
+    	this.inventoryRepo = inventoryRepo;
 		this.customerRepo = customerRepo;
 		this.managerRepo = managerRepo;
 		this.serverRepo = serverRepo;
@@ -157,7 +168,7 @@ public class RestaurantController {
 		return (float) testCell.getNumericCellValue();
 	}
 	
-	public void LoadMenu() throws IOException {
+	public void loadMenu() throws IOException {
 		// TODO Auto-generated method stub
 		
 		/*File test=new File("check.txt");
@@ -206,6 +217,67 @@ public class RestaurantController {
 			 
 		 }
 	}
+	
+public void loadIngredients(String filepath, Restaurants id) throws IOException {
+		
+		FileInputStream thisxls;
+		 XSSFWorkbook wb;
+		 XSSFSheet sheet;
+		 XSSFRow curRow;
+
+		thisxls = new FileInputStream(filepath);
+		wb = new XSSFWorkbook(thisxls);
+		 sheet = wb.getSheetAt(0);
+		 
+		 int count = 0;
+		 curRow = sheet.getRow(count);
+		 
+		 while(curRow.getRowNum() < sheet.getLastRowNum())
+		 {
+			 count++;
+			 curRow = sheet.getRow(count);
+			 Inventory inventory = new Inventory();
+				inventory.setIngredient(checkStringType(curRow.getCell(1)));
+				System.out.println("Got Ingredient");
+				inventory.setQuantity(checkIntType(curRow.getCell(2)));
+				System.out.println("Got Quantity");
+				inventory.setRestaurant_id(id);
+
+				inventoryRepo.save(inventory);
+			 
+		 }
+	}
+
+	public void loadIngredients(String filepath, Warehouses id) throws IOException {
+	
+	FileInputStream thisxls;
+	 XSSFWorkbook wb;
+	 XSSFSheet sheet;
+	 XSSFRow curRow;
+
+	thisxls = new FileInputStream(filepath);
+	wb = new XSSFWorkbook(thisxls);
+	 sheet = wb.getSheetAt(0);
+	 
+	 int count = 0;
+	 curRow = sheet.getRow(count);
+	 
+	 
+	 while(curRow.getRowNum() < sheet.getLastRowNum())
+	 {
+		 count++;
+		 Inventory inventory = new Inventory();
+		 curRow = sheet.getRow(count);
+			inventory.setIngredient(checkStringType(curRow.getCell(1)));
+			System.out.println("Got Ingredient");
+			inventory.setQuantity(checkIntType(curRow.getCell(2)));
+			System.out.println("Got Quantity");
+			inventory.setWarehouse_id(id);
+
+			inventoryRepo.save(inventory);
+		 
+	 }
+	}
     
     
     //index page
@@ -214,6 +286,7 @@ public class RestaurantController {
     	
     	//For testing purposes, delete later
     	customerRepo.deleteAll();
+    	inventoryRepo.deleteAll();
     	adminRepo.deleteAll();
     	managerRepo.deleteAll();
     	serverRepo.deleteAll();
@@ -313,7 +386,10 @@ public class RestaurantController {
     	
     	addSampleOrder();
     	try {
-			LoadMenu();
+			loadMenu();
+			loadIngredients(ingredientFP, warehouse);
+			loadIngredients(ingredientFP, restaurant);
+			loadIngredients(ingredientFP, restaurant2);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -756,6 +832,12 @@ public class RestaurantController {
 		logRepo.save(log);
 
 		restaurantRepo.save(restaurant);
+		try {
+			loadIngredients(ingredientFP, restaurant);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return "redirect:/HQadmin-restaurants-view";
 	}
 
@@ -775,6 +857,12 @@ public class RestaurantController {
 		logRepo.save(log);
 
 		warehouseRepo.save(warehouse);
+		try {
+			loadIngredients(ingredientFP, warehouse);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return "redirect:/HQadmin-warehouses-view";
 	}
 
