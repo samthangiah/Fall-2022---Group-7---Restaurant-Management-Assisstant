@@ -427,9 +427,6 @@ public class RestaurantController {
     //index page
     @RequestMapping({"/"})
     public String homePage() {
-    	
-    	//For testing purposes, delete later
-    	
     	return "index";
     }
     
@@ -477,54 +474,61 @@ public class RestaurantController {
     }
     
     public Customers getLoggedInUser() {
-    	ApplicationUser user = (ApplicationUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    	for (Customers i : customerRepo.findAll()) {
-    		if (i.getEmail().equals(user.getUsername())) {
-    			return i;
-    		}
+    	if (SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString().startsWith("anonymousUser")) {
+    		return null;
+    	} else {
+    		ApplicationUser user = (ApplicationUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        	for (Customers i : customerRepo.findAll()) {
+        		if (i.getEmail().equals(user.getUsername())) {
+        			return i;
+        		}
+        	}
+        	for (Servers i : serverRepo.findAll()) {
+        		if (i.getEmail().equals(user.getUsername())) {
+        			return new Customers(i.getFirstName(),
+        					i.getLastName(),
+        					i.getEmail(),
+        					i.getPassword(),
+        					0,
+        					false,
+        					0,
+        					(int)i.getRestaurant().getId());
+        		}
+        	}
+        	for (Managers i : managerRepo.findAll()) {
+        		if (i.getEmail().equals(user.getUsername())) {
+        			return new Customers(i.getFirstName(),
+        					i.getLastName(),
+        					i.getEmail(),
+        					i.getPassword(),
+        					0,
+        					false,
+        					0,
+        					(int)i.getRestaurant().getId());
+        		}
+        	}
+        	for (Admins i : adminRepo.findAll()) {
+        		if (i.getEmail().equals(user.getUsername())) {
+        			return new Customers(i.getFirstName(),
+        					i.getLastName(),
+        					i.getEmail(),
+        					i.getPassword(),
+        					0,
+        					false,
+        					0,
+        					(int)i.getOffice().getId());
+        		}
+        	}
+        	
+        	return null;
     	}
-    	for (Servers i : serverRepo.findAll()) {
-    		if (i.getEmail().equals(user.getUsername())) {
-    			return new Customers(i.getFirstName(),
-    					i.getLastName(),
-    					i.getEmail(),
-    					i.getPassword(),
-    					0,
-    					false,
-    					0,
-    					(int)i.getRestaurant().getId());
-    		}
-    	}
-    	for (Managers i : managerRepo.findAll()) {
-    		if (i.getEmail().equals(user.getUsername())) {
-    			return new Customers(i.getFirstName(),
-    					i.getLastName(),
-    					i.getEmail(),
-    					i.getPassword(),
-    					0,
-    					false,
-    					0,
-    					(int)i.getRestaurant().getId());
-    		}
-    	}
-    	for (Admins i : adminRepo.findAll()) {
-    		if (i.getEmail().equals(user.getUsername())) {
-    			return new Customers(i.getFirstName(),
-    					i.getLastName(),
-    					i.getEmail(),
-    					i.getPassword(),
-    					0,
-    					false,
-    					0,
-    					(int)i.getOffice().getId());
-    		}
-    	}
-    	
-    	return null;
     }
     
     @RequestMapping({"/showmenu"})
     public String showMenu() {
+    	if (getLoggedInUser() == null) {
+    		return "/guestmenu";
+    	}
     	return "Customer/menupage";
     }
     
@@ -617,6 +621,54 @@ public class RestaurantController {
 
 		customerRepo.save(customers);
 		return "redirect:/login";
+	}
+	
+	@RequestMapping("/contact")
+	public String contactPage() {
+		if (getLoggedInUser() == null) {
+			return "/guestcontact";
+		}
+		return "Customer/contact";
+	}
+	
+	@RequestMapping("/custviewinfo")
+	public String infoPage(Model model) {
+		Customers user = getLoggedInUser();
+		if (user == null) {
+			return "redirect:/";
+		}
+		model.addAttribute("customers", user);
+		return "Customer/custviewinfo";
+	}
+	
+	@GetMapping("/editcustomer/{id}")
+	public String userShowUpdateCustForm(@PathVariable("id") long id, Model model) {
+		Customers customer = customerRepo.findById(id)
+				.orElseThrow(() -> new IllegalArgumentException("Invalid customer Id:" + id));
+
+		model.addAttribute("customer", customer);
+		return "Customer/editprofile";
+	}
+
+	@PostMapping("/usercustomerupdate/{id}")
+	public String userUpdateCust(@PathVariable("id") long id, @Validated Customers customer, BindingResult result,
+			Model model) {
+		if (result.hasErrors()) {
+			customer.setId(id);
+			return "Customer/editprofile";
+		}
+
+		Log log = new Log();
+		log.setDate(date.format(LocalDateTime.now()));
+		log.setTime(time.format(LocalDateTime.now()));
+		log.setLocation(getUserLocation());
+		log.setUserId(getUserUID());
+		log.setAction("Update customer account");
+		log.setActionId(customer.getId());
+		logRepo.save(log);
+
+		customerRepo.save(customer);
+		return "redirect:/loggedinhome";
 	}
 	
 	// HQ admin home page
