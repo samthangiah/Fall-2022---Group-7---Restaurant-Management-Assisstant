@@ -32,9 +32,10 @@ WebSecurityConfigurerAdapter {
 			.authorizeRequests() 
 			.antMatchers("/", "/index", "/css/*", "/js/*", "/img/*", "/assets/*", "/403", "/login", "/showlogin", 
 					"/employeelogin", "/showemployeelogin", "/custregistrationpage", "/addregisteredcustomer", "/add-sample-order",
-					"/showmenu").permitAll()
+					"/showmenu", "/contact").permitAll()
 			
-			.antMatchers("/loggedinhome", "/templogout", "/changeuserpass", "/updateuserpass/*").hasAnyRole(ApplicationUserRole.CUSTOMER.name(),
+			.antMatchers("/loggedinhome", "/templogout", "/changeuserpass", "/updateuserpass/*", "/custviewinfo",
+					"/editcustomer/*", "/usercustomerupdate/*").hasAnyRole(ApplicationUserRole.CUSTOMER.name(),
 					ApplicationUserRole.ADMIN.name(), ApplicationUserRole.HQADMIN.name(), ApplicationUserRole.MANAGER.name(),
 					ApplicationUserRole.HQMANAGER.name(), ApplicationUserRole.SERVER.name())
 			
