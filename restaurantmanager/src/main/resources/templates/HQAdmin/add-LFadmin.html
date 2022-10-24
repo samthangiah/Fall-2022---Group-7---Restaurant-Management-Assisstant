@@ -91,7 +91,7 @@ input[type=text]:focus, input[type=password]:focus {
     							 <option th:value="${restaurant.id}" th:text="${restaurant.id} + ' ' + ${restaurant.address} + ' ' + ${restaurant.city} + ' ' + ${restaurant.state}"></option>
     							 </th:block>
     						</select>  
-    						 <label class="label" for="officeid">Office Location:</label>
+    						<label class="label" for="officeid">Office Location:</label>
     						<select id="officeid" th:field="*{office}" class="form-control" required>
     							<th:block th:each="office : ${listOffices}">
     							 <option th:value="${office.id}" th:text="${office.id} + ' ' + ${office.address} + ' ' + ${office.city} + ' ' + ${office.state}"></option>

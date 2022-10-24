@@ -1,8 +1,6 @@
 package edu.sru.group7.restaurantmanager.domain;
 
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 @Entity
@@ -84,4 +82,11 @@ public class Menu {
     public int getQuantity() {
         return quantity;
     }
+
+	@Override
+	public String toString() {
+		return "[name=" + name + ", price=" + price + "]";
+	}
+    
+    
 }

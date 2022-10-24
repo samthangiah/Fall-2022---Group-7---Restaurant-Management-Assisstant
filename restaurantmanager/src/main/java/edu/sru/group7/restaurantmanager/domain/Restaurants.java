@@ -32,6 +32,9 @@ public class Restaurants extends Locations {
 	@JoinColumn(name="admin_id")
 	private Admins admin;
 	
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "restaurant")
+	private List<Orders> order = new ArrayList<>();
+	
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "restaurant_id")
 	private List<Inventory> inventory = new ArrayList<>();
 	
@@ -100,11 +103,11 @@ public class Restaurants extends Locations {
 		this.city = city;
 	}
 	
-	public Admins getAdmins() {
+	public Admins getAdmin() {
 		return admin;
 	}
 
-	public void setAdmins(Admins admins) {
+	public void setAdmin(Admins admins) {
 		this.admin = admins;
 	}
 

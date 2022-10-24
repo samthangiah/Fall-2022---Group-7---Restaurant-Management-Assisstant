@@ -86,11 +86,11 @@ table, th, td {
         						<td><a th:href="@{/deleteorder/{id}(id=${order.id})}">Delete order</a></td>
         						<td th:text="${order.date}"></td>
         						<td th:text="${order.price}"></td>
-        						<td th:text="${order.customer}"></td>
-        						<td><a th:href="@{/serverviewcustinfo/{id}(id=${order.customer})}">View info and rewards</a></td>
+        						<td th:text="${order.customer_id}"></td>
+        						<td><a th:href="@{/serverviewcustinfo/{id}(id=${order.customer_id})}">View info and rewards</a></td>
         						<td th:text="${order.items}"></td>
         						<td th:text="${order.instructions}"></td>
-        						<td th:text="${order.location}"></td>
+        						<td th:text="${order.restaurant}"></td>
     						</tr>
     					</tbody>
 					</table>
@@ -98,25 +98,21 @@ table, th, td {
 						<table class = "table table-striped table-hover">
 						<thead class="table-dark">
 							<tr>
-        						<th>Item ID</th>
         						<th>Item Name</th>
         						<th>Entree</th>
         						<th>Side Dish</th>
         						<th>Price</th>
         						<th>Availability</th>
-        						<th>Quantity</th>
         						<th></th>
     						</tr>
 						</thead>
 		<tbody>
 			<tr th:each="item : ${menu}">
-    				<td th:text="${item.id}"></td>
         			<td th:text="${item.name}"></td>
         			<td th:text="${item.entree}"></td>
         			<td th:text="${item.sides}"></td>
         			<td th:text="${item.price}"></td>
         			<td th:text="${item.availability}"></td>
-        			<td th:text="${item.quantity}"></td>
         			<td><a th:href="@{/updatemenuitem/{id}(id=${item.id})}">Edit</a></td>
     			</tr>
 		</tbody>

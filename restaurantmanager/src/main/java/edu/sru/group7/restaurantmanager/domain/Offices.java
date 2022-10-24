@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -27,7 +28,7 @@ public class Offices extends Locations {
 	
 	private String city;
 	
-	@OneToMany(mappedBy = "office")
+	@OneToMany(cascade=CascadeType.MERGE, fetch = FetchType.LAZY, mappedBy = "office")
     private List<Admins> admin = new ArrayList<>();
 
 	public Offices() {

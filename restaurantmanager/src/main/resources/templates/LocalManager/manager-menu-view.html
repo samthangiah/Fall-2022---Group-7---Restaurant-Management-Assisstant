@@ -83,9 +83,6 @@ table, th, td {
         						<th>Side Dish</th>
         						<th>Price</th>
         						<th>Availability</th>
-        						<th>Quantity</th>
-        						<th></th>
-        						<th></th>
     						</tr>
 						</thead>
 		<tbody>
@@ -96,7 +93,6 @@ table, th, td {
         			<td th:text="${item.sides}"></td>
         			<td th:text="${item.price}"></td>
         			<td th:text="${item.availability}"></td>
-        			<td th:text="${item.quantity}"></td>
         			<td><a th:href="@{/localmanagereditmenu/{id}(id=${item.id})}">Edit</a></td>
         			<td><a th:href="@{/localmanagerdeletemenu/{id}(id=${item.id})}">Delete</a></td>
     			</tr>

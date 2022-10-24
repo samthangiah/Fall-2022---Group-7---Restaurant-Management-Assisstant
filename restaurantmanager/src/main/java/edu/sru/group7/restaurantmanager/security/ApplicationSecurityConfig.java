@@ -32,7 +32,7 @@ WebSecurityConfigurerAdapter {
 			.authorizeRequests() 
 			.antMatchers("/", "/index", "/css/*", "/js/*", "/img/*", "/assets/*", "/403", "/login", "/showlogin", 
 					"/employeelogin", "/showemployeelogin", "/custregistrationpage", "/addregisteredcustomer", "/add-sample-order",
-					"/showmenu", "/contact").permitAll()
+					"/showmenu", "/contact", "/Customer-ordertype-view").permitAll()
 			
 			.antMatchers("/loggedinhome", "/templogout", "/changeuserpass", "/updateuserpass/*", "/custviewinfo",
 					"/editcustomer/*", "/usercustomerupdate/*").hasAnyRole(ApplicationUserRole.CUSTOMER.name(),
@@ -63,7 +63,7 @@ WebSecurityConfigurerAdapter {
 					"/manager-menu-view", "/localmanageraddmenu", "/addmenuitem", "/localmanagereditmenu/*",
 					"/localmanagerupdatemenu/*", "/localmanagerdeletemenu/*", "/manager-server-view",
 					"/localmanagerserveredit/*", "/localmanagerserverupdate/*", "/localmanagerserverdelete/*",
-					"/manager-inventory-view").hasAnyRole(ApplicationUserRole.MANAGER.name(),
+					"/manager-inventory-view", "/managerinventoryupdate/*", "/managerinventoryedit/*", "/update-inventory").hasAnyRole(ApplicationUserRole.MANAGER.name(),
 							ApplicationUserRole.HQMANAGER.name(), ApplicationUserRole.ADMIN.name(), ApplicationUserRole.HQADMIN.name())
 			
 			.antMatchers("/hqlogview", "/local-manager-view-view", "/HQ-manager-view", "/HQmanager-managers-view",

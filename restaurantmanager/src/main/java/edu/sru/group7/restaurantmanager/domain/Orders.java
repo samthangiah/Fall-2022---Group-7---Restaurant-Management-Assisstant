@@ -1,9 +1,21 @@
 package edu.sru.group7.restaurantmanager.domain;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 
 @Entity
 public class Orders {
@@ -12,22 +24,36 @@ public class Orders {
     private long id;
     private String date;
     private float price;
-    private String customer;
-    private String items;
     private String instructions;
-    private int location;
+    
+    @ManyToOne
+	@JoinColumn(name="restaurant")
+    private Restaurants restaurant;
+    
+    @ManyToMany()
+    @JoinTable(name = "order_items",
+    joinColumns = {
+            @JoinColumn(name = "order_id")},
+    inverseJoinColumns = {
+            @JoinColumn(name = "menu_id")})
+    private Set<Menu> items = new HashSet<Menu>();
+    
+    @ManyToOne
+	@JoinColumn(name="customer_id")
+    private Customers customer_id;
     
     public Orders() {
     }
     
-    public Orders(long id, String date, float price, String customer, String items, String instructions, int location) {
+    public Orders(long id, String date, float price, Customers customer_id, Set<Menu> items, String instructions, Restaurants restaurant) {
         this.id = id;
         this.date = date;
         this.price = price;
-        this.customer = customer;
+        this.customer_id = customer_id;
         this.items = items;
         this.instructions = instructions;
-        this.location = location;
+        this.restaurant = restaurant;
+        
     }
 
 	public long getId() {
@@ -54,19 +80,11 @@ public class Orders {
 		this.price = price;
 	}
 
-	public String getCustomer() {
-		return customer;
-	}
-
-	public void setCustomer(String customer) {
-		this.customer = customer;
-	}
-
-	public String getItems() {
+	public Set<Menu> getItems() {
 		return items;
 	}
 
-	public void setItems(String items) {
+	public void setItems(Set<Menu> items) {
 		this.items = items;
 	}
 
@@ -78,12 +96,22 @@ public class Orders {
 		this.instructions = instructions;
 	}
 
-	public int getLocation() {
-		return location;
+	public Restaurants getRestaurant() {
+		return restaurant;
 	}
 
-	public void setLocation(int location) {
-		this.location = location;
+	public void setRestaurant(Restaurants restaurant) {
+		this.restaurant = restaurant;
 	}
+
+	public Customers getCustomer_id() {
+		return customer_id;
+	}
+
+	public void setCustomer_id(Customers customer_id) {
+		this.customer_id = customer_id;
+	}
+
+	
     
 }

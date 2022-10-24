@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import edu.sru.group7.restaurantmanager.authentication.ApplicationUser;
+import edu.sru.group7.restaurantmanager.authentication.FakeApplicationUserDaoService;
 import edu.sru.group7.restaurantmanager.domain.Admins;
 import edu.sru.group7.restaurantmanager.domain.Customers;
 import edu.sru.group7.restaurantmanager.domain.Inventory;
@@ -294,7 +295,9 @@ public class RestaurantController {
     	officeRepo.deleteAll();
     	restaurantRepo.deleteAll();
     	warehouseRepo.deleteAll();
+    	orderRepo.deleteAll();
     	menuRepo.deleteAll();
+    	
     	
     	Offices office = new Offices("100 Central Loop",
     			"16057",
@@ -384,8 +387,6 @@ public class RestaurantController {
     	
     	officeRepo.save(office2);
     	
-    	
-    	addSampleOrder();
     	try {
 			loadMenu();
 			loadIngredients(ingredientFP, warehouse);
@@ -417,6 +418,34 @@ public class RestaurantController {
 
     	customerRepo.save(samThangiah);
     	customerRepo.save(hqManager);
+    	
+    	Orders order = new Orders();
+		Customers cust = new Customers();
+
+		cust.setEmail("customer@email.com");
+		cust.setFirstName("Test");
+		cust.setLastName("Customer");
+		cust.setLocation((int) restaurant2.getId());
+		cust.setPassword("password");
+		cust.setRewardsAvailable(10);
+		
+		customerRepo.save(cust);
+		
+		Set item = new HashSet();
+		
+		item.add(menuRepo.findById((long) 1).get());
+		item.add(menuRepo.findById((long) 2).get());
+		item.add(menuRepo.findById((long) 3).get());
+		
+		order.setDate(date.format(LocalDateTime.now()));
+		order.setPrice(0.00F);
+		order.setCustomer_id(cust);
+		order.setItems(item);
+		order.setInstructions("instructions");
+		order.setRestaurant(restaurant2);
+
+		orderRepo.save(order);
+		
     	
     	System.out.println("---------------------------------------------------------------------------------------------------------------------------");
 		System.out.println("DATABASE CREATED" + "\n" + "\n");
@@ -697,14 +726,22 @@ public class RestaurantController {
 	// local admin manager view
 	@RequestMapping({ "/admin-man-view" })
 	public String showManList(Model model) {
-		model.addAttribute("managers", managerRepo.findAll());
+		Admins admin = adminRepo.findById(getUserUID())
+				.orElseThrow(() -> new IllegalArgumentException("Invalid admin Id:" + getUserUID()));
+		Restaurants restaurant = restaurantRepo.findByAdmin(admin.getId());
+		model.addAttribute("managers", managerRepo.findByRestaurant(restaurant.getId()));
 		return "LocalAdmin/admin-man-view";
 	}
 
 	// local admin server view
 	@RequestMapping({ "/admin-server-view" })
 	public String showServerList(Model model) {
-		model.addAttribute("servers", serverRepo.findAll());
+		Admins admin = adminRepo.findById(getUserUID())
+				.orElseThrow(() -> new IllegalArgumentException("Invalid admin Id:" + getUserUID()));
+		Restaurants restaurant = restaurantRepo.findByAdmin(admin.getId());
+		
+		
+		model.addAttribute("servers", serverRepo.findServerLocation(restaurant.getId()));
 		return "LocalAdmin/admin-server-view";
 	}
 
@@ -865,7 +902,6 @@ public class RestaurantController {
 			result.rejectValue("email", null, "There is already an account registered with the same email");
 			return "HQAdmin/add-LFadmin";
 		}
-
 		return "redirect:/HQadmin-admin-view";
 	}
 
@@ -1291,38 +1327,9 @@ public class RestaurantController {
 			return "redirect:/servingstaffview";
 		}
 
-		// For testing purposes
-		@GetMapping("/add-sample-order")
-		public String addSampleOrder() {
-			orderRepo.deleteAll();
-			menuRepo.deleteAll();
-
-			Orders order = new Orders();
-			Customers cust = new Customers();
-
-			order.setDate(date.format(LocalDateTime.now()));
-			order.setPrice(0.00F);
-			order.setCustomer("customer@email.com");
-			order.setItems("items");
-			order.setInstructions("instructions");
-			order.setLocation(0);
-
-			cust.setEmail("customer@email.com");
-			cust.setFirstName("Test");
-			cust.setLastName("Customer");
-			cust.setLocation(2);
-			cust.setPassword("password");
-			cust.setRewardsAvailable(10);
-
-			orderRepo.save(order);
-			customerRepo.save(cust);
-
-			return "employeesignin";
-		}
-
 		@GetMapping("/servingstaffview")
 		public String showServerView(Model model) {
-			model.addAttribute("orders", orderRepo.findAll());
+			model.addAttribute("orders", orderRepo.findOrdersByLocation(getUserLocation()));
 			model.addAttribute("menu", menuRepo.findAll());
 			return "LocalServingStaff/serving-staff-view";
 		}
@@ -1444,7 +1451,7 @@ public class RestaurantController {
 			
 			int user = getUserLocation();
 			
-			model.addAttribute("inventory", inventoryRepo.findInventoryRestaurant(user));
+			model.addAttribute("inventoryList", inventoryRepo.findInventoryRestaurant(user));
 			
 			return "LocalManager/manager-inventory-view";
 		}
@@ -1456,6 +1463,8 @@ public class RestaurantController {
 
 		@RequestMapping({ "/manager-cust-view" })
 		public String localManShowUserList(Model model) {
+			
+			
 			model.addAttribute("customers", customerRepo.findAll());
 			return "LocalManager/manager-cust-view";
 		}
@@ -1467,6 +1476,36 @@ public class RestaurantController {
 
 			model.addAttribute("customer", customer);
 			return "LocalManager/update-customer";
+		}
+		
+		@GetMapping("/managerinventoryedit/{id}")
+		public String localManShowUpdateInventoryForm(@PathVariable("id") long id, Model model) {
+			Inventory inventory = inventoryRepo.findById(id)
+					.orElseThrow(() -> new IllegalArgumentException("Invalid inventory Id:" + id));
+
+			model.addAttribute("inventory", inventory);
+			return "LocalManager/update-inventory";
+		}
+			
+		@PostMapping("/managerinventoryupdate/{id}")
+		public String localManUpdateInventory(@PathVariable("id") long id, @Validated Inventory inventory, BindingResult result,
+				Model model) {
+			if (result.hasErrors()) {
+				inventory.setId(id);
+				return "LocalManager/update-inventory";
+			}
+
+			Log log = new Log();
+			log.setDate(date.format(LocalDateTime.now()));
+			log.setTime(time.format(LocalDateTime.now()));
+			log.setLocation(getUserLocation());
+			log.setUserId(getUserUID());
+			log.setAction("Update Inventory");
+			log.setActionId(inventory.getId());
+			logRepo.save(log);
+			
+			inventoryRepo.save(inventory);
+			return "redirect:/manager-inventory-view";
 		}
 
 		@PostMapping("/localmanagercustupdate/{id}")
@@ -1586,7 +1625,7 @@ public class RestaurantController {
 
 		@RequestMapping({ "/manager-server-view" })
 		public String localManShowServers(Model model) {
-			model.addAttribute("servers", serverRepo.findAll());
+			model.addAttribute("servers", serverRepo.findServerLocation(getUserLocation()));
 			return "LocalManager/manager-server-view";
 		}
 
@@ -1743,6 +1782,39 @@ public class RestaurantController {
 		public String hqManShowWarehouses(Model model) {
 			model.addAttribute("warehouses", warehouseRepo.findAll());
 			return "HQManager/HQManager-warehouses-view";
+		}
+		
+		@RequestMapping({"/Customer-ordertype-view"})
+		public String showOrderType(Model model){
+			final long customer = getUserUID();
+			
+			final Orders order = new Orders();
+			model.addAttribute("Order", order);
+			if (customer != -1) {
+				return "Customer/orderpage";
+			}
+			
+			
+			return "Customer/ordertype";
+		}
+		
+		@RequestMapping({"/ordersuccessful"})
+		public String showOrderSuccess(){
+			return "Customer/ordersuccessful";
+		}
+		
+		@PostMapping({"/addorder"})
+		public String custAddOrder(@Validated Orders order, BindingResult result, Model model) {
+			if (result.hasErrors()) {
+				return "Customer/orderpage";
+			}
+			//final long customerid = customerRepo.findById(customer);
+			Customers customer = customerRepo.findById(getUserUID())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid customer Id for Order:" + order.getId()));
+			order.setCustomer_id(customer);
+			orderRepo.save(order);
+			
+			return "redirect:/ordersuccessful";
 		}
 	
     public int getUserLocation() {

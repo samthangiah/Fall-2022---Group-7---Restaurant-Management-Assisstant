@@ -1,11 +1,15 @@
 package edu.sru.group7.restaurantmanager.domain;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-
-import org.springframework.lang.NonNull;
+import javax.persistence.OneToMany;
 
 @Entity
 public class Customers {
@@ -29,6 +33,9 @@ public class Customers {
     private int rewardsAvailable;
     
     private int location;
+    
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "customer_id")
+	private List<Orders> order = new ArrayList<>();
     
     public Customers() {}
 
@@ -115,6 +122,19 @@ public class Customers {
 
 	public void setLocation(int location) {
 		this.location = location;
+	}
+
+	public List<Orders> getOrder() {
+		return order;
+	}
+
+	public void setOrder(List<Orders> order) {
+		this.order = order;
+	}
+
+	@Override
+	public String toString() {
+		return "First name=" + firstName + ", Last name=" + lastName + ", Email=" + email;
 	}
 	
 }

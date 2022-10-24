@@ -5,32 +5,34 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
         <meta name="description" content="" />
         <meta name="author" content="" />
-        <title>Local Manager</title>
+        <title>Update Inventory</title>
         <!-- Favicon-->
         <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
         <!-- Core theme CSS (includes Bootstrap)-->
-        <link href="css/styles.css" rel="stylesheet" />
+        <link href="../css/styles.css" rel="stylesheet" />
 
     </head>
     <style>
-table, th, td {
-	border: 1px solid black;
+input[type=text], input[type=password],input[type=email] {
+  width: 100%;
+  padding: 15px;
+  margin: 5px 0 22px 0;
+  display: inline-block;
+  border: none;
+  background: #f1f1f1;
 }
-.table-hover tbody tr:hover td {
-    background: #F1F1F1;
-}
-.table-striped>tbody>tr:nth-child(odd)>td, 
-.table-striped>tbody>tr:nth-child(odd)>th {
-   background-color: #00674E;
-   color: white; 
- }
- .table-striped>tbody>tr:nth-child(even)>td, 
-.table-striped>tbody>tr:nth-child(even)>th {
-	background-color: #FFFFFF;
+
+input[type=text]:focus, input[type=password]:focus {
+  background-color: #ddd;
+  outline: none;
 }
 .h2{
 	text-align: center;
 	color: #FFFFFF;
+}
+.label{
+	color: white;
+	font-size: 1.5rem;
 }
 
 </style>
@@ -44,7 +46,6 @@ table, th, td {
                 	<a class="list-group-item list-group-item-action list-group-item-light p-3" href="/manager-cust-view">View Customers</a>
                     <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/manager-menu-view">View Menu</a>
                     <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/manager-server-view">View Servers</a>
-                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/manager-inventory-view">View Inventory</a>
                     <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/logview">View Local Action Log</a>
                 </div>
             </div>
@@ -73,28 +74,20 @@ table, th, td {
                 <!-- Page content-->
                 <div class="container-fluid">
                     <div class="container mt-3">
-						<h2 class="h2">Inventory</h2>
-						<table class = "table table-striped table-hover">
-						<thead class="table-dark">
-							<tr>
-								<th>Ingredient</th>
-								<th>Quantity</th>
-								<th></th>
-							</tr>
-						</thead>
-		<tbody>
-			<tr th:each="inventory : ${inventoryList}">
-                    <td th:text="${inventory.ingredient}"></td>
-                    <td th:text="${inventory.quantity}"></td>
-                    <td><a th:href="@{/managerinventoryedit/{id}(id=${inventory.id})}">Edit</a></td> 
-                </tr>
-		</tbody>
-		
-	</table>
-	<div class="btn-group">
-  		<a href="/local-manager-view" class="btn btn-primary" role="button">Return to Manager Page</a>
-	</div>
-	</div>
+                    	<h2 class="h2">Update Inventory</h2>
+						<form action="#" 
+  							th:action="@{/managerinventoryupdate/{id}(id=${inventory.id})}" 
+  							th:object="${inventory}" 
+  							method="post">
+  								<input type="hidden" th:value="*{restaurant_id}" id="restaurant_id" placeholder="RestaurantID" readonly>
+    							<label for="ingredient">Ingredient</label>
+    							<input type="text" th:field="*{ingredient}" id="ingredient" placeholder="Ingredient" required>
+    							<label for="Quantity">Quantity</label>
+    							<input type="text" th:field="*{quantity}" id="quantity" placeholder="Quantity" required>
+    							<br>
+    							<input type="submit" value="Update Inventory">   
+							</form>
+						</div>
                     </div>
                 </div>
             </div>
