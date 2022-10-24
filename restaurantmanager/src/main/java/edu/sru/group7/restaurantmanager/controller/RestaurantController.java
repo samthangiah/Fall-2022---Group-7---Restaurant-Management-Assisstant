@@ -514,7 +514,7 @@ public class RestaurantController {
         	}
         	for (Servers i : serverRepo.findAll()) {
         		if (i.getEmail().equals(user.getUsername())) {
-        			return new Customers(i.getFirstName(),
+        			Customers c = new Customers(i.getFirstName(),
         					i.getLastName(),
         					i.getEmail(),
         					i.getPassword(),
@@ -522,11 +522,13 @@ public class RestaurantController {
         					false,
         					0,
         					(int)i.getRestaurant().getId());
+        			c.setId(i.getId());
+        			return c;
         		}
         	}
         	for (Managers i : managerRepo.findAll()) {
         		if (i.getEmail().equals(user.getUsername())) {
-        			return new Customers(i.getFirstName(),
+        			Customers c = new Customers(i.getFirstName(),
         					i.getLastName(),
         					i.getEmail(),
         					i.getPassword(),
@@ -534,11 +536,13 @@ public class RestaurantController {
         					false,
         					0,
         					(int)i.getRestaurant().getId());
+        			c.setId(i.getId());
+        			return c;
         		}
         	}
         	for (Admins i : adminRepo.findAll()) {
         		if (i.getEmail().equals(user.getUsername())) {
-        			return new Customers(i.getFirstName(),
+        			Customers c = new Customers(i.getFirstName(),
         					i.getLastName(),
         					i.getEmail(),
         					i.getPassword(),
@@ -546,6 +550,8 @@ public class RestaurantController {
         					false,
         					0,
         					(int)i.getOffice().getId());
+        			c.setId(i.getId());
+        			return c;
         		}
         	}
         	
