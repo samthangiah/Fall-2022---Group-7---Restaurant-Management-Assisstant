@@ -14,4 +14,7 @@ public interface OrderRepository extends CrudRepository<Orders, Long> {
 	
 	@Query(value="SELECT * FROM restaurantmanagerdb.orders WHERE restaurant = :id", nativeQuery=true)
 	public List<Orders> findOrdersByLocation(long id);
+	
+	@Query(value="SELECT menu_id FROM restaurantmanagerdb.orders_items WHERE order_id = :id", nativeQuery=true)
+	public List<Orders> findMenuItems(long id);
 }

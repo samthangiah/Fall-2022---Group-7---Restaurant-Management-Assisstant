@@ -16,6 +16,7 @@ import edu.sru.group7.restaurantmanager.authentication.ApplicationUser;
 import edu.sru.group7.restaurantmanager.authentication.FakeApplicationUserDaoService;
 import edu.sru.group7.restaurantmanager.domain.Admins;
 import edu.sru.group7.restaurantmanager.domain.Customers;
+import edu.sru.group7.restaurantmanager.domain.Ingredients;
 import edu.sru.group7.restaurantmanager.domain.Inventory;
 import edu.sru.group7.restaurantmanager.domain.Offices;
 import edu.sru.group7.restaurantmanager.domain.Restaurants;
@@ -29,6 +30,7 @@ import edu.sru.group7.restaurantmanager.domain.Log;
 import edu.sru.group7.restaurantmanager.billing.PaymentDetails;
 import edu.sru.group7.restaurantmanager.repository.AdminRepository;
 import edu.sru.group7.restaurantmanager.repository.CustomerRepository;
+import edu.sru.group7.restaurantmanager.repository.IngredientsRepository;
 import edu.sru.group7.restaurantmanager.repository.InventoryRepository;
 import edu.sru.group7.restaurantmanager.repository.OfficeRepository;
 import edu.sru.group7.restaurantmanager.repository.RestaurantRepository;
@@ -96,16 +98,20 @@ public class RestaurantController {
 	
 	@Autowired
 	private InventoryRepository inventoryRepo;
-	
+
 	@Autowired
 	private PaymentDetailsRepository paymentDetailsRepo;
+
+	@Autowired 
+	private IngredientsRepository ingredientsRepo;
 	
 	private final String menuFP = "src/main/resources/Menu.xlsx";
 	
 	private final String ingredientFP = "src/main/resources/Ingredients.xlsx";
 
 	//create an UserRepository instance - instantiation (new) is done by Spring
-    public RestaurantController(RestaurantRepository restaurantRepo,
+    public RestaurantController(IngredientsRepository ingredientsRepo,
+    							RestaurantRepository restaurantRepo,
     							WarehouseRepository warehouseRepo,
     							InventoryRepository inventoryRepo,
     							OfficeRepository officeRepo,
@@ -115,6 +121,7 @@ public class RestaurantController {
     							OrderRepository orderRepo,
     							MenuRepository menuRepo,
     							LogRepository logRepo) {
+    	this.ingredientsRepo = ingredientsRepo;
     	this.restaurantRepo = restaurantRepo;
     	this.warehouseRepo = warehouseRepo;
     	this.inventoryRepo = inventoryRepo;
@@ -188,13 +195,12 @@ public class RestaurantController {
 		 XSSFWorkbook wb;
 		 XSSFSheet sheet;
 		 XSSFRow curRow;
- 
-		 
 
 		thisxls = new FileInputStream("src/main/resources/Menu.xlsx");
 		wb = new XSSFWorkbook(thisxls);
 		 sheet = wb.getSheetAt(0);
 		 
+		 Ingredients ingredient;
 		 
 		 int count = 0;
 		 
@@ -221,7 +227,15 @@ public class RestaurantController {
 				menus.setQuantity(checkIntType(curRow.getCell(6)));
 				System.out.println("Got Quantity");
 				menuRepo.save(menus);
-			 
+				
+				
+				try {
+				 	ingredient = ingredientsRepo.findById((long) count)
+				 			.orElseThrow(() -> new IllegalArgumentException("Invalid Ingredient Id:"));
+				 	ingredient.setMenu(menus);
+				 	ingredientsRepo.save(ingredient);
+				 	}
+				 	catch(Exception e) {}
 		 }
 		 wb.close();
 	}
@@ -286,7 +300,45 @@ public class RestaurantController {
 			inventoryRepo.save(inventory);
 		 
 	 }
+	 
 	 wb.close();
+	}
+	
+	public void loadIngredients() throws IOException {
+		FileInputStream thisxls;
+		 XSSFWorkbook wb;
+		 XSSFSheet sheet;
+		 XSSFRow curRow;
+
+		thisxls = new FileInputStream("src/main/resources/MenuIngredients.xlsx");
+		wb = new XSSFWorkbook(thisxls);
+		 sheet = wb.getSheetAt(0);
+		 
+		 int i = 0;
+		 
+		 curRow = sheet.getRow(i);
+		 
+		 while(curRow.getRowNum() < sheet.getLastRowNum())
+		 {
+			 i++;
+			 int j = 2;
+			 Vector ingredientsList = new Vector();
+			 Ingredients ingredient = new Ingredients();
+			 curRow = sheet.getRow(i);
+			 ingredient.setId(checkIntType(curRow.getCell(0)));
+			 System.out.println("Got ID");
+			 while (curRow.getLastCellNum() > j) {
+			 	String tempIngredient = checkStringType(curRow.getCell(j));
+			 	ingredientsList.add(tempIngredient);
+			 	System.out.println("Got Ingredient");
+			 	j++;
+			 }
+			 ingredient.setIngredient(ingredientsList);
+			 
+			 ingredientsRepo.save(ingredient);
+			 
+		 }
+		 wb.close();
 	}
 	
 	@PostConstruct
@@ -405,6 +457,7 @@ public class RestaurantController {
     	officeRepo.save(office2);
     	
     	try {
+    		loadIngredients();
 			loadMenu();
 			loadIngredients(ingredientFP, warehouse);
 			loadIngredients(ingredientFP, restaurant);
@@ -848,7 +901,8 @@ public class RestaurantController {
 		if (result.hasErrors()) {
 			return "LocalAdmin/add-customer";
 		}
-
+		
+		try {
 		Log log = new Log();
 		log.setDate(date.format(LocalDateTime.now()));
 		log.setTime(time.format(LocalDateTime.now()));
@@ -864,6 +918,12 @@ public class RestaurantController {
 		logRepo.save(log);
 		
 		customerRepo.save(customers);
+		}
+		catch(Exception e) {
+			result.rejectValue("email", null, "There is already an account registered with the same email");
+			return "LocalAdmin/add-customer";
+		}
+		
 		return "redirect:/admin-cust-view";
 	}
 
@@ -873,6 +933,7 @@ public class RestaurantController {
 			return "LocalAdmin/add-server";
 		}
 		
+		try {
 		Log log = new Log();
 		log.setDate(date.format(LocalDateTime.now()));
 		log.setTime(time.format(LocalDateTime.now()));
@@ -883,6 +944,12 @@ public class RestaurantController {
 		logRepo.save(log);
 
 		serverRepo.save(server);
+		
+		}
+		catch(Exception e) {
+			result.rejectValue("email", null, "There is already an account registered with the same email");
+			return "LocalAdmin/add-server";
+		}
 		return "redirect:/admin-server-view";
 	}
 
@@ -891,7 +958,8 @@ public class RestaurantController {
 		if (result.hasErrors()) {
 			return "LocalAdmin/add-LFmanager";
 		}
-
+		
+		try {
 		Log log = new Log();
 		log.setDate(date.format(LocalDateTime.now()));
 		log.setTime(time.format(LocalDateTime.now()));
@@ -902,17 +970,25 @@ public class RestaurantController {
 		logRepo.save(log);
 
 		managerRepo.save(manager);
+		
+		}
+		catch(Exception e) {
+			result.rejectValue("email", null, "There is already an account registered with the same email");
+			return "HQAdmin/add-LFmanager";
+		}
 		return "redirect:/admin-man-view";
 	}
 
 	@RequestMapping({ "/addadmin" })
 	public String addAdmin(@Validated Admins admin, BindingResult result, Model model) {
+		
 		if (result.hasErrors()) {
 			return "HQAdmin/add-LFadmin";
 		}
 
 		try {
 			adminRepo.save(admin);
+			updateRestaurant(admin);
 			Log log = new Log();
 			log.setDate(date.format(LocalDateTime.now()));
 			log.setTime(time.format(LocalDateTime.now()));
@@ -925,6 +1001,7 @@ public class RestaurantController {
 			result.rejectValue("email", null, "There is already an account registered with the same email");
 			return "HQAdmin/add-LFadmin";
 		}
+		
 		return "redirect:/HQadmin-admin-view";
 	}
 
@@ -1068,7 +1145,8 @@ public class RestaurantController {
 			customer.setId(id);
 			return "LocalAdmin/update-customer";
 		}
-
+		
+		try {
 		Log log = new Log();
 		log.setDate(date.format(LocalDateTime.now()));
 		log.setTime(time.format(LocalDateTime.now()));
@@ -1079,6 +1157,11 @@ public class RestaurantController {
 		logRepo.save(log);
 
 		customerRepo.save(customer);
+		}
+		catch (Exception e) {
+			result.rejectValue("email", null, "There is already an account registered with the same email");
+			return "HQAdmin/add-LFadmin";
+		}
 		return "redirect:/admin-cust-view";
 	}
 
@@ -1089,7 +1172,8 @@ public class RestaurantController {
 			server.setId(id);
 			return "LocalAdmin/update-server";
 		}
-
+		
+		try {
 		Log log = new Log();
 		log.setDate(date.format(LocalDateTime.now()));
 		log.setTime(time.format(LocalDateTime.now()));
@@ -1100,6 +1184,11 @@ public class RestaurantController {
 		logRepo.save(log);
 
 		serverRepo.save(server);
+		}
+		catch (Exception e) {
+			result.rejectValue("email", null, "There is already an account registered with the same email");
+			return "HQAdmin/add-LFadmin";
+		}
 		return "redirect:/admin-server-view";
 	}
 
@@ -1110,7 +1199,8 @@ public class RestaurantController {
 			manager.setId(id);
 			return "LocalAdmin/update-LFmanager";
 		}
-
+		
+		try {
 		Log log = new Log();
 		log.setDate(date.format(LocalDateTime.now()));
 		log.setTime(time.format(LocalDateTime.now()));
@@ -1121,6 +1211,11 @@ public class RestaurantController {
 		logRepo.save(log);
 
 		managerRepo.save(manager);
+		}
+		catch (Exception e) {
+			result.rejectValue("email", null, "There is already an account registered with the same email");
+			return "HQAdmin/add-LFadmin";
+		}
 		return "redirect:/admin-man-view";
 	}
 
@@ -1131,6 +1226,7 @@ public class RestaurantController {
 			return "HQAdmin/update-LFadmin";
 		}
 
+		try {
 		Log log = new Log();
 		log.setDate(date.format(LocalDateTime.now()));
 		log.setTime(time.format(LocalDateTime.now()));
@@ -1139,8 +1235,13 @@ public class RestaurantController {
 		log.setAction("Update admin account");
 		log.setActionId(admin.getId());
 		logRepo.save(log);
-
+		
 		adminRepo.save(admin);
+		}
+		catch (Exception e) {
+			result.rejectValue("email", null, "There is already an account registered with the same email");
+			return "HQAdmin/add-LFadmin";
+		}
 		return "redirect:/HQadmin-admin-view";
 	}
 
@@ -1205,6 +1306,22 @@ public class RestaurantController {
 
 		restaurantRepo.save(restaurant);
 		return "redirect:/HQadmin-restaurants-view";
+	}
+	
+	public void updateRestaurant(Admins admin) {
+		
+		int count = 0;
+		List<Restaurants> restaurants = admin.getRestaurant();
+		Iterator<Restaurants> iterator = restaurants.iterator();
+		
+		while(iterator.hasNext()) {
+			Restaurants restaurant = restaurants.get(count);
+			restaurant.setAdmin(admin);
+			restaurantRepo.save(restaurant);
+			count++;
+			iterator.next();
+	      }
+		
 	}
 
 	// Mapping for the /delete/id URL to delete a user
@@ -1538,7 +1655,8 @@ public class RestaurantController {
 				customer.setId(id);
 				return "LocalManager/update-customer";
 			}
-
+			
+			try {
 			Log log = new Log();
 			log.setDate(date.format(LocalDateTime.now()));
 			log.setTime(time.format(LocalDateTime.now()));
@@ -1549,6 +1667,11 @@ public class RestaurantController {
 			logRepo.save(log);
 
 			customerRepo.save(customer);
+			}
+			catch (Exception e) {
+				result.rejectValue("email", null, "There is already an account registered with the same email");
+				return "HQAdmin/add-LFadmin";
+			}
 			return "redirect:/manager-cust-view";
 		}
 
@@ -1668,7 +1791,8 @@ public class RestaurantController {
 				server.setId(id);
 				return "LocalManager/update-server";
 			}
-
+			
+			try {
 			Log log = new Log();
 			log.setDate(date.format(LocalDateTime.now()));
 			log.setTime(time.format(LocalDateTime.now()));
@@ -1679,6 +1803,11 @@ public class RestaurantController {
 			logRepo.save(log);
 
 			serverRepo.save(server);
+			}
+			catch (Exception e) {
+				result.rejectValue("email", null, "There is already an account registered with the same email");
+				return "HQAdmin/add-LFadmin";
+			}
 			return "redirect:/manager-server-view";
 		}
 
@@ -1866,21 +1995,58 @@ public class RestaurantController {
 			if (result.hasErrors()) {
 				return "Customer/orderpage";
 			}
-			if (getLoggedInUser() == null) {
-				//I would just do this instead of looping through the findAll() but it doesnt like the Optional<> type
-				//order.setCustomer_id(customerRepo.findById((long) -1));
-				for (Customers c : customerRepo.findAll()) {
-					if (c.getId() == (long) -1) {
-						order.setCustomer_id(c);
+      
+			Customers customer = customerRepo.findById(getUserUID())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid customer Id for Order:" + order.getId()));
+			order.setCustomer_id(customer);
+			order.setDate(date.format(LocalDateTime.now()));
+			orderRepo.save(order);
+			
+			
+			Set<Menu> items = order.getItems();
+			Iterator<Menu> it = items.iterator();
+			
+			//finds restaurant corresponding to order
+			Restaurants restaurant = new Restaurants();
+			restaurant.setId(order.getRestaurant().getId());
+			
+			//find inventory corresponding to restaurant
+			List<Inventory> inventoryList = inventoryRepo.findInventoryRestaurant(restaurant.getId());
+			
+			//iterate over all menu ID's for order
+			while(it.hasNext()) {
+				Menu menu = it.next();
+				//find ingredients for menu item and add it to an array and then create an iterator for array
+				Ingredients menuIngredients = ingredientsRepo.findByMenuItem(menu.getId());
+				Vector ingredientList = menuIngredients.getIngredient();
+				Iterator ingredientIT = ingredientList.iterator();
+				//iterate over each ingredient for a menu item
+				while(ingredientIT.hasNext()) {
+					String ingredient = ingredientIT.next().toString();
+					//Create inventoryiterator so it resets per new ingredient to top of list
+					Iterator<Inventory> inventoryIT = inventoryList.iterator();
+					//iterate over each inventory item to compare current ingredient to selected ingredient in Repo
+					while(inventoryIT.hasNext()) {
+						Inventory inventory = inventoryIT.next();
+						System.out.println("--------------------------------------------------------------------------------------------------");
+						System.out.println(inventory.getIngredient() + "get ingredient");
+						System.out.println(ingredient + "ingredient");
+						if(inventory.getIngredient().compareTo(ingredient) == 0) {
+							System.out.println(inventory.getIngredient() + " is equal to " + ingredient);
+							inventory.setQuantity(inventory.getQuantity() - 1);
+							inventoryRepo.save(inventory);
+						}
 					}
 				}
 			}
-			else {
-				order.setCustomer_id(getLoggedInUser());
-			}
-			orderRepo.save(order);
 			
-			return "redirect:/pay";
+      return "redirect:/pay";
+		}
+		
+		@RequestMapping({})
+		public String addInventoryRequest() {
+			
+			return null;
 		}
 	
     public int getUserLocation() {

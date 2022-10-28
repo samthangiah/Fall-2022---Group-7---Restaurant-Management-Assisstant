@@ -1,7 +1,12 @@
 package edu.sru.group7.restaurantmanager.domain;
 
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 
 @Entity
 public class Menu {
@@ -13,6 +18,9 @@ public class Menu {
     private float price;
     private boolean availability;
     private int quantity;
+    
+    @OneToMany(cascade=CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "menu")
+    private List<Ingredients> ingredients;
     
     public Menu() {
     }
