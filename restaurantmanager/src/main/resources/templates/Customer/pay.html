@@ -17,7 +17,7 @@
             <div class="border-end bg-white" id="sidebar-wrapper">
                 <div class="sidebar-heading border-bottom bg-light">Insert logo here?</div>
                 <div class="list-group list-group-flush">
-                	<a class="list-group-item list-group-item-action list-group-item-light p-3" href="/loggedinhome">Home</a>
+                	<a class="list-group-item list-group-item-action list-group-item-light p-3" href="/loggedinhome">HOME</a>
                 	<a class="list-group-item list-group-item-action list-group-item-light p-3" href="/showmenu">MENU</a>
                 </div>
             </div>
@@ -54,21 +54,21 @@
                     <br>
                     <br>
                     <div style="text-align: center;" >
-                    <form action="#" th:action="@{/addorder}" th:object="${Order}" method="post">
-                    		<select id="restaurantid" th:field="*{restaurant}" class="form-control" required>
-    							<th:block th:each="Restaurant : ${listRestaurants}">
-    							 <option th:value="${Restaurant.id}" th:text="${Restaurant.address} + ' ' + ${Restaurant.city} + ' ' + ${Restaurant.state} + ' ' + ${Restaurant.zipcode}"></option>
-    							 </th:block>
-    						</select>
-    						<select id="menuid" th:field="*{items}" class="form-control" multiple="multiple" required>
-    							<th:block th:each="Menu : ${listMenu}">
-    							 <option th:value="${Menu.id}" th:text="${Menu.name} + ' ' + ${Menu.entree} + ' ' + ${Menu.sides} + ' ' + ${Menu.price}"></option>
-    							 </th:block>
-    						</select>
-    						<label for="name">Special Instructions: </label>
-    						<input type="text" th:field="*{instructions}" id="name" placeholder="Item Name" required>
+                    <form action="#" th:action="@{/processpayment}" th:object="${PaymentDetails_Form}" method="post">
+    						<label for="cardType">Card processor: (i.e. Mastercard, Discover, Visa, etc.)</label><br>
+    						<input type="text" th:field="*{cardType}" id="cardType" placeholder="Card Type" required><br>
+    						<label for="cardholderName">Cardholder Name: </label><br>
+    						<input type="text" th:field="*{cardholderName}" id="cardholderName" placeholder="Name" required><br>
+    						<label for="cardNumber">Card Number: </label><br>
+    						<input type="number" th:field="*{cardNumber}" id="cardNumber" placeholder="Card Number" required><br>
+    						<label for="expirationDate">Expiration Date: </label><br>
+    						<input type="text" th:field="*{expirationDate}" id="expirationDate" placeholder="Expiration Date" required><br>
+    						<label for="securityCode">Security Code: </label><br>
+    						<input type="number" th:field="*{securityCode}" id="securityCode" placeholder="Security Code" required><br>
+    						<label for="postalCode">Billing ZIP Code: </label><br>
+    						<input type="number" th:field="*{postalCode}" id="postalCode" placeholder="Postal Code" required><br>
     						<br>
-    						<input type="submit" value="Add Order">  
+    						<input type="submit" value="Submit Payment">  
 						</form>
                     </div>
                 </div>

@@ -24,8 +24,10 @@ import edu.sru.group7.restaurantmanager.domain.Warehouses;
 import edu.sru.group7.restaurantmanager.domain.Managers;
 import edu.sru.group7.restaurantmanager.domain.Servers;
 import edu.sru.group7.restaurantmanager.domain.Orders;
+import edu.sru.group7.restaurantmanager.domain.PaymentDetails_Form;
 import edu.sru.group7.restaurantmanager.domain.Menu;
 import edu.sru.group7.restaurantmanager.domain.Log;
+import edu.sru.group7.restaurantmanager.billing.PaymentDetails;
 import edu.sru.group7.restaurantmanager.repository.AdminRepository;
 import edu.sru.group7.restaurantmanager.repository.CustomerRepository;
 import edu.sru.group7.restaurantmanager.repository.IngredientsRepository;
@@ -36,8 +38,10 @@ import edu.sru.group7.restaurantmanager.repository.WarehouseRepository;
 import edu.sru.group7.restaurantmanager.repository.ManagerRepository;
 import edu.sru.group7.restaurantmanager.repository.ServerRepository;
 import edu.sru.group7.restaurantmanager.repository.OrderRepository;
+import edu.sru.group7.restaurantmanager.repository.PaymentDetailsRepository;
 import edu.sru.group7.restaurantmanager.repository.MenuRepository;
 import edu.sru.group7.restaurantmanager.repository.LogRepository;
+import edu.sru.group7.restaurantmanager.billing.PaymentDetailsController;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -94,7 +98,10 @@ public class RestaurantController {
 	
 	@Autowired
 	private InventoryRepository inventoryRepo;
-	
+
+	@Autowired
+	private PaymentDetailsRepository paymentDetailsRepo;
+
 	@Autowired 
 	private IngredientsRepository ingredientsRepo;
 	
@@ -350,6 +357,16 @@ public class RestaurantController {
     	orderRepo.deleteAll();
     	menuRepo.deleteAll();
     	
+    	Customers guest = new Customers("Guest",
+    			"",
+    			"Guest",
+    			"",
+    			0,
+    			false,
+    			0,
+    			0);
+    	guest.setId(-1);
+    	customerRepo.save(guest);
     	
     	Offices office = new Offices("100 Central Loop",
     			"16057",
@@ -509,7 +526,7 @@ public class RestaurantController {
     //index page
     @RequestMapping({"/"})
     public String homePage() {
-    	return "index";
+    	return "Guest/index";
     }
     
     @ModelAttribute
@@ -527,7 +544,7 @@ public class RestaurantController {
     //403 Error page
     @GetMapping("/403")
 	public String error403() {
-		return "403";
+		return "SignIn/403";
 	}
     
     @RequestMapping({"/signin"})
@@ -545,7 +562,7 @@ public class RestaurantController {
     
     @GetMapping("/loggedinhome")
 	public String loggedIn() {
-		return "loggedinhome";
+		return "Customer/loggedinhome";
 	}
     
     @RequestMapping({"/templogout"})
@@ -615,7 +632,7 @@ public class RestaurantController {
     @RequestMapping({"/showmenu"})
     public String showMenu() {
     	if (getLoggedInUser() == null) {
-    		return "/guestmenu";
+    		return "Guest/guestmenu";
     	}
     	return "Customer/menupage";
     }
@@ -642,7 +659,7 @@ public class RestaurantController {
     	if (user.getAuthorities().toString().contains("ROLE_CUSTOMER")) {
     		return "redirect:/loggedinhome";
 		}
-		return "temploginpage";
+		return "SignIn/temploginpage";
 	}
     
     /*@RequestMapping({"/employeesignin"})
@@ -658,7 +675,7 @@ public class RestaurantController {
 		}
 
 		model.addAttribute("customer", customer);
-		return "/update-password";
+		return "Customer/update-password";
 	}
 
 	@PostMapping("/updateuserpass/{id}")
@@ -666,7 +683,7 @@ public class RestaurantController {
 			Model model) {
 		if (result.hasErrors()) {
 			customer.setId(id);
-			return "/update-password";
+			return "Customer/update-password";
 		}
 
 		Log log = new Log();
@@ -684,13 +701,13 @@ public class RestaurantController {
 
 	@RequestMapping({ "/custregistrationpage" })
 	public String showCustRegisterForm(Customers customer) {
-		return "/register";
+		return "SignIn/register";
 	}
 
 	@RequestMapping({ "/addregisteredcustomer" })
 	public String addNewCust(@Validated Customers customers, BindingResult result, Model model) {
 		if (result.hasErrors()) {
-			return "/register";
+			return "SignIn/register";
 		}
 
 		Log log = new Log();
@@ -714,7 +731,7 @@ public class RestaurantController {
 	@RequestMapping("/contact")
 	public String contactPage() {
 		if (getLoggedInUser() == null) {
-			return "/guestcontact";
+			return "Guest/guestcontact";
 		}
 		return "Customer/contact";
 	}
@@ -1531,7 +1548,7 @@ public class RestaurantController {
 				}
 			}
 			model.addAttribute("log", (Iterable<Log>) localLog);
-			return "log-view";
+			return "LocalManager/log-view";
 		}
 
 		@GetMapping("/logadminview")
@@ -1921,21 +1938,56 @@ public class RestaurantController {
 		
 		@RequestMapping({"/Customer-ordertype-view"})
 		public String showOrderType(Model model){
-			final long customer = getUserUID();
+			final Customers customer = getLoggedInUser();
 			
 			final Orders order = new Orders();
 			model.addAttribute("Order", order);
-			if (customer != -1) {
+			if (customer != null) {
 				return "Customer/orderpage";
 			}
 			
-			
-			return "Customer/ordertype";
+			return "Guest/order-as-guest";
 		}
 		
 		@RequestMapping({"/ordersuccessful"})
 		public String showOrderSuccess(){
-			return "Customer/ordersuccessful";
+			if (getLoggedInUser() != null) {
+				return "Customer/ordersuccessful";
+			}
+			return "Guest/guestordersuccess";
+		}
+		
+		@RequestMapping("/pay")
+		public String showPaymentPage(Model model) {
+			PaymentDetails_Form payForm = new PaymentDetails_Form();
+			model.addAttribute("PaymentDetails_Form", payForm);
+			if (getLoggedInUser() != null) {
+				return "Customer/pay";
+			}
+			return "Guest/guestpay";
+		}
+		
+		@RequestMapping("/processpayment")
+		public String processPayment(@Validated PaymentDetails_Form form, BindingResult result, Model model) {
+			if (result.hasErrors()) {
+				return "Customer/pay";
+			}
+			PaymentDetails details = new PaymentDetails();
+			details.buildFromForm(form);
+			
+			//TODO
+			//if (payment can be processed) {
+			
+			//Error in provided controller, just delete it directly through the repo instead
+			//PaymentDetailsController controller = new PaymentDetailsController(paymentDetailsRepo);
+			//controller.deletePaymentDetails(details);
+			paymentDetailsRepo.delete(details);
+			
+			return "redirect:/ordersuccessful";
+			
+			//else {
+			//paymentDetailsRepo.delete(details);
+			//return "redirect:/pay";
 		}
 		
 		@PostMapping({"/addorder"})
@@ -1943,7 +1995,7 @@ public class RestaurantController {
 			if (result.hasErrors()) {
 				return "Customer/orderpage";
 			}
-			//final long customerid = customerRepo.findById(customer);
+      
 			Customers customer = customerRepo.findById(getUserUID())
 					.orElseThrow(() -> new IllegalArgumentException("Invalid customer Id for Order:" + order.getId()));
 			order.setCustomer_id(customer);
@@ -1988,7 +2040,7 @@ public class RestaurantController {
 				}
 			}
 			
-			return "redirect:/ordersuccessful";
+      return "redirect:/pay";
 		}
 		
 		@RequestMapping({})
@@ -2008,7 +2060,7 @@ public class RestaurantController {
 	public long getUserUID() {
 		Customers user = getLoggedInUser();
 		if (user == null) {
-			return -1;
+			return (long) -1;
 		}
 		return user.getId();
 	}
