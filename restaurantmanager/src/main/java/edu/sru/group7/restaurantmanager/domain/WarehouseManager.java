@@ -8,7 +8,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
 @Entity
-public class Managers {
+public class WarehouseManager {
 
 	@Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -23,23 +23,10 @@ public class Managers {
     private String password;
     
     @ManyToOne
-	@JoinColumn(name="restaurant_id")
-	private Restaurants restaurant;
-    
-    @ManyToOne
 	@JoinColumn(name="warehouse_id")
 	private Warehouses warehouse;
 
-	public Managers(String firstName, String lastName, String email, String password, Restaurants restaurant) {
-		super();
-		this.firstName = firstName;
-		this.lastName = lastName;
-		this.email = email;
-		this.password = password;
-		this.restaurant = restaurant;
-	}
-
-	public Managers(long id, String firstName, String lastName, String email, String password, Warehouses warehouse) {
+	public WarehouseManager(long id, String firstName, String lastName, String email, String password, Warehouses warehouse) {
 		super();
 		this.id = id;
 		this.firstName = firstName;
@@ -49,7 +36,7 @@ public class Managers {
 		this.warehouse = warehouse;
 	}
 
-	public Managers() {
+	public WarehouseManager() {
 		super();
 	}
 
@@ -93,23 +80,13 @@ public class Managers {
 		this.password = password;
 	}
 
-	public Restaurants getRestaurant() {
-		return restaurant;
-	}
-
-	public void setRestaurant(Restaurants restaurant) {
-		this.restaurant = restaurant;
-	}
-
 	public Warehouses getWarehouse() {
 		return warehouse;
 	}
 
 	public void setWarehouse(Warehouses warehouse) {
 		this.warehouse = warehouse;
-	}
-
-	
-    
-    
+	}    
 }
+
+

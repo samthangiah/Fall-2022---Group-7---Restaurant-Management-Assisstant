@@ -29,6 +29,9 @@ public class Warehouses extends Locations {
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "warehouse_id")
 	private List<Inventory> inventory = new ArrayList<>();
 	
+	@OneToMany(cascade=CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "warehouse")
+    private List<Managers> managers = new ArrayList<>();
+	
 	public Warehouses(String address, String zipcode, String city, String state) {
 		super();
 		this.address = address;

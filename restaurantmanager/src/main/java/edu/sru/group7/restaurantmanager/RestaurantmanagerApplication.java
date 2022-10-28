@@ -9,6 +9,12 @@ package edu.sru.group7.restaurantmanager;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+/**
+ * Class that starts springboot application
+ * @author Bradley Smith
+ * @author Ethan Pasman
+ *
+ */
 @SpringBootApplication
 public class RestaurantmanagerApplication {
 
