@@ -32,7 +32,8 @@ WebSecurityConfigurerAdapter {
 			.authorizeRequests() 
 			.antMatchers("/", "/index", "/css/*", "/js/*", "/img/*", "/assets/*", "/403", "/login", "/showlogin", 
 					"/employeelogin", "/showemployeelogin", "/custregistrationpage", "/addregisteredcustomer", "/add-sample-order",
-					"/showmenu", "/contact", "/Customer-ordertype-view").permitAll()
+					"/showmenu", "/contact", "/Customer-ordertype-view", "/ordersuccessful", "/pay", "/processpayment",
+					"/addorder").permitAll()
 			
 			.antMatchers("/loggedinhome", "/templogout", "/changeuserpass", "/updateuserpass/*", "/custviewinfo",
 					"/editcustomer/*", "/usercustomerupdate/*").hasAnyRole(ApplicationUserRole.CUSTOMER.name(),

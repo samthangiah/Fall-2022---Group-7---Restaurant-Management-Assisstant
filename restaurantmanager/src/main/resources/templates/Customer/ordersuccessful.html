@@ -17,7 +17,7 @@
             <div class="border-end bg-white" id="sidebar-wrapper">
                 <div class="sidebar-heading border-bottom bg-light">Insert logo here?</div>
                 <div class="list-group list-group-flush">
-                	<a class="list-group-item list-group-item-action list-group-item-light p-3" href="/">HOME</a>
+                	<a class="list-group-item list-group-item-action list-group-item-light p-3" href="/loggedinhome">Home</a>
                 	<a class="list-group-item list-group-item-action list-group-item-light p-3" href="/showmenu">MENU</a>
                 </div>
             </div>
@@ -30,14 +30,16 @@
                         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
                         <div class="collapse navbar-collapse" id="navbarSupportedContent">
                             <ul class="navbar-nav ms-auto mt-2 mt-lg-0">
-                                <li class="nav-item active"><a class="nav-link" href="/">Home</a></li>
-                                <li class="nav-item"><a class="nav-link" href="/">Order As Guest (WIP)</a></li>
+                                <li class="nav-item active"><a class="nav-link" href="/loggedinhome">Home</a></li>
+                                <li class="nav-item"><a class="nav-link" href="/Customer-ordertype-view">Order Now</a></li>
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Account</a>
                                     <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                        <a class="dropdown-item" href="/employeelogin">Sign-in</a>
+                                    	<a class="dropdown-item" href="/custviewinfo">View Profile</a>
+                                        <a class="dropdown-item" href="/changeuserpass">Change Password</a>
                                         <a class="dropdown-item" href="/contact">Contact Us</a>
                                         <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item" href="/logout">Sign-out</a>
                                     </div>
                                 </li>
                             </ul>
