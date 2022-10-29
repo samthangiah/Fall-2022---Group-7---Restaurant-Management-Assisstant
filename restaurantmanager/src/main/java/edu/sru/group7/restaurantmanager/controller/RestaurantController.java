@@ -1976,18 +1976,15 @@ public class RestaurantController {
 			details.buildFromForm(form);
 			
 			//TODO
+			//add payment gateway such as stripe to handle payment processing
 			//if (payment can be processed) {
-			
-			//Error in provided controller, just delete it directly through the repo instead
-			//PaymentDetailsController controller = new PaymentDetailsController(paymentDetailsRepo);
-			//controller.deletePaymentDetails(details);
-			paymentDetailsRepo.delete(details);
-			
-			return "redirect:/ordersuccessful";
-			
+				paymentDetailsRepo.delete(details);
+				return "redirect:/ordersuccessful";
+			//}
 			//else {
-			//paymentDetailsRepo.delete(details);
-			//return "redirect:/pay";
+			//	paymentDetailsRepo.delete(details);
+			//	return "redirect:/pay";
+			//}
 		}
 		
 		@PostMapping({"/addorder"})
@@ -1996,15 +1993,23 @@ public class RestaurantController {
 				return "Customer/orderpage";
 			}
       
-			Customers customer = customerRepo.findById(getUserUID())
-					.orElseThrow(() -> new IllegalArgumentException("Invalid customer Id for Order:" + order.getId()));
-			order.setCustomer_id(customer);
+			if (getLoggedInUser() == null) {
+				//I would just do this instead of looping through the findAll() but it doesnt like the Optional<> type
+				//order.setCustomer_id(customerRepo.findById((long) -1));
+				for (Customers c : customerRepo.findAll()) {
+					if (c.getId() == (long) -1) {
+						order.setCustomer_id(c);
+					}
+				}
+			}
+			else {
+				order.setCustomer_id(getLoggedInUser());
+			}
 			order.setDate(date.format(LocalDateTime.now()));
-			orderRepo.save(order);
-			
 			
 			Set<Menu> items = order.getItems();
 			Iterator<Menu> it = items.iterator();
+			float totalPrice = 0.00F;
 			
 			//finds restaurant corresponding to order
 			Restaurants restaurant = new Restaurants();
@@ -2016,6 +2021,7 @@ public class RestaurantController {
 			//iterate over all menu ID's for order
 			while(it.hasNext()) {
 				Menu menu = it.next();
+				totalPrice += menu.getPrice();
 				//find ingredients for menu item and add it to an array and then create an iterator for array
 				Ingredients menuIngredients = ingredientsRepo.findByMenuItem(menu.getId());
 				Vector ingredientList = menuIngredients.getIngredient();
@@ -2039,8 +2045,9 @@ public class RestaurantController {
 					}
 				}
 			}
-			
-      return "redirect:/pay";
+			order.setPrice(totalPrice);
+			orderRepo.save(order);
+      			return "redirect:/pay";
 		}
 		
 		@RequestMapping({})
