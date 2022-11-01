@@ -76,6 +76,7 @@ WebSecurityConfigurerAdapter {
 			.authenticated() 
 			.and() 
 			.formLogin()
+			.loginProcessingUrl("/processcredentials")
 			.and()
 			.logout()
 				.logoutSuccessUrl("/templogout")

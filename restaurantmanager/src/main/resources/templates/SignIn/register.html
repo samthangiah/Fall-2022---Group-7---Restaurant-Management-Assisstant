@@ -42,7 +42,8 @@ input[type=text]:focus, input[type=password]:focus {
             <div class="border-end bg-white" id="sidebar-wrapper">
                 <div class="sidebar-heading border-bottom bg-light">Insert logo here?</div>
                 <div class="list-group list-group-flush">
-                	<!-- <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!">HOME</a> -->
+                	<a class="list-group-item list-group-item-action list-group-item-light p-3" href="/">HOME</a>
+                	<a class="list-group-item list-group-item-action list-group-item-light p-3" href="/showmenu">MENU</a>
                 </div>
             </div>
             <!-- Page content wrapper-->
@@ -55,6 +56,7 @@ input[type=text]:focus, input[type=password]:focus {
                         <div class="collapse navbar-collapse" id="navbarSupportedContent">
                             <ul class="navbar-nav ms-auto mt-2 mt-lg-0">
                                 <li class="nav-item active"><a class="nav-link" href="/">Home</a></li>
+                                <li class="nav-item"><a class="nav-link" href="/Customer-ordertype-view">Order as Guest</a></li>
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Account</a>
                                     <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
@@ -82,6 +84,8 @@ input[type=text]:focus, input[type=password]:focus {
     						<br>
     						<label class="label" for="password">Password:</label>
     						<input type="password" th:field="*{password}" id="password" placeholder="Password" required>
+   							<br>
+   							<input type="checkbox" th:field="*{rewardsMember}" id="rewardsmember" checked> Sign up for rewards?<br>
    							<br>
     						<input type="submit" value="Add Customer">
 						</form>

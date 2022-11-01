@@ -114,5 +114,9 @@ public class FakeApplicationUserDaoService implements ApplicationUserDao {
 		
 		return applicationUsers;
 	}
+	
+	public String encode(String password) {
+		return passwordEncoder.encode(password);
+	}
 
 }

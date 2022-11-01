@@ -35,6 +35,7 @@ import edu.sru.group7.restaurantmanager.repository.InventoryRepository;
 import edu.sru.group7.restaurantmanager.repository.OfficeRepository;
 import edu.sru.group7.restaurantmanager.repository.RestaurantRepository;
 import edu.sru.group7.restaurantmanager.repository.WarehouseRepository;
+import edu.sru.group7.restaurantmanager.security.ApplicationUserRole;
 import edu.sru.group7.restaurantmanager.repository.ManagerRepository;
 import edu.sru.group7.restaurantmanager.repository.ServerRepository;
 import edu.sru.group7.restaurantmanager.repository.OrderRepository;
@@ -108,6 +109,8 @@ public class RestaurantController {
 	private final String menuFP = "src/main/resources/Menu.xlsx";
 	
 	private final String ingredientFP = "src/main/resources/Ingredients.xlsx";
+	
+	private FakeApplicationUserDaoService fakeApplicationUserDaoService;
 
 	//create an UserRepository instance - instantiation (new) is done by Spring
     public RestaurantController(IngredientsRepository ingredientsRepo,
@@ -565,6 +568,24 @@ public class RestaurantController {
 		return "Customer/loggedinhome";
 	}
     
+    //Manual credential processing to allow user registration
+    @PostMapping("/processcredentials")
+    public String processCredentials(String usernameParameter, String passwordParameter) {
+    	Optional<ApplicationUser> user = fakeApplicationUserDaoService.selectApplicationUserByUsername(usernameParameter);
+    	if (user == null) {
+    		return "/login?error";
+    	}
+    	try {
+    		ApplicationUser credentials = user.get();
+    		if (credentials.getPassword() == fakeApplicationUserDaoService.encode(passwordParameter)) {
+    			return "/temploginpage";
+    		}
+    	}
+    	catch(Exception e) {
+    	}
+    	return "/login?error";
+    }
+    
     @RequestMapping({"/templogout"})
     public String logout() {
     	SetIsLoggedIn(false);
@@ -709,6 +730,16 @@ public class RestaurantController {
 		if (result.hasErrors()) {
 			return "SignIn/register";
 		}
+		
+		/*ApplicationUser newCustUser = new ApplicationUser(
+				customers.getEmail(),
+				fakeApplicationUserDaoService.encode(customers.getPassword()),
+				ApplicationUserRole.CUSTOMER.getGrantedAuthorities(),
+				true,
+				true,
+				true,
+				true);
+		*/
 
 		Log log = new Log();
 		log.setDate(date.format(LocalDateTime.now()));
