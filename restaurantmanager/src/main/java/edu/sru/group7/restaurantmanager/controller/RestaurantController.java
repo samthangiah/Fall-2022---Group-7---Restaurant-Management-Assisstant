@@ -813,10 +813,12 @@ public class RestaurantController {
 		while(it.hasNext()) {
 			CartItems cartItem = it.next();
 			
-			float currPrice = cartItem.getMenu_id().getPrice();
+			float currPrice = cartItem.getMenu_id().getPrice() * cartItem.getQuantity();
 			total = total + currPrice;
 		}
-		model.addAttribute("totalprice", total);
+		String roundOff = String.format("%.2f", total);
+		String displayTotal = "$" + roundOff;
+		model.addAttribute("totalprice", displayTotal);
 		return "Customer/cart";
 	}
 	
@@ -2059,6 +2061,34 @@ public class RestaurantController {
 			//	paymentDetailsRepo.delete(details);
 			//	return "redirect:/pay";
 			//}
+		}
+		
+		@PostMapping({"/addtoorder"})
+		public String custAddToOrder(@Validated CartItems cartItems, BindingResult result, Model model) {
+			if (result.hasErrors()) {
+			return "Customer/orderpagenew";
+			}
+			
+			cartItems.setCustomer_id(getLoggedInUser());
+			try {
+				Log log = new Log();
+				log.setDate(date.format(LocalDateTime.now()));
+				log.setTime(time.format(LocalDateTime.now()));
+				//log.setLocation(getUserLocation());
+				log.setUserId(getUserUID());
+				log.setAction("Add to Order");
+				log.setActionId(cartItems.getId());
+				logRepo.save(log);
+
+				cartItemsRepo.save(cartItems);
+				
+				}
+				catch(Exception e) {
+					e.printStackTrace();
+					return "Customer/orderpagenew";
+				}
+			
+			return "Customer/orderpagenew";
 		}
 		
 		@PostMapping({"/addorder"})

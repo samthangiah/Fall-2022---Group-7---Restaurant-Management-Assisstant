@@ -35,6 +35,14 @@ public class CartItems {
 		super();
 	}
 
+	public long getId() {
+		return id;
+	}
+
+	public void setId(long id) {
+		this.id = id;
+	}
+
 	public Menu getMenu_id() {
 		return menu_id;
 	}
