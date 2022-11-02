@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import edu.sru.group7.restaurantmanager.authentication.ApplicationUser;
 import edu.sru.group7.restaurantmanager.authentication.FakeApplicationUserDaoService;
 import edu.sru.group7.restaurantmanager.domain.Admins;
+import edu.sru.group7.restaurantmanager.domain.CartItems;
 import edu.sru.group7.restaurantmanager.domain.Customers;
 import edu.sru.group7.restaurantmanager.domain.Ingredients;
 import edu.sru.group7.restaurantmanager.domain.Inventory;
@@ -29,6 +30,7 @@ import edu.sru.group7.restaurantmanager.domain.Menu;
 import edu.sru.group7.restaurantmanager.domain.Log;
 import edu.sru.group7.restaurantmanager.billing.PaymentDetails;
 import edu.sru.group7.restaurantmanager.repository.AdminRepository;
+import edu.sru.group7.restaurantmanager.repository.CartItemsRepository;
 import edu.sru.group7.restaurantmanager.repository.CustomerRepository;
 import edu.sru.group7.restaurantmanager.repository.IngredientsRepository;
 import edu.sru.group7.restaurantmanager.repository.InventoryRepository;
@@ -106,6 +108,9 @@ public class RestaurantController {
 	@Autowired 
 	private IngredientsRepository ingredientsRepo;
 	
+	@Autowired 
+	private CartItemsRepository cartItemsRepo;
+	
 	private final String menuFP = "src/main/resources/Menu.xlsx";
 	
 	private final String ingredientFP = "src/main/resources/Ingredients.xlsx";
@@ -116,6 +121,7 @@ public class RestaurantController {
     public RestaurantController(IngredientsRepository ingredientsRepo,
     							RestaurantRepository restaurantRepo,
     							WarehouseRepository warehouseRepo,
+    							CartItemsRepository cartItemsRepo,
     							InventoryRepository inventoryRepo,
     							OfficeRepository officeRepo,
     							CustomerRepository customerRepo, 
@@ -127,6 +133,7 @@ public class RestaurantController {
     	this.ingredientsRepo = ingredientsRepo;
     	this.restaurantRepo = restaurantRepo;
     	this.warehouseRepo = warehouseRepo;
+    	this.cartItemsRepo = cartItemsRepo;
     	this.inventoryRepo = inventoryRepo;
 		this.customerRepo = customerRepo;
 		this.managerRepo = managerRepo;
@@ -519,6 +526,25 @@ public class RestaurantController {
 
 		orderRepo.save(order);
 		
+		CartItems cartItems = new CartItems();
+		cartItems.setMenu_id(menuRepo.findById((long) 1).get());
+		cartItems.setCustomer_id(cust);
+		cartItems.setQuantity(10);
+		
+		CartItems cartItems2 = new CartItems();
+		cartItems2.setMenu_id(menuRepo.findById((long) 2).get());
+		cartItems2.setCustomer_id(cust);
+		cartItems2.setQuantity(10);
+		
+		CartItems cartItems3 = new CartItems();
+		cartItems3.setMenu_id(menuRepo.findById((long) 3).get());
+		cartItems3.setCustomer_id(cust);
+		cartItems3.setQuantity(10);
+		
+		cartItemsRepo.save(cartItems);
+		cartItemsRepo.save(cartItems2);
+		cartItemsRepo.save(cartItems3);
+		
     	
     	System.out.println("---------------------------------------------------------------------------------------------------------------------------");
 		System.out.println("DATABASE CREATED" + "\n" + "\n");
@@ -775,6 +801,23 @@ public class RestaurantController {
 		}
 		model.addAttribute("customers", user);
 		return "Customer/custviewinfo";
+	}
+	
+	@RequestMapping("/Customer-cart-view")
+	public String viewCart(Model model) {
+		List<CartItems> cartItems = cartItemsRepo.findByCustomer(getLoggedInUser());
+		
+		model.addAttribute("listCart",cartItems);
+		float total = 0f;
+		Iterator<CartItems> it = cartItems.iterator();
+		while(it.hasNext()) {
+			CartItems cartItem = it.next();
+			
+			float currPrice = cartItem.getMenu_id().getPrice();
+			total = total + currPrice;
+		}
+		model.addAttribute("totalprice", total);
+		return "Customer/cart";
 	}
 	
 	@GetMapping("/editcustomer/{id}")
