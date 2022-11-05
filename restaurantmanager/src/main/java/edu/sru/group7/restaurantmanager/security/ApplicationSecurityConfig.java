@@ -36,7 +36,7 @@ WebSecurityConfigurerAdapter {
 					"/addorder").permitAll()
 			
 			.antMatchers("/loggedinhome", "/templogout", "/changeuserpass", "/updateuserpass/*", "/custviewinfo",
-					"/editcustomer/*", "/usercustomerupdate/*").hasAnyRole(ApplicationUserRole.CUSTOMER.name(),
+					"/editcustomer/*", "/usercustomerupdate/*", "/Customer-cart-view", "/addtoorder").hasAnyRole(ApplicationUserRole.CUSTOMER.name(),
 					ApplicationUserRole.ADMIN.name(), ApplicationUserRole.HQADMIN.name(), ApplicationUserRole.MANAGER.name(),
 					ApplicationUserRole.HQMANAGER.name(), ApplicationUserRole.SERVER.name())
 			

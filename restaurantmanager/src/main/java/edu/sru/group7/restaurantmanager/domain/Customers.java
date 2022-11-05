@@ -1,7 +1,9 @@
 package edu.sru.group7.restaurantmanager.domain;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -36,6 +38,9 @@ public class Customers {
     
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "customer_id")
 	private List<Orders> order = new ArrayList<>();
+    
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "customer_id")
+	private Set<CartItems> cartItems = new HashSet<>();
     
     public Customers() {}
 
