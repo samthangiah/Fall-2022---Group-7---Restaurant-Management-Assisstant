@@ -34,7 +34,7 @@ public class CartItems {
 	public CartItems() {
 		super();
 	}
-	
+
 	public long getId() {
 		return id;
 	}
@@ -66,6 +66,5 @@ public class CartItems {
 	public void setQuantity(Integer quantity) {
 		this.quantity = quantity;
 	}
-
 
 }

@@ -2073,7 +2073,6 @@ public class RestaurantController {
 			if (result.hasErrors()) {
 			return "Customer/orderpagenew";
 			}
-
 			cartItems.setCustomer_id(getLoggedInUser());
 			try {
 				//I don't think logging this is necessary

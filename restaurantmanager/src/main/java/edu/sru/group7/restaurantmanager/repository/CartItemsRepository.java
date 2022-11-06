@@ -15,5 +15,4 @@ public interface CartItemsRepository extends CrudRepository<CartItems, Long> {
 	@Query(value="SELECT * FROM restaurantmanagerdb.cart_items WHERE customer_id = :id", nativeQuery=true)
 	public List<CartItems> findByCustomer(Customers id);
 
-
 }
