@@ -567,7 +567,14 @@ public class RestaurantController {
     	List<Offices> listoffices = (List<Offices>) officeRepo.findAll();
     	model.addAttribute("listOffices", listoffices);
     	List<Menu> listmenu = (List<Menu>) menuRepo.findAll();
-    	model.addAttribute("listMenu", listmenu);
+    	//Only display menu items that are available
+    	List<Menu> availablemenu = new ArrayList<Menu>();
+    	for (Menu m : listmenu) {
+    		if (m.getAvailability() == true) {
+    			availablemenu.add(m);
+    		}
+    	}
+    	model.addAttribute("listMenu", availablemenu);
     }
     
     //403 Error page
@@ -2178,10 +2185,46 @@ public class RestaurantController {
       		return "redirect:/pay";
 		}
 		
+		@RequestMapping({"/redeem"})
+		public String redeemRewards() {
+			if (getLoggedInUser().getRewardsMember() == true) {
+				int rewards = getLoggedInUser().getRewardsAvailable();
+				//Redeem 5 rewards points at a time
+				if (rewards >= 5) {
+					getLoggedInUser().setRewardsAvailable(rewards - 5);
+					
+					List<CartItems> items = cartItemsRepo.findByCustomer(getLoggedInUser());
+					float price = 0.00F;
+					for (CartItems i : items) {
+						price += i.getMenu_id().getPrice() * i.getQuantity();
+					}
+					//Discount is 10% of order, rounded to 2 decimal places
+					float discountPrice = Math.round((price / 10) * 100.0) / 100.0F;
+					
+					Menu discount = new Menu();
+					discount.setId(-1);
+					discount.setName("Rewards discount");
+					discount.setAvailability(false);
+					//Price set to negative so that it is subtracted
+					discount.setPrice(0 - discountPrice);
+					menuRepo.save(discount);
+					
+					cartItemsRepo.save(new CartItems(discount, getLoggedInUser(), 1));
+				}
+			}
+			return "redirect:/Customer-cart-view";
+		}
+		
 		@RequestMapping({})
 		public String addInventoryRequest() {
 			
 			return null;
+		}
+		
+		@GetMapping("/rewardsinfo")
+		public String custRewardsInfo(Model model) {
+			model.addAttribute("customers", getLoggedInUser());
+			return "Customer/rewards";
 		}
 	
     public int getUserLocation() {
