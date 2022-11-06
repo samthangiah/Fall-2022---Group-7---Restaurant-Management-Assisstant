@@ -2212,6 +2212,7 @@ public class RestaurantController {
 					cartItemsRepo.save(new CartItems(discount, getLoggedInUser(), 1));
 				}
 			}
+			
 			return "redirect:/Customer-cart-view";
 		}
 		
