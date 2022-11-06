@@ -5,12 +5,35 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
         <meta name="description" content="" />
         <meta name="author" content="" />
-        <title>The Gazebo</title>
+        <title>Customer Information</title>
         <!-- Favicon-->
         <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
         <!-- Core theme CSS (includes Bootstrap)-->
         <link href="../css/styles.css" rel="stylesheet" />
+
     </head>
+    <style>
+table, th, td {
+	border: 1px solid black;
+}
+.table-hover tbody tr:hover td {
+    background: #F1F1F1;
+}
+.table-striped>tbody>tr:nth-child(odd)>td, 
+.table-striped>tbody>tr:nth-child(odd)>th {
+   background-color: #00674E;
+   color: white; 
+ }
+ .table-striped>tbody>tr:nth-child(even)>td, 
+.table-striped>tbody>tr:nth-child(even)>th {
+	background-color: #FFFFFF;
+}
+.h2{
+	text-align: center;
+	color: #FFFFFF;
+}
+
+</style>
     <body>
         <div class="d-flex" id="wrapper">
             <!-- Sidebar-->
@@ -18,7 +41,7 @@
                 <div class="sidebar-heading border-bottom bg-light">Insert logo here?</div>
                 <div class="list-group list-group-flush">
                 	<a class="list-group-item list-group-item-action list-group-item-light p-3" href="/loggedinhome">Home</a>
-                	<a class="list-group-item list-group-item-action list-group-item-light p-3" href="/showmenu">MENU</a>
+                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/showmenu">MENU</a>
                 </div>
             </div>
             <!-- Page content wrapper-->
@@ -49,20 +72,35 @@
                 </nav>
                 <!-- Page content-->
                 <div class="container-fluid">
-                    <h1 class="mt-4">Order Successful!</h1>
-                    <br>
-                    <br>
-                    <br>
-                    <br>
-                    <div style="text-align: center;" >
-                    <div class="btn-group">
-  						<a href="/loggedinhome" class="btn btn-primary" role="button">Home</a>
-  						<a href="/Customer-ordertype-view" class="btn btn-primary" role="button">Order again</a>
-  						</div>
+                    <div class="container mt-3">
+						<h2 class="h2">Customer Information</h2>
+						<table class = "table table-striped table-hover">
+						<thead class="table-dark">
+							<tr>
+								<th>Rewards Points Available</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr th:each="customer : ${customers}">
+                    			<td th:text="${customer.rewardsAvailable}"></td>
+                			</tr>
+						</tbody>
+					</table>
+					<div>
+						<br>
+						<h2 style="text-align: center;">How can I earn rewards?</h2>
+						<br>
+						<p style="text-align: center;">You can earn 1 rewards point for every $10 spent in an order.</p>
+						<h2 style="text-align: center;">What are my rewards used for?</h2>
+						<br>
+						<p style="text-align: center;">You can redeem 5 rewards points at a time for 10% off of your next order.</p>
+						<p style="text-align: center;">Press the "Redeem rewards" button in your cart to redeem.</p>
 					</div>
-                    </div>
-                </div>
+				</div>
             </div>
+        </div>
+    </div>
+
         <!-- Bootstrap core JS-->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
         <!-- Core theme JS-->

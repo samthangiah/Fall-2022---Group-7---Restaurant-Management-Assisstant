@@ -9,19 +9,19 @@ import javax.persistence.ManyToOne;
 
 @Entity
 public class CartItems {
-	
+
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-	
+
 	@ManyToOne
 	@JoinColumn(name="menu_id")
 	private Menu menu_id;
-	
+
 	@ManyToOne
 	@JoinColumn(name="customer_id")
 	private Customers customer_id;
-	
+
 	private Integer quantity;
 
 	public CartItems(Menu menu_id, Customers customer_id, Integer quantity) {
@@ -66,6 +66,5 @@ public class CartItems {
 	public void setQuantity(Integer quantity) {
 		this.quantity = quantity;
 	}
-	
-	
+
 }
