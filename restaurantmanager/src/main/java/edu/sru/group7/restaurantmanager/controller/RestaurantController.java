@@ -2075,12 +2075,21 @@ public class RestaurantController {
 			//}
 		}
 		
-		@PostMapping({"/addtoorder"})
-		public String custAddToOrder(@Validated CartItems cartItems, BindingResult result, Model model) {
+		@GetMapping({"/addtoorder/{id}"})
+		public String custAddToOrder(@PathVariable("id") long id, @Validated CartItems cartItem, BindingResult result, Model model) {
 			if (result.hasErrors()) {
-			return "Customer/orderpagenew";
+			return "Customer/orderpage";
 			}
-			cartItems.setCustomer_id(getLoggedInUser());
+			
+			cartItem = cartItemsRepo.findByCustMenuId(id, getLoggedInUser().getId());
+			
+			if (cartItem == null) {
+				cartItem = createNewOrder(id, cartItem);
+			}
+			else {
+			
+			cartItem.setQuantity(cartItem.getQuantity() + 1);
+			}
 			try {
 				//I don't think logging this is necessary
 				/*Log log = new Log();
@@ -2089,18 +2098,32 @@ public class RestaurantController {
 				//log.setLocation(getUserLocation());
 				log.setUserId(getUserUID());
 				log.setAction("Add to Order");
-				log.setActionId(cartItems.getId());
-				logRepo.save(log);*/
 
-				cartItemsRepo.save(cartItems);
+				log.setActionId(cartItem.getId());
+				logRepo.save(log);
 
+				cartItemsRepo.save(cartItem);
 				}
 				catch(Exception e) {
 					e.printStackTrace();
-					return "Customer/orderpagenew";
+					return "Customer/orderpage";
 				}
-
-			return "Customer/orderpagenew";
+			
+			return "Customer/orderpage";
+			}
+		
+		
+		private CartItems createNewOrder(long id, CartItems cartItem) {
+			
+			Customers cust = getLoggedInUser();
+			Menu menu = menuRepo.findById(id)
+					.orElseThrow(() -> new IllegalArgumentException("Invalid menu Id:" + id));
+			cartItem = new CartItems();
+			cartItem.setCustomer_id(cust);
+			cartItem.setMenu_id(menu);
+			cartItem.setQuantity(1);
+			
+			return cartItem;
 		}
 		
 		@PostMapping({"/addorder"})

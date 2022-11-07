@@ -5,12 +5,35 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
         <meta name="description" content="" />
         <meta name="author" content="" />
-        <title>The Gazebo</title>
+        <title>Menu</title>
         <!-- Favicon-->
-        <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+        <link rel="icon" type="image/x-icon" href="/assets/favicon.ico" />
         <!-- Core theme CSS (includes Bootstrap)-->
-        <link href="../css/styles.css" rel="stylesheet" />
+        <link href="../css/styles.css" rel="stylesheet" /> 
+
     </head>
+    <style>
+table, th, td {
+	border: 1px solid black;
+}
+.table-hover tbody tr:hover td {
+    background: #F1F1F1;
+}
+.table-striped>tbody>tr:nth-child(odd)>td, 
+.table-striped>tbody>tr:nth-child(odd)>th {
+   background-color: #00674E;
+   color: white; 
+ }
+ .table-striped>tbody>tr:nth-child(even)>td, 
+.table-striped>tbody>tr:nth-child(even)>th {
+	background-color: #FFFFFF;
+}
+.h2{
+	text-align: center;
+	color: #FFFFFF;
+}
+
+</style>
     <body>
         <div class="d-flex" id="wrapper">
             <!-- Sidebar-->
@@ -18,7 +41,7 @@
                 <div class="sidebar-heading border-bottom bg-light">Insert logo here?</div>
                 <div class="list-group list-group-flush">
                 	<a class="list-group-item list-group-item-action list-group-item-light p-3" href="/loggedinhome">Home</a>
-                	<a class="list-group-item list-group-item-action list-group-item-light p-3" href="/showmenu">MENU</a>
+                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/showmenu">MENU</a>
                 </div>
             </div>
             <!-- Page content wrapper-->
@@ -48,31 +71,40 @@
                 </nav>
                 <!-- Page content-->
                 <div class="container-fluid">
-                    <h1 class="mt-4">The Gazebo</h1>
-                    <br>
-                    <br>
-                    <br>
-                    <br>
-                    <div style="text-align: center;" >
-                    <form action="#" th:action="@{/addorder}" th:object="${Order}" method="post">
-                    		<select id="restaurantid" th:field="*{restaurant}" class="form-control" required>
-    							<th:block th:each="Restaurant : ${listRestaurants}">
-    							 <option th:value="${Restaurant.id}" th:text="${Restaurant.address} + ' ' + ${Restaurant.city} + ' ' + ${Restaurant.state} + ' ' + ${Restaurant.zipcode}"></option>
-    							 </th:block>
-    						</select>
-    						<select id="menuid" th:field="*{items}" class="form-control" multiple="multiple" required>
-    							<th:block th:each="Menu : ${listMenu}">
-    							 <option th:value="${Menu.id}" th:text="${Menu.name} + ' ' + ${Menu.entree} + ' ' + ${Menu.sides} + ' ' + ${Menu.price}"></option>
-    							 </th:block>
-    						</select>
-    						<label for="name">Special Instructions: </label>
-    						<input type="text" th:field="*{instructions}" id="name" placeholder="Item Name">
-    						<br>
-    						<input type="submit" value="Add Order">  
-						</form>
+                    <div class="container mt-3">
+						<h2 class="h2">Menu</h2>
+						<table class = "table table-striped table-hover">
+						<thead class="table-dark">
+							<tr>
+								<th>Name</th>
+								<th>Entree</th>
+								<th>Side</th>
+								<th>Price</th>
+								<th>Add</th>
+							</tr>
+						</thead>
+		<tbody>
+		 	<th:block th:each="menu : ${listMenu}">
+			<tr>
+				<td th:text="${menu.name}"></td>
+				<td th:text="${menu.entree}"></td>
+				<td th:text="${menu.sides}"></td>
+				<td th:text="${menu.price}"></td>
+				<td><a th:href="@{/addtoorder/{id}(id = ${menu.id})}" class="btn btn-primary">Add</a></td>
+			</tr>
+			</th:block>
+		</tbody>
+		
+	</table>
+	<div class="btn-group">
+  		<a href="/loggedinhome" class="btn btn-primary" role="button">Return Home</a>
+  		<a href="/Customer-cart-view" class="btn btn-primary" role="button">View Cart</a>
+	</div>
+	</div>
                     </div>
                 </div>
             </div>
+        
         <!-- Bootstrap core JS-->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
         <!-- Core theme JS-->
