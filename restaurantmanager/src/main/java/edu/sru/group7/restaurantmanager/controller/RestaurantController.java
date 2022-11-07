@@ -2091,17 +2091,6 @@ public class RestaurantController {
 			cartItem.setQuantity(cartItem.getQuantity() + 1);
 			}
 			try {
-				//I don't think logging this is necessary
-				/*Log log = new Log();
-				log.setDate(date.format(LocalDateTime.now()));
-				log.setTime(time.format(LocalDateTime.now()));
-				//log.setLocation(getUserLocation());
-				log.setUserId(getUserUID());
-				log.setAction("Add to Order");
-
-				log.setActionId(cartItem.getId());
-				logRepo.save(log);
-
 				cartItemsRepo.save(cartItem);
 				}
 				catch(Exception e) {
