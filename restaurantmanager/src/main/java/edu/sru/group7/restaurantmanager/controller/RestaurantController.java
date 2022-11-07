@@ -507,6 +507,7 @@ public class RestaurantController {
 		cust.setLastName("Customer");
 		cust.setLocation((int) restaurant2.getId());
 		cust.setPassword("password");
+		cust.setRewardsMember(true);
 		cust.setRewardsAvailable(10);
 		
 		customerRepo.save(cust);
@@ -530,21 +531,20 @@ public class RestaurantController {
 		cartItems.setMenu_id(menuRepo.findById((long) 1).get());
 		cartItems.setCustomer_id(cust);
 		cartItems.setQuantity(10);
-		
+
 		CartItems cartItems2 = new CartItems();
 		cartItems2.setMenu_id(menuRepo.findById((long) 2).get());
 		cartItems2.setCustomer_id(cust);
 		cartItems2.setQuantity(10);
-		
+
 		CartItems cartItems3 = new CartItems();
 		cartItems3.setMenu_id(menuRepo.findById((long) 3).get());
 		cartItems3.setCustomer_id(cust);
 		cartItems3.setQuantity(10);
-		
+
 		cartItemsRepo.save(cartItems);
 		cartItemsRepo.save(cartItems2);
 		cartItemsRepo.save(cartItems3);
-		
     	
     	System.out.println("---------------------------------------------------------------------------------------------------------------------------");
 		System.out.println("DATABASE CREATED" + "\n" + "\n");
@@ -567,7 +567,14 @@ public class RestaurantController {
     	List<Offices> listoffices = (List<Offices>) officeRepo.findAll();
     	model.addAttribute("listOffices", listoffices);
     	List<Menu> listmenu = (List<Menu>) menuRepo.findAll();
-    	model.addAttribute("listMenu", listmenu);
+    	//Only display menu items that are available
+    	List<Menu> availablemenu = new ArrayList<Menu>();
+    	for (Menu m : listmenu) {
+    		if (m.getAvailability() == true) {
+    			availablemenu.add(m);
+    		}
+    	}
+    	model.addAttribute("listMenu", availablemenu);
     }
     
     //403 Error page
@@ -806,13 +813,13 @@ public class RestaurantController {
 	@RequestMapping("/Customer-cart-view")
 	public String viewCart(Model model) {
 		List<CartItems> cartItems = cartItemsRepo.findByCustomer(getLoggedInUser());
-		
+
 		model.addAttribute("listCart",cartItems);
 		float total = 0f;
 		Iterator<CartItems> it = cartItems.iterator();
 		while(it.hasNext()) {
 			CartItems cartItem = it.next();
-			
+
 			float currPrice = cartItem.getMenu_id().getPrice() * cartItem.getQuantity();
 			total = total + currPrice;
 		}
@@ -1581,6 +1588,12 @@ public class RestaurantController {
 			}
 			return "LocalServingStaff/server-cust-view";
 		}
+		
+		//For guest order "view customer info and rewards" to not throw 404
+		@GetMapping("/serverviewcustinfo/")
+		public String blankCustInfo() {
+			return "redirect:/servingstaffview";
+		}
 
 		@GetMapping("/updatemenuitem/{id}")
 		public String showUpdateMenuItemForm(@PathVariable("id") long id, Model model) {
@@ -2051,7 +2064,6 @@ public class RestaurantController {
 			PaymentDetails details = new PaymentDetails();
 			details.buildFromForm(form);
 			
-			//TODO
 			//add payment gateway such as stripe to handle payment processing
 			//if (payment can be processed) {
 				paymentDetailsRepo.delete(details);
@@ -2079,17 +2091,18 @@ public class RestaurantController {
 			cartItem.setQuantity(cartItem.getQuantity() + 1);
 			}
 			try {
-				Log log = new Log();
+				//I don't think logging this is necessary
+				/*Log log = new Log();
 				log.setDate(date.format(LocalDateTime.now()));
 				log.setTime(time.format(LocalDateTime.now()));
 				//log.setLocation(getUserLocation());
 				log.setUserId(getUserUID());
 				log.setAction("Add to Order");
+
 				log.setActionId(cartItem.getId());
 				logRepo.save(log);
 
 				cartItemsRepo.save(cartItem);
-				
 				}
 				catch(Exception e) {
 					e.printStackTrace();
@@ -2123,6 +2136,7 @@ public class RestaurantController {
 				//I would just do this instead of looping through the findAll() but it doesnt like the Optional<> type
 				//order.setCustomer_id(customerRepo.findById((long) -1));
 				for (Customers c : customerRepo.findAll()) {
+					//Guest user -1
 					if (c.getId() == (long) -1) {
 						order.setCustomer_id(c);
 					}
@@ -2161,8 +2175,8 @@ public class RestaurantController {
 					while(inventoryIT.hasNext()) {
 						Inventory inventory = inventoryIT.next();
 						System.out.println("--------------------------------------------------------------------------------------------------");
-						System.out.println(inventory.getIngredient() + "get ingredient");
-						System.out.println(ingredient + "ingredient");
+						System.out.println(inventory.getIngredient() + " get ingredient");
+						System.out.println(ingredient + " ingredient");
 						if(inventory.getIngredient().compareTo(ingredient) == 0) {
 							System.out.println(inventory.getIngredient() + " is equal to " + ingredient);
 							inventory.setQuantity(inventory.getQuantity() - 1);
@@ -2173,13 +2187,67 @@ public class RestaurantController {
 			}
 			order.setPrice(totalPrice);
 			orderRepo.save(order);
-      			return "redirect:/pay";
+			
+			//Award rewards points to signed in rewards customers
+			Customers orderCustomer = getLoggedInUser();
+			if (orderCustomer != null) {
+				if (orderCustomer.getRewardsMember() == true) {
+					System.out.println("--------------------------------------------------------------------------------------------------");
+					System.out.println(order.getPrice());
+					//For every $10 spent per order, cust is awarded with 1 rewards point
+					int rewards = (int) order.getPrice() / 10;
+					System.out.println("rewards earned: " + rewards);
+					rewards += orderCustomer.getRewardsAvailable();
+					
+					orderCustomer.setRewardsAvailable(rewards);
+					customerRepo.save(orderCustomer);
+				}
+			}
+			
+      		return "redirect:/pay";
+		}
+		
+		@RequestMapping({"/redeem"})
+		public String redeemRewards() {
+			if (getLoggedInUser().getRewardsMember() == true) {
+				int rewards = getLoggedInUser().getRewardsAvailable();
+				//Redeem 5 rewards points at a time
+				if (rewards >= 5) {
+					getLoggedInUser().setRewardsAvailable(rewards - 5);
+					
+					List<CartItems> items = cartItemsRepo.findByCustomer(getLoggedInUser());
+					float price = 0.00F;
+					for (CartItems i : items) {
+						price += i.getMenu_id().getPrice() * i.getQuantity();
+					}
+					//Discount is 10% of order, rounded to 2 decimal places
+					float discountPrice = Math.round((price / 10) * 100.0) / 100.0F;
+					
+					Menu discount = new Menu();
+					discount.setId(-1);
+					discount.setName("Rewards discount");
+					discount.setAvailability(false);
+					//Price set to negative so that it is subtracted
+					discount.setPrice(0 - discountPrice);
+					menuRepo.save(discount);
+					
+					cartItemsRepo.save(new CartItems(discount, getLoggedInUser(), 1));
+				}
+			}
+			
+			return "redirect:/Customer-cart-view";
 		}
 		
 		@RequestMapping({})
 		public String addInventoryRequest() {
 			
 			return null;
+		}
+		
+		@GetMapping("/rewardsinfo")
+		public String custRewardsInfo(Model model) {
+			model.addAttribute("customers", getLoggedInUser());
+			return "Customer/rewards";
 		}
 	
     public int getUserLocation() {
