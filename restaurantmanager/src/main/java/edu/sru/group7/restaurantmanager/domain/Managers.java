@@ -25,11 +25,15 @@ public class Managers {
     @ManyToOne
 	@JoinColumn(name="restaurant_id")
 	private Restaurants restaurant;
-    
-    @ManyToOne
-	@JoinColumn(name="warehouse_id")
-	private Warehouses warehouse;
 
+    /**
+     * Restaurant Manager parameter Constructor
+     * @param firstName
+     * @param lastName
+     * @param email
+     * @param password
+     * @param restaurant
+     */
 	public Managers(String firstName, String lastName, String email, String password, Restaurants restaurant) {
 		super();
 		this.firstName = firstName;
@@ -39,16 +43,9 @@ public class Managers {
 		this.restaurant = restaurant;
 	}
 
-	public Managers(long id, String firstName, String lastName, String email, String password, Warehouses warehouse) {
-		super();
-		this.id = id;
-		this.firstName = firstName;
-		this.lastName = lastName;
-		this.email = email;
-		this.password = password;
-		this.warehouse = warehouse;
-	}
-
+	/**
+	 * Default Restaurant Manager Constructor
+	 */
 	public Managers() {
 		super();
 	}
@@ -93,23 +90,20 @@ public class Managers {
 		this.password = password;
 	}
 
+	/**
+	 * 
+	 * @return Restaurant that Manager was assigned to
+	 */
 	public Restaurants getRestaurant() {
 		return restaurant;
 	}
 
+	/**
+	 * 
+	 * @param restaurant Assigns Restaurant to Manager
+	 */
 	public void setRestaurant(Restaurants restaurant) {
 		this.restaurant = restaurant;
 	}
-
-	public Warehouses getWarehouse() {
-		return warehouse;
-	}
-
-	public void setWarehouse(Warehouses warehouse) {
-		this.warehouse = warehouse;
-	}
-
-	
-    
     
 }

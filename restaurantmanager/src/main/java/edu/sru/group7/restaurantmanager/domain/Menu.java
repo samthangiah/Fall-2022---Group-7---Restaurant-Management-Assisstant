@@ -13,6 +13,10 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
+/**
+ * POJO that holds the current Menu items
+ *
+ */
 @Entity
 public class Menu {
     @Id
@@ -30,9 +34,22 @@ public class Menu {
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "menu_id")
 	private Set<CartItems> cartItems = new HashSet<>();
     
+    /**
+     * Default Menu Constructor
+     */
     public Menu() {
     }
     
+    /**
+     * Menu Constructor with parameters
+     * @param id
+     * @param name
+     * @param entree
+     * @param sides
+     * @param price
+     * @param availability
+     * @param quantity
+     */
     public Menu(long id, String name, String entree, String sides, float price, boolean availability, int quantity) {
         this.id = id;
         this.name = name;

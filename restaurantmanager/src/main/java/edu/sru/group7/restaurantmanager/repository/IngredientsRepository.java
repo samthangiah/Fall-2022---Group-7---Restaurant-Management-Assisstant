@@ -6,10 +6,18 @@ import org.springframework.stereotype.Service;
 
 import edu.sru.group7.restaurantmanager.domain.Ingredients;
 
+/**
+ * CRUD interface for Ingredients POJO
+ */
 @Service
 public interface IngredientsRepository extends CrudRepository<Ingredients, Long> {
 
+	/**
+	 * 
+	 * @param id
+	 * @return Ingredients belonging to a Menu Id
+	 */
 	@Query(value="SELECT * FROM restaurantmanagerdb.ingredients WHERE menu_id = :id", nativeQuery=true)
-	Ingredients findByMenuItem(long id);
+	public Ingredients findByMenuItem(long id);
 
 }

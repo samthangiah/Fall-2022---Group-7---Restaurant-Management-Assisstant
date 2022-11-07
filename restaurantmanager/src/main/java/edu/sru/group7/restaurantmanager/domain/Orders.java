@@ -17,8 +17,12 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
+/**
+ * POJO that holds all Orders
+ */
 @Entity
 public class Orders {
+	
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
@@ -43,9 +47,22 @@ public class Orders {
 	@JoinColumn(name="customer_id")
     private Customers customer_id;
     
+    /**
+     * Default Orders Constructor
+     */
     public Orders() {
     }
     
+    /**
+     * Orders Constructor with parameters
+     * @param id
+     * @param date
+     * @param price
+     * @param customer_id
+     * @param items
+     * @param instructions
+     * @param restaurant
+     */
     public Orders(long id, String date, float price, Customers customer_id, Set<Menu> items, String instructions, Restaurants restaurant) {
         this.id = id;
         this.date = date;
@@ -97,18 +114,30 @@ public class Orders {
 		this.instructions = instructions;
 	}
 
+	/**
+	 * @return Restaurant belonging to this Order
+	 */
 	public Restaurants getRestaurant() {
 		return restaurant;
 	}
 
+	/**
+	 * @param restaurant belonging to this Order
+	 */
 	public void setRestaurant(Restaurants restaurant) {
 		this.restaurant = restaurant;
 	}
 
+	/**
+	 * @return Customer of the Order
+	 */
 	public Customers getCustomer_id() {
 		return customer_id;
 	}
 
+	/**
+	 * @param customer_id Customer of the Order
+	 */
 	public void setCustomer_id(Customers customer_id) {
 		this.customer_id = customer_id;
 	}

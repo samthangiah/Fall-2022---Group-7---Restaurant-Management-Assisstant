@@ -14,8 +14,7 @@ import javax.persistence.ManyToOne;
 
 
 /**
- * 'Ingredients' class that creates entity in database
- * @author Bradley Smith
+ * POJO that holds all the ingredients belonging to a Menu item
  * 
  */
 @Entity
@@ -28,7 +27,6 @@ public class Ingredients {
     @JoinColumn(name = "menu_id")
 	private Menu menu;
 	
-	//list
 	private Vector ingredient = new Vector<>();
 
 	public Ingredients(long id, Menu menu, Vector ingredient) {
@@ -54,10 +52,17 @@ public class Ingredients {
 		return menu;
 	}
 
+	/**
+	 * @param menu Assigns Menu object to Vector of ingredients
+	 */
 	public void setMenu(Menu menu) {
 		this.menu = menu;
 	}
 
+	/**
+	 * 
+	 * @return Vector of ingredients belonging to Menu object
+	 */
 	public Vector getIngredient() {
 		return ingredient;
 	}

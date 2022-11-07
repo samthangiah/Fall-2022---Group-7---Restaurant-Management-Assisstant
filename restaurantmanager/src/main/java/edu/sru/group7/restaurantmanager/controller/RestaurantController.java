@@ -62,6 +62,9 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 
 @Controller
+/**
+ * Restaurant Controller class for the entire Restaurant Management Assistant
+ */
 public class RestaurantController {
     
     DateTimeFormatter date = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -2141,10 +2144,10 @@ public class RestaurantController {
 		
 		@RequestMapping({"/addNewOrder"})
 		public String custAddOrder(Orders order) {
-			
-			//initialize final Price
+			if (orderRepo.findByCustomerIdUnpaid(getUserUID()) != null) {
+				return "redirect:pay";
+			}
 			float finalPrice = 0;
-			//Need to add a custom user for every guest order. Store them in some local variable when creating new Order
 			//Need function to create temp customer user for guest order so it can be added to incrementally.
 			List<CartItems> cartItems = cartItemsRepo.findByCustomer(getLoggedInUser());
 			Iterator<CartItems> cartIt = cartItems.iterator();

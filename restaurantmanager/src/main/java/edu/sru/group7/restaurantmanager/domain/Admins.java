@@ -44,7 +44,7 @@ public class Admins {
     
     
     /**
-     * Constructor for Admins 
+     * Admins Constructor without any Restaurants assigned
      * @param firstName
      * @param lastName
      * @param email
@@ -61,7 +61,7 @@ public class Admins {
 	}
 
 	/**
-	 * Constructor for Admins
+	 * Admins Constructor with all parameters
 	 * @param id
 	 * @param firstName
 	 * @param lastName
@@ -83,119 +83,75 @@ public class Admins {
 	}
 	
 	/**
-	 * Constructor for Admins with no parameters
+	 * Default Admins Constructor
 	 */
 	public Admins() {
 		super();
 	}
 	
-	/**
-	 * Gets Admins id
-	 * @return id
-	 */
 	public long getId() {
 		return id;
 	}
 	
-	/**
-	 * Sets Admins id
-	 * @param id
-	 */
 	public void setId(long id) {
 		this.id = id;
 	}
 	
-	/**
-	 * Returns Admins first name
-	 * @return firstName
-	 */
 	public String getFirstName() {
 		return firstName;
 	}
 	
-	/**
-	 * Sets Admins first name
-	 * @param firstName
-	 */
 	public void setFirstName(String firstName) {
 		this.firstName = firstName;
 	}
 	
-	/**
-	 * Returns Admins last name
-	 * @return lastName
-	 */
 	public String getLastName() {
 		return lastName;
 	}
 	
-	/**
-	 * Sets Admins last name
-	 * @param lastName
-	 */
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
 	}
 	
-	/**
-	 * Returns Admins email
-	 * @return email
-	 */
 	public String getEmail() {
 		return email;
 	}
 	
-	/**
-	 * Sets Admins email
-	 * @param email
-	 */
 	public void setEmail(String email) {
 		this.email = email;
 	}
 
-	/**
-	 * Returns Admins password
-	 * @return password 
-	 */
 	public String getPassword() {
 		return password;
 	}
 	
-	/**
-	 * Sets Admins password
-	 * @param password
-	 */
 	public void setPassword(String password) {
 		this.password = password;
 	}
 	
 	/**
-	 * Returns the list of 'Restaurants' that 'Admins' are assigned
-	 * @return restaurant
+	 * @return restaurant Gets List of Restaurants Admin is assigned
 	 */
 	public List<Restaurants> getRestaurant() {
 		return restaurant;
 	}
 
 	/**
-	 * Sets 'Restaurants' that 'Admins' are assigned
-	 * @param restaurant
+	 * @param restaurant Sets List of Restaurants Admin is assigned
 	 */
 	public void setRestaurant(List<Restaurants> restaurant) {
 		this.restaurant = restaurant;
 	}
 	
 	/**
-	 * Returns the 'Offices' location for 'Admins'
-	 * @return office
+	 * @return office, Office location of Admin
 	 */
 	public Offices getOffice() {
 		return office;
 	}
 
 	/**
-	 * Sets the 'Offices' location for 'Admins'
-	 * @param office
+	 * @param office Assigns Admin to an Office location
 	 */
 	public void setOffice(Offices office) {
 		this.office = office;
