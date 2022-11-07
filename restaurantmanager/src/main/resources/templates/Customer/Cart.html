@@ -96,8 +96,22 @@ table, th, td {
 							</tr>
 						</tbody>
 						</table>
+						<br>
+						<br>
+						<form action="#" th:action="@{/addNewOrder}" th:object="${Order}" method="post">
+    						<label class="label" for="instructions">Special Instructions:</label>
+    						<input type="text" th:field="*{instructions}" id="instructions" placeholder="Special Instructions">
+    						<label class="label" for="officeid">Office Location:</label>
+    						<select id="restaurantid" th:field="*{restaurant}" class="form-control" required>
+    							<th:block th:each="restaurant : ${listRestaurants}">
+    							 <option th:value="${restaurant.id}" th:text="${restaurant.id} + ' ' + ${restaurant.address} + ' ' + ${restaurant.city} + ' ' + ${restaurant.state}"></option>
+    							 </th:block>
+    						</select>
+    						<input type="submit" value="Checkout"> 
+    					</form>
+						
 	<div class="btn-group">
-      <a href="/redeem" class="btn btn-primary" role="button">Redeem Rewards points</a>
+      	<a href="/redeem" class="btn btn-primary" role="button">Redeem Rewards points</a>
   		<a href="/Customer-ordertype-view" class="btn btn-primary" role="button">Return to Order</a>
   		<a href="/pay" class="btn btn-primary" role="button">Checkout</a>
 	</div>

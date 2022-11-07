@@ -25,6 +25,7 @@ public class Orders {
     private String date;
     private float price;
     private String instructions;
+    private String status;
     
     @ManyToOne
 	@JoinColumn(name="restaurant")
@@ -110,6 +111,14 @@ public class Orders {
 
 	public void setCustomer_id(Customers customer_id) {
 		this.customer_id = customer_id;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
 	

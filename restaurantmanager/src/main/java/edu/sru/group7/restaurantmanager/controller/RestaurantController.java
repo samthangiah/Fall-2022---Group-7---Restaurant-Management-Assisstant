@@ -144,8 +144,9 @@ public class RestaurantController {
 		this.logRepo = logRepo;
 		isLoggedIn = false;
 	}
-    
-    public boolean GetIsLoggedIn() {
+
+
+	public boolean GetIsLoggedIn() {
     	return isLoggedIn;
     }
     
@@ -524,6 +525,7 @@ public class RestaurantController {
 		order.setItems(item);
 		order.setInstructions("instructions");
 		order.setRestaurant(restaurant2);
+		order.setStatus("Completed");
 
 		orderRepo.save(order);
 		
@@ -812,20 +814,24 @@ public class RestaurantController {
 	
 	@RequestMapping("/Customer-cart-view")
 	public String viewCart(Model model) {
+		float finalPrice = 0;
+		
 		List<CartItems> cartItems = cartItemsRepo.findByCustomer(getLoggedInUser());
 
 		model.addAttribute("listCart",cartItems);
-		float total = 0f;
 		Iterator<CartItems> it = cartItems.iterator();
 		while(it.hasNext()) {
 			CartItems cartItem = it.next();
 
-			float currPrice = cartItem.getMenu_id().getPrice() * cartItem.getQuantity();
-			total = total + currPrice;
+			//abcdefg
+			finalPrice = finalPrice + (cartItem.getMenu_id().getPrice() * cartItem.getQuantity());
 		}
-		String roundOff = String.format("%.2f", total);
+		String roundOff = String.format("%.2f", finalPrice);
 		String displayTotal = "$" + roundOff;
 		model.addAttribute("totalprice", displayTotal);
+		
+		Orders order = new Orders();
+		model.addAttribute("Order", order);
 		return "Customer/cart";
 	}
 	
@@ -1542,11 +1548,12 @@ public class RestaurantController {
 			log.setTime(time.format(LocalDateTime.now()));
 			log.setLocation(getUserLocation());
 			log.setUserId(getUserUID());
-			log.setAction("Delete order");
+			log.setAction("Complete order");
 			log.setActionId(order.getId());
 			logRepo.save(log);
+			order.setStatus("Completed");
 
-			orderRepo.delete(order);
+			orderRepo.save(order);
 			return "redirect:/servingstaffview";
 		}
 
@@ -1554,6 +1561,7 @@ public class RestaurantController {
 		public String showServerView(Model model) {
 			model.addAttribute("orders", orderRepo.findOrdersByLocation(getUserLocation()));
 			model.addAttribute("menu", menuRepo.findAll());
+			//TO-DO make output of orders more neat
 			return "LocalServingStaff/serving-staff-view";
 		}
 
@@ -1678,9 +1686,7 @@ public class RestaurantController {
 		@RequestMapping({"/manager-inventory-view"})
 		public String showInventoryView(Model model) {
 			
-			int user = getUserLocation();
-			
-			model.addAttribute("inventoryList", inventoryRepo.findInventoryRestaurant(user));
+			model.addAttribute("inventoryList", inventoryRepo.findInventoryRestaurant(getUserUID()));
 			
 			return "LocalManager/manager-inventory-view";
 		}
@@ -2064,6 +2070,13 @@ public class RestaurantController {
 			PaymentDetails details = new PaymentDetails();
 			details.buildFromForm(form);
 			
+			Orders order = orderRepo.findByCustomerIdUnpaid(getUserUID());
+			removeFromInventory(order);
+			order.setStatus("Paid");
+			orderRepo.save(order);
+			
+			deleteCartItems();
+			
 			//add payment gateway such as stripe to handle payment processing
 			//if (payment can be processed) {
 				paymentDetailsRepo.delete(details);
@@ -2073,6 +2086,13 @@ public class RestaurantController {
 			//	paymentDetailsRepo.delete(details);
 			//	return "redirect:/pay";
 			//}
+		}
+		
+		public void deleteCartItems() {
+			Customers customer = getLoggedInUser();
+			List<CartItems> cartItems = cartItemsRepo.findByCustomer(customer);
+			
+			cartItemsRepo.deleteAll(cartItems);
 		}
 		
 		@GetMapping({"/addtoorder/{id}"})
@@ -2116,6 +2136,98 @@ public class RestaurantController {
 				cartItem.setQuantity(null);
 			}
 			return cartItem;
+		}
+		
+		
+		@RequestMapping({"/addNewOrder"})
+		public String custAddOrder(Orders order) {
+			
+			//initialize final Price
+			float finalPrice = 0;
+			//Need to add a custom user for every guest order. Store them in some local variable when creating new Order
+			//Need function to create temp customer user for guest order so it can be added to incrementally.
+			List<CartItems> cartItems = cartItemsRepo.findByCustomer(getLoggedInUser());
+			Iterator<CartItems> cartIt = cartItems.iterator();
+			Set<Menu> menuItems = new HashSet<Menu>();
+			
+			
+			//Orders order = new Orders();
+			order.setCustomer_id(getLoggedInUser());
+			order.setDate(date.format(LocalDateTime.now()));
+			order.setPrice(0);
+			
+			while(cartIt.hasNext()) {
+				CartItems cartItem = cartIt.next();
+				menuItems.add(cartItem.getMenu_id());
+				finalPrice = finalPrice + (cartItem.getMenu_id().getPrice() * cartItem.getQuantity());
+				
+			}
+			order.setItems(menuItems);
+			order.setPrice(finalPrice);
+			order.setStatus("Pending Payment");
+			orderRepo.save(order);
+			
+			Customers orderCustomer = getLoggedInUser();
+			if (orderCustomer != null) {
+				if (orderCustomer.getRewardsMember() == true) {
+					System.out.println("--------------------------------------------------------------------------------------------------");
+					System.out.println(order.getPrice());
+					//For every $10 spent per order, cust is awarded with 1 rewards point
+					int rewards = (int) order.getPrice() / 10;
+					System.out.println("rewards earned: " + rewards);
+					rewards += orderCustomer.getRewardsAvailable();
+					
+					orderCustomer.setRewardsAvailable(rewards);
+					customerRepo.save(orderCustomer);
+				}
+			}
+			return "redirect:/pay";
+		}
+		
+		public void removeFromInventory(Orders order) {
+			Set<Menu> items = order.getItems();
+			Iterator<Menu> it = items.iterator();
+			
+			//finds restaurant corresponding to order
+			Restaurants restaurant = new Restaurants();
+			restaurant.setId(order.getRestaurant().getId());
+			
+			//find inventory corresponding to restaurant
+			List<Inventory> inventoryList = inventoryRepo.findInventoryRestaurant(restaurant.getId());
+			
+			//iterate over all menu ID's for order
+			while(it.hasNext()) {
+				Menu menu = it.next();
+				//find ingredients for menu item and add it to an array and then create an iterator for array
+				Ingredients menuIngredients = ingredientsRepo.findByMenuItem(menu.getId());
+				try {
+					Vector ingredientList = menuIngredients.getIngredient();
+					Iterator ingredientIT = ingredientList.iterator();
+					//iterate over each ingredient for a menu item
+					while(ingredientIT.hasNext()) {
+						String ingredient = ingredientIT.next().toString();
+						//Create inventoryiterator so it resets per new ingredient to top of list
+						Iterator<Inventory> inventoryIT = inventoryList.iterator();
+						//iterate over each inventory item to compare current ingredient to selected ingredient in Repo
+						while(inventoryIT.hasNext()) {
+							Inventory inventory = inventoryIT.next();
+							System.out.println("--------------------------------------------------------------------------------------------------");
+							System.out.println(inventory.getIngredient() + " get ingredient");
+							System.out.println(ingredient + " ingredient");
+							if(inventory.getIngredient().compareTo(ingredient) == 0) {
+								System.out.println(inventory.getIngredient() + " is equal to " + ingredient);
+								inventory.setQuantity(inventory.getQuantity() - 1);
+								inventoryRepo.save(inventory);
+								break;
+							}
+						}
+					}
+				}
+				catch(Exception e){
+					System.out.println("No ingredients for Menu Item");
+				}
+				
+			}
 		}
 		
 		@PostMapping({"/addorder"})
