@@ -2112,6 +2112,9 @@ public class RestaurantController {
 			cartItem.setMenu_id(menu);
 			cartItem.setQuantity(1);
 			
+			if (menu.getId() == -1) {
+				cartItem.setQuantity(null);
+			}
 			return cartItem;
 		}
 		
@@ -2153,26 +2156,33 @@ public class RestaurantController {
 				totalPrice += menu.getPrice();
 				//find ingredients for menu item and add it to an array and then create an iterator for array
 				Ingredients menuIngredients = ingredientsRepo.findByMenuItem(menu.getId());
-				Vector ingredientList = menuIngredients.getIngredient();
-				Iterator ingredientIT = ingredientList.iterator();
-				//iterate over each ingredient for a menu item
-				while(ingredientIT.hasNext()) {
-					String ingredient = ingredientIT.next().toString();
-					//Create inventoryiterator so it resets per new ingredient to top of list
-					Iterator<Inventory> inventoryIT = inventoryList.iterator();
-					//iterate over each inventory item to compare current ingredient to selected ingredient in Repo
-					while(inventoryIT.hasNext()) {
-						Inventory inventory = inventoryIT.next();
-						System.out.println("--------------------------------------------------------------------------------------------------");
-						System.out.println(inventory.getIngredient() + " get ingredient");
-						System.out.println(ingredient + " ingredient");
-						if(inventory.getIngredient().compareTo(ingredient) == 0) {
-							System.out.println(inventory.getIngredient() + " is equal to " + ingredient);
-							inventory.setQuantity(inventory.getQuantity() - 1);
-							inventoryRepo.save(inventory);
+				try {
+					Vector ingredientList = menuIngredients.getIngredient();
+					Iterator ingredientIT = ingredientList.iterator();
+					//iterate over each ingredient for a menu item
+					while(ingredientIT.hasNext()) {
+						String ingredient = ingredientIT.next().toString();
+						//Create inventoryiterator so it resets per new ingredient to top of list
+						Iterator<Inventory> inventoryIT = inventoryList.iterator();
+						//iterate over each inventory item to compare current ingredient to selected ingredient in Repo
+						while(inventoryIT.hasNext()) {
+							Inventory inventory = inventoryIT.next();
+							System.out.println("--------------------------------------------------------------------------------------------------");
+							System.out.println(inventory.getIngredient() + " get ingredient");
+							System.out.println(ingredient + " ingredient");
+							if(inventory.getIngredient().compareTo(ingredient) == 0) {
+								System.out.println(inventory.getIngredient() + " is equal to " + ingredient);
+								inventory.setQuantity(inventory.getQuantity() - 1);
+								inventoryRepo.save(inventory);
+								break;
+							}
 						}
 					}
 				}
+				catch(Exception e){
+					System.out.println("No ingredients for Menu Item");
+				}
+				
 			}
 			order.setPrice(totalPrice);
 			orderRepo.save(order);

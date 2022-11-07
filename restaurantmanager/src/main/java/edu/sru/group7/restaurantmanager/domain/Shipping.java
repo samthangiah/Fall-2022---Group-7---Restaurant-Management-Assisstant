@@ -26,5 +26,7 @@ public class Shipping {
 	
 	private List<Inventory> inventory;
 	
+	private String explanation;
+	
 	
 }*/
