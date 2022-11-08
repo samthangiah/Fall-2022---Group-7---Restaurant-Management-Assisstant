@@ -79,6 +79,7 @@ table, th, td {
 								<th>Name</th>
 								<th>Price</th>
 								<th>Quantity</th>
+								<th>Edit</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -87,6 +88,7 @@ table, th, td {
 								<td th:text="${cart.menu_id.name}"></td>
 								<td th:text="${cart.menu_id.price}"></td>
 								<td th:text="${cart.quantity}"></td>
+								<td><a th:href="@{/editcart/{id}(id=${cart.id})}">Remove from cart</a></td>
 							</tr>
 						</th:block>
 							<tr>
@@ -112,7 +114,7 @@ table, th, td {
     						<br>
     						<div class="btn-group">
       							<a href="/redeem" class="btn btn-primary" role="button">Redeem Rewards points</a>
-  								<a href="/Customer-ordertype-view" class="btn btn-primary" role="button">Return to Order</a>
+  								<a href="/Customer-ordertype-view" class="btn btn-primary" role="button">Add more items to order</a>
   								<!--  <a href="/pay" class="btn btn-primary" role="button">Checkout</a>-->
 							</div>
 							<br>

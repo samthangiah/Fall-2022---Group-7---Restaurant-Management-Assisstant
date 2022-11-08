@@ -2073,12 +2073,14 @@ public class RestaurantController {
 			PaymentDetails details = new PaymentDetails();
 			details.buildFromForm(form);
 			
-			Orders order = orderRepo.findByCustomerIdUnpaid(getUserUID());
-			removeFromInventory(order);
-			order.setStatus("Paid");
-			orderRepo.save(order);
-			
-			deleteCartItems();
+			if (getLoggedInUser() != null) {
+				Orders order = orderRepo.findByCustomerIdUnpaid(getUserUID());
+				removeFromInventory(order);
+				order.setStatus("Paid");
+				orderRepo.save(order);
+				
+				deleteCartItems();
+			}
 			
 			//add payment gateway such as stripe to handle payment processing
 			//if (payment can be processed) {
@@ -2089,6 +2091,14 @@ public class RestaurantController {
 			//	paymentDetailsRepo.delete(details);
 			//	return "redirect:/pay";
 			//}
+		}
+		
+		@GetMapping("/editcart/{id}")
+		public String deleteCartItem(@PathVariable("id") long id, Model model) {
+			CartItems item = cartItemsRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid cartItems Id:" + id));
+			cartItemsRepo.delete(item);
+			
+			return "redirect:/Customer-cart-view";
 		}
 		
 		public void deleteCartItems() {
@@ -2124,9 +2134,7 @@ public class RestaurantController {
 			return "Customer/orderpage";
 			}
 		
-		
 		private CartItems createNewOrder(long id, CartItems cartItem) {
-			
 			Customers cust = getLoggedInUser();
 			Menu menu = menuRepo.findById(id)
 					.orElseThrow(() -> new IllegalArgumentException("Invalid menu Id:" + id));
@@ -2141,11 +2149,10 @@ public class RestaurantController {
 			return cartItem;
 		}
 		
-		
 		@RequestMapping({"/addNewOrder"})
 		public String custAddOrder(Orders order) {
 			if (orderRepo.findByCustomerIdUnpaid(getUserUID()) != null) {
-				return "redirect:pay";
+				return "redirect:/pay";
 			}
 			float finalPrice = 0;
 			//Need function to create temp customer user for guest order so it can be added to incrementally.
