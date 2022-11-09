@@ -728,7 +728,7 @@ public class RestaurantController {
     	ApplicationUser user = (ApplicationUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     	//Redirect user to staff page of highest authority
     	if (user.getAuthorities().toString().contains("ROLE_HQADMIN")) {
-    		return "redirect:/HQadmin-log-view";
+    		return "redirect:/hqlogadminview";
 		}
     	if (user.getAuthorities().toString().contains("ROLE_HQMANAGER")) {
     		return "redirect:/HQ-manager-view";
@@ -916,7 +916,7 @@ public class RestaurantController {
 	 * @param customer
 	 * @param result
 	 * @param model
-	 * @return home page. Saves Updated customer data.
+	 * @return loggedinhome page & Saves Updated customer data.
 	 */
 	@PostMapping("/usercustomerupdate/{id}")
 	public String userUpdateCust(@PathVariable("id") long id, @Validated Customers customer, BindingResult result,
@@ -937,22 +937,6 @@ public class RestaurantController {
 
 		customerRepo.save(customer);
 		return "redirect:/loggedinhome";
-	}
-	
-	/**
-	 * @return HQ admin home page
-	 */
-	@RequestMapping({ "/HQ-admin-view" })
-	public String showHQAdminPage() {
-		return "HQAdmin/HQ-admin-view";
-	}
-
-	/**
-	 * @return 
-	 */
-	@RequestMapping({ "/HQadmin-locations-view" })
-	public String showLocationsPage() {
-		return "HQAdmin/HQadmin-locations-view";
 	}
 
 	// local admin home page
@@ -995,74 +979,115 @@ public class RestaurantController {
 		return "LocalAdmin/admin-cust-view";
 	}
 
-	// HQ admin local admins view
+	/**
+	 * @param model
+	 * @return HQadmin-admin-view. HQ Administrators view of all admins
+	 */
 	@RequestMapping({ "/HQadmin-admin-view" })
 	public String showAdminList(Model model) {
 		model.addAttribute("admins", adminRepo.findAll());
 		return "HQAdmin/HQadmin-admin-view";
 	}
 
-	// HQ admin offices view
+	/**
+	 * @param model
+	 * @return HQadmin-offices-view. HQ administrators view of all offices
+	 */
 	@RequestMapping({ "/HQadmin-offices-view" })
 	public String showOfficesList(Model model) {
 		model.addAttribute("offices", officeRepo.findAll());
 		return "HQAdmin/HQadmin-offices-view";
 	}
 
-	// HQ admin restaurants view
+	/**
+	 * @param model
+	 * @return HQadmin-restaurants-view. HQ administrators view of all restaurants
+	 */
 	@RequestMapping({ "/HQadmin-restaurants-view" })
 	public String showRestaurantList(Model model) {
 		model.addAttribute("restaurants", restaurantRepo.findAll());
 		return "HQAdmin/HQadmin-restaurants-view";
 	}
 
-	// HQ admin warehouses view
+	/**
+	 * @param model
+	 * @return HQadmin-warehouses-view. HQ Administrators view of all warehouses
+	 */
 	@RequestMapping({ "/HQadmin-warehouses-view" })
 	public String showWarehouseList(Model model) {
 		model.addAttribute("warehouses", warehouseRepo.findAll());
 		return "HQAdmin/HQadmin-warehouses-view";
 	}
 
-	// add customer view
+	/**
+	 * @param customer
+	 * @return add-customer. Local Administrators add customer page
+	 */
 	@RequestMapping({ "/custsignup" })
 	public String showCustSignUpForm(Customers customer) {
 		return "LocalAdmin/add-customer";
 	}
 
-	// add server view
+	/**
+	 * @param server
+	 * @return add-server. Local Administrators add server page
+	 */
 	@RequestMapping({ "/serversignup" })
 	public String showServerSignUpForm(Servers server) {
 		return "LocalAdmin/add-server";
 	}
 
-	// add manager view
+	/**
+	 * @param manager
+	 * @return add-LFmanager. Local Administrators add Local Manager page.
+	 */
 	@RequestMapping({ "/mansignup" })
 	public String showManagerSignUpForm(Managers manager) {
 		return "LocalAdmin/add-LFmanager";
 	}
 
-	// add local admin view
+	/**
+	 * @param admin
+	 * @return add-LFadmin. HQ administrators add local admin page
+	 */
 	@RequestMapping({ "/adminsignup" })
 	public String showAdminSignUpForm(Admins admin) {
 		return "HQAdmin/add-LFadmin";
 	}
 
+	/**
+	 * @param office
+	 * @return add-office. HQ administrators add office page
+	 */
 	@RequestMapping({ "/officesignup" })
 	public String showOfficeSignUpForm(Offices office) {
 		return "HQAdmin/add-office";
 	}
 
+	/**
+	 * @param restaurant
+	 * @return add-restaurant. HQ administrators add restaurant page
+	 */
 	@RequestMapping({ "/restaurantsignup" })
 	public String showRestaurantSignUpForm(Restaurants restaurant) {
 		return "HQAdmin/add-restaurant";
 	}
 
+	/**
+	 * @param warehouse
+	 * @return add-warehouse. HQ administrators add warehouse page
+	 */
 	@RequestMapping({ "/warehousesignup" })
 	public String showWarehouseSignUpForm(Warehouses warehouse) {
 		return "HQAdmin/add-warehouse";
 	}
 
-	// Mapping for the /signup URL - to add a user
+	/**
+	 * @param customers
+	 * @param result
+	 * @param model
+	 * @return admin-cust-view & Saves the new customer.
+	 */
 	@RequestMapping({ "/addcustomer" })
 	public String addCust(@Validated Customers customers, BindingResult result, Model model) {
 		if (result.hasErrors()) {
