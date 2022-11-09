@@ -196,6 +196,9 @@ public class RestaurantController {
 		return (float) testCell.getNumericCellValue();
 	}
 	
+	/**
+	 * @throws IOException Loads Menu from excel sheet and adds into Menu POJO
+	 */
 	public void loadMenu() throws IOException {
 		// TODO Auto-generated method stub
 		
@@ -254,6 +257,11 @@ public class RestaurantController {
 		 wb.close();
 	}
 	
+	/** 
+	 * @param filepath Ingredients excel filepath
+	 * @param id
+	 * @throws IOException Loads all Ingredients for each menu Items and adds to Restaurant inventory
+	 */
 	public void loadIngredients(String filepath, Restaurants id) throws IOException {
 		
 		FileInputStream thisxls;
@@ -285,6 +293,11 @@ public class RestaurantController {
 		 wb.close();
 	}
 
+	/**
+	 * @param filepath Ingredients excel filepath
+	 * @param id
+	 * @throws IOException Loads all Ingredients for each menu Items and adds to Warehouse inventory
+	 */
 	public void loadIngredients(String filepath, Warehouses id) throws IOException {
 	
 	FileInputStream thisxls;
@@ -318,6 +331,9 @@ public class RestaurantController {
 	 wb.close();
 	}
 	
+	/**
+	 * @throws IOException Default Ingredients loader
+	 */
 	public void loadIngredients() throws IOException {
 		FileInputStream thisxls;
 		 XSSFWorkbook wb;
@@ -558,6 +574,9 @@ public class RestaurantController {
     
     
     //index page
+	/**
+	 * @return index page
+	 */
     @RequestMapping({"/"})
     public String homePage() {
     	return "Guest/index";
@@ -582,18 +601,22 @@ public class RestaurantController {
     	model.addAttribute("listMenu", availablemenu);
     }
     
-    //403 Error page
+    /**
+     * 403 Error page
+     */
     @GetMapping("/403")
 	public String error403() {
 		return "SignIn/403";
 	}
     
+    //Do we use this?
     @RequestMapping({"/signin"})
     public String signIn() {
     	SetIsLoggedIn(true);
 		return "redirect:/loggedinhome";
     }
     
+    //Do we use this?
     @RequestMapping({"/employeelogin"})
     public String tempEmployeeLoginPage() {
     	SetIsLoggedIn(true);
@@ -601,6 +624,7 @@ public class RestaurantController {
     	return "redirect:/temploginpage";
     }
     
+    //Do we use this?
     @GetMapping("/loggedinhome")
 	public String loggedIn() {
 		return "Customer/loggedinhome";
@@ -688,6 +712,9 @@ public class RestaurantController {
     	}
     }
     
+    /**
+     * @return Menu page
+     */
     @RequestMapping({"/showmenu"})
     public String showMenu() {
     	if (getLoggedInUser() == null) {
@@ -701,7 +728,7 @@ public class RestaurantController {
     	ApplicationUser user = (ApplicationUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     	//Redirect user to staff page of highest authority
     	if (user.getAuthorities().toString().contains("ROLE_HQADMIN")) {
-    		return "redirect:/HQ-admin-view";
+    		return "redirect:/HQadmin-log-view";
 		}
     	if (user.getAuthorities().toString().contains("ROLE_HQMANAGER")) {
     		return "redirect:/HQ-manager-view";
@@ -726,6 +753,10 @@ public class RestaurantController {
     	return "employeesignin";
     }*/
     
+    /**
+     * @param model
+     * @return Update Password page
+     */
     @GetMapping("/changeuserpass")
 	public String showUpdatePassForm(Model model) {
 		Customers customer = getLoggedInUser();
@@ -737,6 +768,13 @@ public class RestaurantController {
 		return "Customer/update-password";
 	}
 
+    /**
+     * @param id Customer Id
+     * @param customer Customer POJO
+     * @param result
+     * @param model
+     * @return loggedin page
+     */
 	@PostMapping("/updateuserpass/{id}")
 	public String updatePass(@PathVariable("id") long id, @Validated Customers customer, BindingResult result,
 			Model model) {
@@ -758,11 +796,21 @@ public class RestaurantController {
 		return "redirect:/loggedinhome";
 	}
 
+	/**
+	 * @param customer
+	 * @return Registration page
+	 */
 	@RequestMapping({ "/custregistrationpage" })
 	public String showCustRegisterForm(Customers customer) {
 		return "SignIn/register";
 	}
 
+	/**
+	 * @param customers
+	 * @param result
+	 * @param model
+	 * @return login page. Saves user to Customers in DB
+	 */
 	@RequestMapping({ "/addregisteredcustomer" })
 	public String addNewCust(@Validated Customers customers, BindingResult result, Model model) {
 		if (result.hasErrors()) {
@@ -797,6 +845,9 @@ public class RestaurantController {
 		return "redirect:/login";
 	}
 	
+	/**
+	 * @return Contact us page
+	 */
 	@RequestMapping("/contact")
 	public String contactPage() {
 		if (getLoggedInUser() == null) {
@@ -805,6 +856,10 @@ public class RestaurantController {
 		return "Customer/contact";
 	}
 	
+	/**
+	 * @param model
+	 * @return Customer profile page
+	 */
 	@RequestMapping("/custviewinfo")
 	public String infoPage(Model model) {
 		Customers user = getLoggedInUser();
@@ -815,6 +870,10 @@ public class RestaurantController {
 		return "Customer/custviewinfo";
 	}
 	
+	/**
+	 * @param model
+	 * @return Customer Cart page
+	 */
 	@RequestMapping("/Customer-cart-view")
 	public String viewCart(Model model) {
 		float finalPrice = 0;
@@ -838,6 +897,11 @@ public class RestaurantController {
 		return "Customer/cart";
 	}
 	
+	/**
+	 * @param id Customer ID
+	 * @param model
+	 * @return Customer profile edit page.
+	 */
 	@GetMapping("/editcustomer/{id}")
 	public String userShowUpdateCustForm(@PathVariable("id") long id, Model model) {
 		Customers customer = customerRepo.findById(id)
@@ -847,6 +911,13 @@ public class RestaurantController {
 		return "Customer/editprofile";
 	}
 
+	/**
+	 * @param id
+	 * @param customer
+	 * @param result
+	 * @param model
+	 * @return home page. Saves Updated customer data.
+	 */
 	@PostMapping("/usercustomerupdate/{id}")
 	public String userUpdateCust(@PathVariable("id") long id, @Validated Customers customer, BindingResult result,
 			Model model) {
@@ -868,13 +939,17 @@ public class RestaurantController {
 		return "redirect:/loggedinhome";
 	}
 	
-	// HQ admin home page
+	/**
+	 * @return HQ admin home page
+	 */
 	@RequestMapping({ "/HQ-admin-view" })
 	public String showHQAdminPage() {
 		return "HQAdmin/HQ-admin-view";
 	}
 
-	// HQ admin all 3 locations view
+	/**
+	 * @return 
+	 */
 	@RequestMapping({ "/HQadmin-locations-view" })
 	public String showLocationsPage() {
 		return "HQAdmin/HQadmin-locations-view";
