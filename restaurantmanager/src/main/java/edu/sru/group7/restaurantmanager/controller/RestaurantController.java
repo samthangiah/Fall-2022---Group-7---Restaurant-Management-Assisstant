@@ -428,9 +428,7 @@ public class RestaurantController {
     	
     	listadmins.add(admin);
     	listadmins.add(admin2);
-    	
-    	//String address, String zipcode, String city
-    	
+    	    	
     	adminRepo.save(admin);
     	adminRepo.save(admin2);
     	
@@ -731,13 +729,13 @@ public class RestaurantController {
     		return "redirect:/hqlogadminview";
 		}
     	if (user.getAuthorities().toString().contains("ROLE_HQMANAGER")) {
-    		return "redirect:/HQ-manager-view";
+    		return "redirect:/hqlogview";
 		}
     	if (user.getAuthorities().toString().contains("ROLE_ADMIN")) {
-    		return "redirect:/local-admin-view";
+    		return "redirect:/logadminview";
 		}
     	if (user.getAuthorities().toString().contains("ROLE_MANAGER")) {
-    		return "redirect:/local-manager-view";
+    		return "redirect:/logview";
 		}
     	if (user.getAuthorities().toString().contains("ROLE_SERVER")) {
     		return "redirect:/servingstaffview";
@@ -747,11 +745,6 @@ public class RestaurantController {
 		}
 		return "SignIn/temploginpage";
 	}
-    
-    /*@RequestMapping({"/employeesignin"})
-    public String employeeSignIn() {
-    	return "employeesignin";
-    }*/
     
     /**
      * @param model
@@ -816,16 +809,6 @@ public class RestaurantController {
 		if (result.hasErrors()) {
 			return "SignIn/register";
 		}
-		
-		/*ApplicationUser newCustUser = new ApplicationUser(
-				customers.getEmail(),
-				fakeApplicationUserDaoService.encode(customers.getPassword()),
-				ApplicationUserRole.CUSTOMER.getGrantedAuthorities(),
-				true,
-				true,
-				true,
-				true);
-		*/
 
 		Log log = new Log();
 		log.setDate(date.format(LocalDateTime.now()));
@@ -937,12 +920,6 @@ public class RestaurantController {
 
 		customerRepo.save(customer);
 		return "redirect:/loggedinhome";
-	}
-
-	// local admin home page
-	@RequestMapping({ "/local-admin-view" })
-	public String showAdminPage() {
-		return "LocalAdmin/local-admin-view";
 	}
 
 	@RequestMapping({ "/order-placement/cust-order" })
@@ -1230,7 +1207,8 @@ public class RestaurantController {
 		log.setAction("Add new restaurant");
 		log.setActionId(restaurant.getId());
 		logRepo.save(log);
-
+		restaurant.setSales(0);
+		
 		restaurantRepo.save(restaurant);
 		try {
 			loadIngredients(ingredientFP, restaurant);
@@ -1670,6 +1648,7 @@ public class RestaurantController {
 
 		@GetMapping("/servingstaffviewview")
 		public String showLocalManServerView(Model model) {
+			//get all orders paid
 			model.addAttribute("orders", orderRepo.findAll());
 			model.addAttribute("menu", menuRepo.findAll());
 			return "LocalManager/manager-server-view-view";
@@ -1788,8 +1767,10 @@ public class RestaurantController {
 		
 		@RequestMapping({"/manager-inventory-view"})
 		public String showInventoryView(Model model) {
+			Managers manager = managerRepo.findById(getUserUID())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid admin Id:" + getUserUID()));
 			
-			model.addAttribute("inventoryList", inventoryRepo.findInventoryRestaurant(getUserUID()));
+			model.addAttribute("inventoryList", inventoryRepo.findInventoryRestaurant(manager.getRestaurant().getId()));
 			
 			return "LocalManager/manager-inventory-view";
 		}
@@ -2176,6 +2157,7 @@ public class RestaurantController {
 			if (getLoggedInUser() != null) {
 				Orders order = orderRepo.findByCustomerIdUnpaid(getUserUID());
 				removeFromInventory(order);
+				addToSales(order);
 				order.setStatus("Paid");
 				orderRepo.save(order);
 				
@@ -2193,6 +2175,14 @@ public class RestaurantController {
 			//}
 		}
 		
+		private void addToSales(Orders order) {
+			Restaurants restaurant = order.getRestaurant();
+			restaurant.setSales(restaurant.getSales() + order.getPrice());
+			restaurantRepo.save(restaurant);
+			
+		}
+
+
 		@GetMapping("/editcart/{id}")
 		public String deleteCartItem(@PathVariable("id") long id, Model model) {
 			CartItems item = cartItemsRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid cartItems Id:" + id));
@@ -2277,6 +2267,7 @@ public class RestaurantController {
 			order.setStatus("Pending Payment");
 			orderRepo.save(order);
 			
+			//change this to a /pay method
 			Customers orderCustomer = getLoggedInUser();
 			if (orderCustomer != null) {
 				if (orderCustomer.getRewardsMember() == true) {
@@ -2340,7 +2331,7 @@ public class RestaurantController {
 			}
 		}
 		
-		@PostMapping({"/addorder"})
+		/**@PostMapping({"/addorder"})
 		public String custAddOrder(@Validated Orders order, BindingResult result, Model model) {
 			if (result.hasErrors()) {
 				return "Customer/orderpage";
@@ -2427,6 +2418,7 @@ public class RestaurantController {
 			
       		return "redirect:/pay";
 		}
+		*/
 		
 		@RequestMapping({"/redeem"})
 		public String redeemRewards() {
