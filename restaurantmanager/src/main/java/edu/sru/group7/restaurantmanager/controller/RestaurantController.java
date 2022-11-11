@@ -767,35 +767,6 @@ public class RestaurantController {
 	}
 
 	/**
-	 * @param model
-	 * @return cart. Shows the current cart of the logged in user. Grabs each
-	 *         menuItem price and adds to finalPrice to display total price. Creates
-	 *         New order instance to pass as a model attribute.
-	 */
-	@RequestMapping("/Customer-cart-view")
-	public String viewCart(Model model) {
-		float finalPrice = 0;
-
-		List<CartItems> cartItems = cartItemsRepo.findByCustomer(getLoggedInUser());
-
-		model.addAttribute("listCart", cartItems);
-		Iterator<CartItems> it = cartItems.iterator();
-		while (it.hasNext()) {
-			CartItems cartItem = it.next();
-
-			// abcdefg
-			finalPrice = finalPrice + (cartItem.getMenu_id().getPrice() * cartItem.getQuantity());
-		}
-		String roundOff = String.format("%.2f", finalPrice);
-		String displayTotal = "$" + roundOff;
-		model.addAttribute("totalprice", displayTotal);
-
-		Orders order = new Orders();
-		model.addAttribute("Order", order);
-		return "Customer/cart";
-	}
-
-	/**
 	 * @param id    Customer ID
 	 * @param model
 	 * @return editprofile. Shows edit profile page for current logged in user.
@@ -2271,6 +2242,7 @@ public class RestaurantController {
 			
 			removeFromInventory(order);
 			order.setStatus("Paid");
+			addToSales(order);
 			orderRepo.save(order);
 			deleteCartItems();
 			
@@ -2507,6 +2479,52 @@ public class RestaurantController {
 			return "redirect:/pay";
 		}
 		
+		public void removeFromInventory(Orders order) {
+			Set<Menu> items = order.getItems();
+			Iterator<Menu> it = items.iterator();
+			
+			//finds restaurant corresponding to order
+			Restaurants restaurant = new Restaurants();
+			restaurant.setId(order.getRestaurant().getId());
+			
+			//find inventory corresponding to restaurant
+			List<Inventory> inventoryList = inventoryRepo.findInventoryRestaurant(restaurant.getId());
+			
+			//iterate over all menu ID's for order
+			while(it.hasNext()) {
+				Menu menu = it.next();
+				//find ingredients for menu item and add it to an array and then create an iterator for array
+				Ingredients menuIngredients = ingredientsRepo.findByMenuItem(menu.getId());
+				try {
+					Vector ingredientList = menuIngredients.getIngredient();
+					Iterator ingredientIT = ingredientList.iterator();
+					//iterate over each ingredient for a menu item
+					while(ingredientIT.hasNext()) {
+						String ingredient = ingredientIT.next().toString();
+						//Create inventoryiterator so it resets per new ingredient to top of list
+						Iterator<Inventory> inventoryIT = inventoryList.iterator();
+						//iterate over each inventory item to compare current ingredient to selected ingredient in Repo
+						while(inventoryIT.hasNext()) {
+							Inventory inventory = inventoryIT.next();
+							System.out.println("--------------------------------------------------------------------------------------------------");
+							System.out.println(inventory.getIngredient() + " get ingredient");
+							System.out.println(ingredient + " ingredient");
+							if(inventory.getIngredient().compareTo(ingredient) == 0) {
+								System.out.println(inventory.getIngredient() + " is equal to " + ingredient);
+								inventory.setQuantity(inventory.getQuantity() - 1);
+								inventoryRepo.save(inventory);
+								break;
+							}
+						}
+					}
+				}
+				catch(Exception e){
+					System.out.println("No ingredients for Menu Item");
+				}
+				
+			}
+		}
+		
 		/**@PostMapping({"/addorder"})
 		public String custAddOrder(@Validated Orders order, BindingResult result, Model model) {
 			if (result.hasErrors()) {
@@ -2620,23 +2638,16 @@ public class RestaurantController {
 					cartItemsRepo.save(new CartItems(discount, user, 1));
 
 				}
-				// Discount is 10% of order, rounded to 2 decimal places
-				float discountPrice = Math.round((price / 10) * 100.0) / 100.0F;
-
-				Menu discount = new Menu();
-				discount.setId(-1);
-				discount.setName("Rewards discount");
-				discount.setAvailability(false);
-				// Price set to negative so that it is subtracted
-				discount.setPrice(0 - discountPrice);
-				menuRepo.save(discount);
-
-				cartItemsRepo.save(new CartItems(discount, getLoggedInUser(), 1));
-			}
 		}
 
 		return "redirect:/Customer-cart-view";
-	}
+		}
+	
+		@GetMapping("/rewardsinfo")
+		public String custRewardsInfo(Model model) {
+			model.addAttribute("customers", getLoggedInUser());
+			return "Customer/rewards";
+		}	
 	
 	/*
 	 * @return Customer object for hardcoded guest customer of id -1
