@@ -73,11 +73,10 @@ table, th, td {
         						<th></th>
         						<th>Date</th>
         						<th>Price</th>
+        						<th>Menu Items</th>
         						<th>Customer</th>
         						<th></th>
-        						<th>Menu Items</th>
         						<th>Special Instructions</th>
-        						<th>Location</th>
     						</tr>
     					</thead>
     					<tbody>
@@ -86,11 +85,13 @@ table, th, td {
         						<td><a th:href="@{/deleteorder/{id}(id=${order.id})}">Delete order</a></td>
         						<td th:text="${order.date}"></td>
         						<td th:text="${order.price}"></td>
-        						<td th:text="${order.customer_id}"></td>
-        						<td><a th:href="@{/serverviewcustinfo/{id}(id=${order.customer_id})}">View info and rewards</a></td>
         						<td th:text="${order.items}"></td>
-        						<td th:text="${order.instructions}"></td>
-        						<td th:text="${order.restaurant}"></td>
+        						<td th:if="${order?.customer_id}" th:text="${order.customer_id}"></td>
+        						<td th:unless="${order?.customer_id}"><p>Guest</p></td>
+        						<td th:if="${order.customer_id?.id}"><a th:href="@{/serverviewcustinfo/{id}(id=${order.customer_id.id})}">View info and rewards</a></td>
+        						<td th:unless="${order.customer_id?.id}"><p></p></td>
+        						<td th:if="${order.instructions} != ''" th:text="${order.instructions}"></td>
+        						<td th:unless="${order.instructions} != ''"><p>None</p></td>
     						</tr>
     					</tbody>
 					</table>

@@ -63,18 +63,17 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-
 @Controller
 /**
  * Restaurant Controller class for the entire Restaurant Management Assistant
  */
 public class RestaurantController {
-    
-    DateTimeFormatter date = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    DateTimeFormatter time = DateTimeFormatter.ofPattern("HH:mm:ss");
-    
-    private boolean isLoggedIn;
-    
+
+	DateTimeFormatter date = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+	DateTimeFormatter time = DateTimeFormatter.ofPattern("HH:mm:ss");
+
+	private boolean isLoggedIn;
+
 	@Autowired
 	private CustomerRepository customerRepo;
 
@@ -83,64 +82,56 @@ public class RestaurantController {
 
 	@Autowired
 	private ServerRepository serverRepo;
-	
+
 	@Autowired
 	private OrderRepository orderRepo;
-	
+
 	@Autowired
 	private MenuRepository menuRepo;
-	
+
 	@Autowired
-    private LogRepository logRepo;
-	
+	private LogRepository logRepo;
+
 	@Autowired
 	private AdminRepository adminRepo;
-	
-	@Autowired 
+
+	@Autowired
 	private OfficeRepository officeRepo;
-	
-	@Autowired 
+
+	@Autowired
 	private WarehouseRepository warehouseRepo;
-	
-	@Autowired 
+
+	@Autowired
 	private RestaurantRepository restaurantRepo;
-	
+
 	@Autowired
 	private InventoryRepository inventoryRepo;
 
 	@Autowired
 	private PaymentDetailsRepository paymentDetailsRepo;
 
-	@Autowired 
+	@Autowired
 	private IngredientsRepository ingredientsRepo;
-	
-	@Autowired 
+
+	@Autowired
 	private CartItemsRepository cartItemsRepo;
-	
+
 	private final String menuFP = "src/main/resources/Menu.xlsx";
-	
+
 	private final String ingredientFP = "src/main/resources/Ingredients.xlsx";
-	
+
 	private FakeApplicationUserDaoService fakeApplicationUserDaoService;
 
-	//create an UserRepository instance - instantiation (new) is done by Spring
-    public RestaurantController(IngredientsRepository ingredientsRepo,
-    							RestaurantRepository restaurantRepo,
-    							WarehouseRepository warehouseRepo,
-    							CartItemsRepository cartItemsRepo,
-    							InventoryRepository inventoryRepo,
-    							OfficeRepository officeRepo,
-    							CustomerRepository customerRepo, 
-    							ManagerRepository managerRepo,
-    							ServerRepository serverRepo, 
-    							OrderRepository orderRepo,
-    							MenuRepository menuRepo,
-    							LogRepository logRepo) {
-    	this.ingredientsRepo = ingredientsRepo;
-    	this.restaurantRepo = restaurantRepo;
-    	this.warehouseRepo = warehouseRepo;
-    	this.cartItemsRepo = cartItemsRepo;
-    	this.inventoryRepo = inventoryRepo;
+	// create an UserRepository instance - instantiation (new) is done by Spring
+	public RestaurantController(IngredientsRepository ingredientsRepo, RestaurantRepository restaurantRepo,
+			WarehouseRepository warehouseRepo, CartItemsRepository cartItemsRepo, InventoryRepository inventoryRepo,
+			OfficeRepository officeRepo, CustomerRepository customerRepo, ManagerRepository managerRepo,
+			ServerRepository serverRepo, OrderRepository orderRepo, MenuRepository menuRepo, LogRepository logRepo) {
+		this.ingredientsRepo = ingredientsRepo;
+		this.restaurantRepo = restaurantRepo;
+		this.warehouseRepo = warehouseRepo;
+		this.cartItemsRepo = cartItemsRepo;
+		this.inventoryRepo = inventoryRepo;
 		this.customerRepo = customerRepo;
 		this.managerRepo = managerRepo;
 		this.serverRepo = serverRepo;
@@ -161,174 +152,161 @@ public class RestaurantController {
     }
 
 	public boolean GetIsLoggedIn() {
-    	return isLoggedIn;
-    }
-    
-    public void SetIsLoggedIn(boolean isLoggedIn) {
-    	this.isLoggedIn = isLoggedIn;
-    }
-    
-    
-    static String checkStringType(XSSFCell testCell)
-	{
-		if(testCell.getCellType() == CellType.NUMERIC)
-		{
-			return Integer.toString((int)testCell.getNumericCellValue());
+		return isLoggedIn;
+	}
+
+	public void SetIsLoggedIn(boolean isLoggedIn) {
+		this.isLoggedIn = isLoggedIn;
+	}
+
+	static String checkStringType(XSSFCell testCell) {
+		if (testCell.getCellType() == CellType.NUMERIC) {
+			return Integer.toString((int) testCell.getNumericCellValue());
 		}
-		if(testCell.getCellType() == CellType.BLANK)
-		{
+		if (testCell.getCellType() == CellType.BLANK) {
 			return null;
 		}
 		return testCell.getStringCellValue();
 	}
-	static int checkIntType(XSSFCell testCell)
-	{
-		if(testCell.getCellType() == CellType.STRING)
-		{
+
+	static int checkIntType(XSSFCell testCell) {
+		if (testCell.getCellType() == CellType.STRING) {
 			return Integer.parseInt(testCell.getStringCellValue());
 		}
-		if(testCell.getCellType() == CellType.BLANK)
-		{
+		if (testCell.getCellType() == CellType.BLANK) {
 			return (Integer) null;
 		}
-		return (int)testCell.getNumericCellValue();
+		return (int) testCell.getNumericCellValue();
 	}
-	
-	static float checkFloatType(XSSFCell testCell)
-	{
-		if(testCell.getCellType() == CellType.STRING)
-		{
+
+	static float checkFloatType(XSSFCell testCell) {
+		if (testCell.getCellType() == CellType.STRING) {
 			return Integer.parseInt(testCell.getStringCellValue());
 		}
-		if(testCell.getCellType() == CellType.BLANK)
-		{
+		if (testCell.getCellType() == CellType.BLANK) {
 			return (Float) null;
 		}
 		return (float) testCell.getNumericCellValue();
 	}
-	
+
 	/**
 	 * @throws IOException Loads Menu from excel sheet and adds into Menu POJO
 	 */
 	public void loadMenu() throws IOException {
 		// TODO Auto-generated method stub
-		
-		/*File test=new File("check.txt");
-		if (test.createNewFile()) {
-		    System.out.println("File created: " + test.getName());
-		  }*/
-		
-		
+
+		/*
+		 * File test=new File("check.txt"); if (test.createNewFile()) {
+		 * System.out.println("File created: " + test.getName()); }
+		 */
+
 		FileInputStream thisxls;
-		 XSSFWorkbook wb;
-		 XSSFSheet sheet;
-		 XSSFRow curRow;
+		XSSFWorkbook wb;
+		XSSFSheet sheet;
+		XSSFRow curRow;
 
 		thisxls = new FileInputStream("src/main/resources/Menu.xlsx");
 		wb = new XSSFWorkbook(thisxls);
-		 sheet = wb.getSheetAt(0);
-		 
-		 Ingredients ingredient;
-		 
-		 int count = 0;
-		 
-		 curRow = sheet.getRow(count);
-		 
-		 Menu menus = new Menu();
-		 
-		 while(curRow.getRowNum() < sheet.getLastRowNum())
-		 {
-			 count++;
-			 curRow = sheet.getRow(count);
-				menus.setId(checkIntType(curRow.getCell(0))); 
-				System.out.println("Got ID");
-				menus.setName(checkStringType(curRow.getCell(1)));
-				System.out.println("Got Name");
-				menus.setEntree(checkStringType(curRow.getCell(2)));
-				System.out.println("Got Entree");
-				menus.setSides(checkStringType(curRow.getCell(3)));
-				System.out.println("Got Sides");
-				menus.setPrice(checkFloatType(curRow.getCell(4)));
-				System.out.println("Got Price");
-				menus.setAvailability(true);
-				System.out.println("Got Availability");
-				menus.setQuantity(checkIntType(curRow.getCell(6)));
-				System.out.println("Got Quantity");
-				menuRepo.save(menus);
-				
-				
-				try {
-				 	ingredient = ingredientsRepo.findById((long) count)
-				 			.orElseThrow(() -> new IllegalArgumentException("Invalid Ingredient Id:"));
-				 	ingredient.setMenu(menus);
-				 	ingredientsRepo.save(ingredient);
-				 	}
-				 	catch(Exception e) {}
-		 }
-		 wb.close();
-	}
-	
-	/** 
-	 * @param filepath Ingredients excel filepath
-	 * @param id
-	 * @throws IOException Loads all Ingredients for each menu Items and adds to Restaurant inventory
-	 */
-	public void loadIngredients(String filepath, Restaurants id) throws IOException {
-		
-		FileInputStream thisxls;
-		 XSSFWorkbook wb;
-		 XSSFSheet sheet;
-		 XSSFRow curRow;
+		sheet = wb.getSheetAt(0);
 
-		thisxls = new FileInputStream(filepath);
-		wb = new XSSFWorkbook(thisxls);
-		 sheet = wb.getSheetAt(0);
-		 
-		 int count = 0;
-		 curRow = sheet.getRow(count);
-		 
-		 while(curRow.getRowNum() < sheet.getLastRowNum())
-		 {
-			 count++;
-			 curRow = sheet.getRow(count);
-			 Inventory inventory = new Inventory();
-				inventory.setIngredient(checkStringType(curRow.getCell(1)));
-				System.out.println("Got Ingredient");
-				inventory.setQuantity(checkIntType(curRow.getCell(2)));
-				System.out.println("Got Quantity");
-				inventory.setRestaurant_id(id);
+		Ingredients ingredient;
 
-				inventoryRepo.save(inventory);
-			 
-		 }
-		 wb.close();
+		int count = 0;
+
+		curRow = sheet.getRow(count);
+
+		Menu menus = new Menu();
+
+		while (curRow.getRowNum() < sheet.getLastRowNum()) {
+			count++;
+			curRow = sheet.getRow(count);
+			menus.setId(checkIntType(curRow.getCell(0)));
+			System.out.println("Got ID");
+			menus.setName(checkStringType(curRow.getCell(1)));
+			System.out.println("Got Name");
+			menus.setEntree(checkStringType(curRow.getCell(2)));
+			System.out.println("Got Entree");
+			menus.setSides(checkStringType(curRow.getCell(3)));
+			System.out.println("Got Sides");
+			menus.setPrice(checkFloatType(curRow.getCell(4)));
+			System.out.println("Got Price");
+			menus.setAvailability(true);
+			System.out.println("Got Availability");
+			menus.setQuantity(checkIntType(curRow.getCell(6)));
+			System.out.println("Got Quantity");
+			menuRepo.save(menus);
+
+			try {
+				ingredient = ingredientsRepo.findById((long) count)
+						.orElseThrow(() -> new IllegalArgumentException("Invalid Ingredient Id:"));
+				ingredient.setMenu(menus);
+				ingredientsRepo.save(ingredient);
+			} catch (Exception e) {
+			}
+		}
+		wb.close();
 	}
 
 	/**
 	 * @param filepath Ingredients excel filepath
 	 * @param id
-	 * @throws IOException Loads all Ingredients for each menu Items and adds to Warehouse inventory
+	 * @throws IOException Loads all Ingredients for each menu Items and adds to
+	 *                     Restaurant inventory
+	 */
+	public void loadIngredients(String filepath, Restaurants id) throws IOException {
+
+		FileInputStream thisxls;
+		XSSFWorkbook wb;
+		XSSFSheet sheet;
+		XSSFRow curRow;
+
+		thisxls = new FileInputStream(filepath);
+		wb = new XSSFWorkbook(thisxls);
+		sheet = wb.getSheetAt(0);
+
+		int count = 0;
+		curRow = sheet.getRow(count);
+
+		while (curRow.getRowNum() < sheet.getLastRowNum()) {
+			count++;
+			curRow = sheet.getRow(count);
+			Inventory inventory = new Inventory();
+			inventory.setIngredient(checkStringType(curRow.getCell(1)));
+			System.out.println("Got Ingredient");
+			inventory.setQuantity(checkIntType(curRow.getCell(2)));
+			System.out.println("Got Quantity");
+			inventory.setRestaurant_id(id);
+
+			inventoryRepo.save(inventory);
+
+		}
+		wb.close();
+	}
+
+	/**
+	 * @param filepath Ingredients excel filepath
+	 * @param id
+	 * @throws IOException Loads all Ingredients for each menu Items and adds to
+	 *                     Warehouse inventory
 	 */
 	public void loadIngredients(String filepath, Warehouses id) throws IOException {
-	
-	FileInputStream thisxls;
-	 XSSFWorkbook wb;
-	 XSSFSheet sheet;
-	 XSSFRow curRow;
 
-	thisxls = new FileInputStream(filepath);
-	wb = new XSSFWorkbook(thisxls);
-	 sheet = wb.getSheetAt(0);
-	 
-	 int count = 0;
-	 curRow = sheet.getRow(count);
-	 
-	 
-	 while(curRow.getRowNum() < sheet.getLastRowNum())
-	 {
-		 count++;
-		 Inventory inventory = new Inventory();
-		 curRow = sheet.getRow(count);
+		FileInputStream thisxls;
+		XSSFWorkbook wb;
+		XSSFSheet sheet;
+		XSSFRow curRow;
+
+		thisxls = new FileInputStream(filepath);
+		wb = new XSSFWorkbook(thisxls);
+		sheet = wb.getSheetAt(0);
+
+		int count = 0;
+		curRow = sheet.getRow(count);
+
+		while (curRow.getRowNum() < sheet.getLastRowNum()) {
+			count++;
+			Inventory inventory = new Inventory();
+			curRow = sheet.getRow(count);
 			inventory.setIngredient(checkStringType(curRow.getCell(1)));
 			System.out.println("Got Ingredient");
 			inventory.setQuantity(checkIntType(curRow.getCell(2)));
@@ -336,167 +314,120 @@ public class RestaurantController {
 			inventory.setWarehouse_id(id);
 
 			inventoryRepo.save(inventory);
-		 
-	 }
-	 
-	 wb.close();
+
+		}
+
+		wb.close();
 	}
-	
+
 	/**
 	 * @throws IOException Default Ingredients loader
 	 */
 	public void loadIngredients() throws IOException {
 		FileInputStream thisxls;
-		 XSSFWorkbook wb;
-		 XSSFSheet sheet;
-		 XSSFRow curRow;
+		XSSFWorkbook wb;
+		XSSFSheet sheet;
+		XSSFRow curRow;
 
 		thisxls = new FileInputStream("src/main/resources/MenuIngredients.xlsx");
 		wb = new XSSFWorkbook(thisxls);
-		 sheet = wb.getSheetAt(0);
-		 
-		 int i = 0;
-		 
-		 curRow = sheet.getRow(i);
-		 
-		 while(curRow.getRowNum() < sheet.getLastRowNum())
-		 {
-			 i++;
-			 int j = 2;
-			 Vector ingredientsList = new Vector();
-			 Ingredients ingredient = new Ingredients();
-			 curRow = sheet.getRow(i);
-			 ingredient.setId(checkIntType(curRow.getCell(0)));
-			 System.out.println("Got ID");
-			 while (curRow.getLastCellNum() > j) {
-			 	String tempIngredient = checkStringType(curRow.getCell(j));
-			 	ingredientsList.add(tempIngredient);
-			 	System.out.println("Got Ingredient");
-			 	j++;
-			 }
-			 ingredient.setIngredient(ingredientsList);
-			 
-			 ingredientsRepo.save(ingredient);
-			 
-		 }
-		 wb.close();
+		sheet = wb.getSheetAt(0);
+
+		int i = 0;
+
+		curRow = sheet.getRow(i);
+
+		while (curRow.getRowNum() < sheet.getLastRowNum()) {
+			i++;
+			int j = 2;
+			Vector ingredientsList = new Vector();
+			Ingredients ingredient = new Ingredients();
+			curRow = sheet.getRow(i);
+			ingredient.setId(checkIntType(curRow.getCell(0)));
+			System.out.println("Got ID");
+			while (curRow.getLastCellNum() > j) {
+				String tempIngredient = checkStringType(curRow.getCell(j));
+				ingredientsList.add(tempIngredient);
+				System.out.println("Got Ingredient");
+				j++;
+			}
+			ingredient.setIngredient(ingredientsList);
+
+			ingredientsRepo.save(ingredient);
+
+		}
+		wb.close();
 	}
-	
+
 	@PostConstruct
 	public void loadData() {
-		
-		System.out.println("--------------------------------------------------------------------------------------------------------------------------------------------------------" + "\n");
+
+		System.out.println(
+				"--------------------------------------------------------------------------------------------------------------------------------------------------------"
+						+ "\n");
 		System.out.println("STARTING TO CREATE THE DATABASE" + "\n" + "\n");
-		
+
 		customerRepo.deleteAll();
-    	adminRepo.deleteAll();
-    	managerRepo.deleteAll();
-    	serverRepo.deleteAll();
-    	officeRepo.deleteAll();
-    	restaurantRepo.deleteAll();
-    	warehouseRepo.deleteAll();
-    	orderRepo.deleteAll();
-    	menuRepo.deleteAll();
-    	
-    	Customers guest = new Customers("Guest",
-    			"",
-    			"Guest",
-    			"",
-    			0,
-    			false,
-    			0,
-    			0);
-    	guest.setId(-1);
-    	customerRepo.save(guest);
-    	
-    	Offices office = new Offices("100 Central Loop",
-    			"16057",
-    			"Slippery Rock",
-    			"PA");
-    	
-    	Warehouses warehouse = new Warehouses("150 Branchton Road",
-    			"16057",
-    			"Slippery Rock",
-    			"PA");
-    	
-    	List<Admins> listadmins = new ArrayList<>();
-    	
-    	officeRepo.save(office);
-    	
-    	warehouseRepo.save(warehouse);
-    	
-    	Admins admin = new Admins("Darth",
-    			"Vader",
-    			"Administrator@email.com",
-    			"pass",
-    			office); 
-    	
-    	Admins admin2 = new Admins("Kylo",
-    			"Ren",
-    			"Administrator2@email.com",
-    			"pass",
-    			office);
-    	
-    	listadmins.add(admin);
-    	listadmins.add(admin2);
-    	    	
-    	adminRepo.save(admin);
-    	adminRepo.save(admin2);
-    	
-    	Restaurants restaurant = new Restaurants("100 Arrowhead Drive",
-    			"16057",
-    			"Slippery Rock",
-    			"PA",
-    			admin2);
-    	
-    	Restaurants restaurant2 = new Restaurants("1 Vineyard Circle",
-    			"16057",
-    			"Slippery Rock",
-    			"PA",
-    			admin);
-    	
-    	restaurantRepo.save(restaurant);
-    	restaurantRepo.save(restaurant2);
-    	
-    	Offices office2 = new Offices("1620 East Maiden",
-    			"16057",
-    			"Slippery Rock",
-    			"PA",
-    			listadmins);
-    	
-    	Managers manager = new Managers("Anakin",
-    			"Skywalker",
-    			"Manager@email.com",
-    			"pass",
-    			restaurant); //restaurant is 2
-    	
-    	Managers manager2 = new Managers("Luke",
-    			"Skywalker",
-    			"Manager2@email.com",
-    			"pass",
-    			restaurant2);
-    	
-    	Servers server = new Servers("Obi-wan",
-    			"Kenobi",
-    			"server@email.com",
-    			"pass",
-    			restaurant); 
-    	
-    	Servers server2 = new Servers("Baby",
-    			"Yoda",
-    			"server2@email.com",
-    			"pass",
-    			restaurant2); 
-    	
-    	managerRepo.save(manager);
-    	managerRepo.save(manager2);
-    	serverRepo.save(server);
-    	serverRepo.save(server2);
-    	
-    	officeRepo.save(office2);
-    	
-    	try {
-    		loadIngredients();
+		adminRepo.deleteAll();
+		managerRepo.deleteAll();
+		serverRepo.deleteAll();
+		officeRepo.deleteAll();
+		restaurantRepo.deleteAll();
+		warehouseRepo.deleteAll();
+		orderRepo.deleteAll();
+		menuRepo.deleteAll();
+
+		Customers guest = new Customers("Guest", "", "Guest", "", 0, false, 0, 0);
+		guest.setId(-1);
+		customerRepo.save(guest);
+
+		Offices office = new Offices("100 Central Loop", "16057", "Slippery Rock", "PA");
+
+		Warehouses warehouse = new Warehouses("150 Branchton Road", "16057", "Slippery Rock", "PA");
+
+		List<Admins> listadmins = new ArrayList<>();
+
+		officeRepo.save(office);
+
+		warehouseRepo.save(warehouse);
+
+		Admins admin = new Admins("Darth", "Vader", "Administrator@email.com", "pass", office);
+
+		Admins admin2 = new Admins("Kylo", "Ren", "Administrator2@email.com", "pass", office);
+
+		listadmins.add(admin);
+		listadmins.add(admin2);
+
+		adminRepo.save(admin);
+		adminRepo.save(admin2);
+
+		Restaurants restaurant = new Restaurants("100 Arrowhead Drive", "16057", "Slippery Rock", "PA", admin2);
+
+		Restaurants restaurant2 = new Restaurants("1 Vineyard Circle", "16057", "Slippery Rock", "PA", admin);
+
+		restaurantRepo.save(restaurant);
+		restaurantRepo.save(restaurant2);
+
+		Offices office2 = new Offices("1620 East Maiden", "16057", "Slippery Rock", "PA", listadmins);
+
+		Managers manager = new Managers("Anakin", "Skywalker", "Manager@email.com", "pass", restaurant); // restaurant
+																											// is 2
+
+		Managers manager2 = new Managers("Luke", "Skywalker", "Manager2@email.com", "pass", restaurant2);
+
+		Servers server = new Servers("Obi-wan", "Kenobi", "server@email.com", "pass", restaurant);
+
+		Servers server2 = new Servers("Baby", "Yoda", "server2@email.com", "pass", restaurant2);
+
+		managerRepo.save(manager);
+		managerRepo.save(manager2);
+		serverRepo.save(server);
+		serverRepo.save(server2);
+
+		officeRepo.save(office2);
+
+		try {
+			loadIngredients();
 			loadMenu();
 			loadIngredients(ingredientFP, warehouse);
 			loadIngredients(ingredientFP, restaurant);
@@ -505,30 +436,16 @@ public class RestaurantController {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-    	
-    	//Customer objects for hardcoded logins
-    	Customers samThangiah = new Customers("sam",
-    			"thangiah",
-    			"sam",
-    			"thangiah",
-    			0,
-    			false,
-    			0,
-    			1);
-    	
-    	Customers hqManager = new Customers("hq",
-    			"manager",
-    			"hqmanager@email.com",
-    			"pass",
-    			0,
-    			false,
-    			0,
-    			1);
 
-    	customerRepo.save(samThangiah);
-    	customerRepo.save(hqManager);
-    	
-    	Orders order = new Orders();
+		// Customer objects for hardcoded logins
+		Customers samThangiah = new Customers("sam", "thangiah", "sam", "thangiah", 0, false, 0, 1);
+
+		Customers hqManager = new Customers("hq", "manager", "hqmanager@email.com", "pass", 0, false, 0, 1);
+
+		customerRepo.save(samThangiah);
+		customerRepo.save(hqManager);
+
+		Orders order = new Orders();
 		Customers cust = new Customers();
 
 		cust.setEmail("customer@email.com");
@@ -538,15 +455,15 @@ public class RestaurantController {
 		cust.setPassword("password");
 		cust.setRewardsMember(true);
 		cust.setRewardsAvailable(10);
-		
+
 		customerRepo.save(cust);
-		
+
 		Set item = new HashSet();
-		
+
 		item.add(menuRepo.findById((long) 1).get());
 		item.add(menuRepo.findById((long) 2).get());
 		item.add(menuRepo.findById((long) 3).get());
-		
+
 		order.setDate(date.format(LocalDateTime.now()));
 		order.setPrice(0.00F);
 		order.setCustomer_id(cust);
@@ -556,7 +473,7 @@ public class RestaurantController {
 		order.setStatus("Completed");
 
 		orderRepo.save(order);
-		
+
 		CartItems cartItems = new CartItems();
 		cartItems.setMenu_id(menuRepo.findById((long) 1).get());
 		cartItems.setCustomer_id(cust);
@@ -575,193 +492,178 @@ public class RestaurantController {
 		cartItemsRepo.save(cartItems);
 		cartItemsRepo.save(cartItems2);
 		cartItemsRepo.save(cartItems3);
-    	
-    	System.out.println("---------------------------------------------------------------------------------------------------------------------------");
+
+		System.out.println(
+				"---------------------------------------------------------------------------------------------------------------------------");
 		System.out.println("DATABASE CREATED" + "\n" + "\n");
-		
+
 	}
-    
-    
-    //index page
+
+	// index page
 	/**
 	 * @return index page
 	 */
-    @RequestMapping({"/"})
-    public String homePage() {
-    	return "Guest/index";
-    }
-    
-    @ModelAttribute
-    public void addAttributes(Model model) {
-    	List<Restaurants> listrestaurants = (List<Restaurants>) restaurantRepo.findAll();
-    	model.addAttribute("listRestaurants", listrestaurants);
-    	List<Admins> listadmins = (List<Admins>) adminRepo.findAll();
-    	model.addAttribute("listAdmins", listadmins);
-    	List<Offices> listoffices = (List<Offices>) officeRepo.findAll();
-    	model.addAttribute("listOffices", listoffices);
-    	List<Menu> listmenu = (List<Menu>) menuRepo.findAll();
-    	//Only display menu items that are available
-    	List<Menu> availablemenu = new ArrayList<Menu>();
-    	for (Menu m : listmenu) {
-    		if (m.getAvailability() == true) {
-    			availablemenu.add(m);
-    		}
-    	}
-    	model.addAttribute("listMenu", availablemenu);
-    }
-    
-    /**
-     * 403 Error page
-     */
-    @GetMapping("/403")
+	@RequestMapping({ "/" })
+	public String homePage() {
+		return "Guest/index";
+	}
+
+	@ModelAttribute
+	public void addAttributes(Model model) {
+		List<Restaurants> listrestaurants = (List<Restaurants>) restaurantRepo.findAll();
+		model.addAttribute("listRestaurants", listrestaurants);
+		List<Admins> listadmins = (List<Admins>) adminRepo.findAll();
+		model.addAttribute("listAdmins", listadmins);
+		List<Offices> listoffices = (List<Offices>) officeRepo.findAll();
+		model.addAttribute("listOffices", listoffices);
+		List<Menu> listmenu = (List<Menu>) menuRepo.findAll();
+		// Only display menu items that are available
+		List<Menu> availablemenu = new ArrayList<Menu>();
+		for (Menu m : listmenu) {
+			if (m.getAvailability() == true) {
+				availablemenu.add(m);
+			}
+		}
+		model.addAttribute("listMenu", availablemenu);
+	}
+
+	/**
+	 * 403 Error page
+	 */
+	@GetMapping("/403")
 	public String error403() {
 		return "SignIn/403";
 	}
-    
-    //Do we use this?
-    @RequestMapping({"/signin"})
-    public String signIn() {
-    	SetIsLoggedIn(true);
+
+	// Do we use this?
+	@RequestMapping({ "/signin" })
+	public String signIn() {
+		SetIsLoggedIn(true);
 		return "redirect:/loggedinhome";
-    }
-    
-    //Do we use this?
-    @RequestMapping({"/employeelogin"})
-    public String tempEmployeeLoginPage() {
-    	SetIsLoggedIn(true);
-    	
-    	return "redirect:/temploginpage";
-    }
-    
-    //Do we use this?
-    @GetMapping("/loggedinhome")
+	}
+
+	// Do we use this?
+	@RequestMapping({ "/employeelogin" })
+	public String tempEmployeeLoginPage() {
+		SetIsLoggedIn(true);
+
+		return "redirect:/temploginpage";
+	}
+
+	// Do we use this?
+	@GetMapping("/loggedinhome")
 	public String loggedIn() {
 		return "Customer/loggedinhome";
 	}
-    
-    //Manual credential processing to allow user registration
-    @PostMapping("/processcredentials")
-    public String processCredentials(String usernameParameter, String passwordParameter) {
-    	Optional<ApplicationUser> user = fakeApplicationUserDaoService.selectApplicationUserByUsername(usernameParameter);
-    	if (user == null) {
-    		return "/login?error";
-    	}
-    	try {
-    		ApplicationUser credentials = user.get();
-    		if (credentials.getPassword() == fakeApplicationUserDaoService.encode(passwordParameter)) {
-    			return "/temploginpage";
-    		}
-    	}
-    	catch(Exception e) {
-    	}
-    	return "/login?error";
-    }
-    
-    @RequestMapping({"/templogout"})
-    public String logout() {
-    	SetIsLoggedIn(false);
-    	//Clears authentication and invalidates HTTPsession through ApplicationSecurityConfig
-    	return "redirect:/temploginpage";
-    }
-    
-    public Customers getLoggedInUser() {
-    	if (SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString().startsWith("anonymousUser")) {
-    		return null;
-    	} else {
-    		ApplicationUser user = (ApplicationUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        	for (Customers i : customerRepo.findAll()) {
-        		if (i.getEmail().equals(user.getUsername())) {
-        			return i;
-        		}
-        	}
-        	for (Servers i : serverRepo.findAll()) {
-        		if (i.getEmail().equals(user.getUsername())) {
-        			Customers c = new Customers(i.getFirstName(),
-        					i.getLastName(),
-        					i.getEmail(),
-        					i.getPassword(),
-        					0,
-        					false,
-        					0,
-        					(int)i.getRestaurant().getId());
-        			c.setId(i.getId());
-        			return c;
-        		}
-        	}
-        	for (Managers i : managerRepo.findAll()) {
-        		if (i.getEmail().equals(user.getUsername())) {
-        			Customers c = new Customers(i.getFirstName(),
-        					i.getLastName(),
-        					i.getEmail(),
-        					i.getPassword(),
-        					0,
-        					false,
-        					0,
-        					(int)i.getRestaurant().getId());
-        			c.setId(i.getId());
-        			return c;
-        		}
-        	}
-        	for (Admins i : adminRepo.findAll()) {
-        		if (i.getEmail().equals(user.getUsername())) {
-        			Customers c = new Customers(i.getFirstName(),
-        					i.getLastName(),
-        					i.getEmail(),
-        					i.getPassword(),
-        					0,
-        					false,
-        					0,
-        					(int)i.getOffice().getId());
-        			c.setId(i.getId());
-        			return c;
-        		}
-        	}
-        	
-        	return null;
-    	}
-    }
-    
-    /**
-     * @return Menu page
-     */
-    @RequestMapping({"/showmenu"})
-    public String showMenu() {
-    	if (getLoggedInUser() == null) {
-    		return "Guest/guestmenu";
-    	}
-    	return "Customer/menupage";
-    }
-    
-    @GetMapping("/temploginpage")
+
+	// Manual credential processing to allow user registration
+	@PostMapping("/processcredentials")
+	public String processCredentials(String usernameParameter, String passwordParameter) {
+		Optional<ApplicationUser> user = fakeApplicationUserDaoService
+				.selectApplicationUserByUsername(usernameParameter);
+		if (user == null) {
+			return "/login?error";
+		}
+		try {
+			ApplicationUser credentials = user.get();
+			if (credentials.getPassword() == fakeApplicationUserDaoService.encode(passwordParameter)) {
+				return "/temploginpage";
+			}
+		} catch (Exception e) {
+		}
+		return "/login?error";
+	}
+
+	@RequestMapping({ "/templogout" })
+	public String logout() {
+		SetIsLoggedIn(false);
+		// Clears authentication and invalidates HTTPsession through
+		// ApplicationSecurityConfig
+		return "redirect:/temploginpage";
+	}
+
+	public Customers getLoggedInUser() {
+		if (SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString()
+				.startsWith("anonymousUser")) {
+			return null;
+		} else {
+			ApplicationUser user = (ApplicationUser) SecurityContextHolder.getContext().getAuthentication()
+					.getPrincipal();
+			for (Customers i : customerRepo.findAll()) {
+				if (i.getEmail().equals(user.getUsername())) {
+					return i;
+				}
+			}
+			for (Servers i : serverRepo.findAll()) {
+				if (i.getEmail().equals(user.getUsername())) {
+					Customers c = new Customers(i.getFirstName(), i.getLastName(), i.getEmail(), i.getPassword(), 0,
+							false, 0, (int) i.getRestaurant().getId());
+					c.setId(i.getId());
+					return c;
+				}
+			}
+			for (Managers i : managerRepo.findAll()) {
+				if (i.getEmail().equals(user.getUsername())) {
+					Customers c = new Customers(i.getFirstName(), i.getLastName(), i.getEmail(), i.getPassword(), 0,
+							false, 0, (int) i.getRestaurant().getId());
+					c.setId(i.getId());
+					return c;
+				}
+			}
+			for (Admins i : adminRepo.findAll()) {
+				if (i.getEmail().equals(user.getUsername())) {
+					Customers c = new Customers(i.getFirstName(), i.getLastName(), i.getEmail(), i.getPassword(), 0,
+							false, 0, (int) i.getOffice().getId());
+					c.setId(i.getId());
+					return c;
+				}
+			}
+
+			return null;
+		}
+	}
+
+	/**
+	 * @return menupage. Customers view of the menu
+	 */
+	@RequestMapping({ "/showmenu" })
+	public String showMenu() {
+		if (getLoggedInUser() == null) {
+			return "Guest/guestmenu";
+		}
+		return "Customer/menupage";
+	}
+
+	@GetMapping("/temploginpage")
 	public String staffLoginPage() {
-    	ApplicationUser user = (ApplicationUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    	//Redirect user to staff page of highest authority
-    	if (user.getAuthorities().toString().contains("ROLE_HQADMIN")) {
-    		return "redirect:/hqlogadminview";
+		ApplicationUser user = (ApplicationUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		// Redirect user to staff page of highest authority
+		if (user.getAuthorities().toString().contains("ROLE_HQADMIN")) {
+			return "redirect:/hqlogadminview";
 		}
-    	if (user.getAuthorities().toString().contains("ROLE_HQMANAGER")) {
-    		return "redirect:/hqlogview";
+		if (user.getAuthorities().toString().contains("ROLE_HQMANAGER")) {
+			return "redirect:/hqlogview";
 		}
-    	if (user.getAuthorities().toString().contains("ROLE_ADMIN")) {
-    		return "redirect:/logadminview";
+		if (user.getAuthorities().toString().contains("ROLE_ADMIN")) {
+			return "redirect:/logadminview";
 		}
-    	if (user.getAuthorities().toString().contains("ROLE_MANAGER")) {
-    		return "redirect:/logview";
+		if (user.getAuthorities().toString().contains("ROLE_MANAGER")) {
+			return "redirect:/logview";
 		}
-    	if (user.getAuthorities().toString().contains("ROLE_SERVER")) {
-    		return "redirect:/servingstaffview";
+		if (user.getAuthorities().toString().contains("ROLE_SERVER")) {
+			return "redirect:/servingstaffview";
 		}
-    	if (user.getAuthorities().toString().contains("ROLE_CUSTOMER")) {
-    		return "redirect:/loggedinhome";
+		if (user.getAuthorities().toString().contains("ROLE_CUSTOMER")) {
+			return "redirect:/loggedinhome";
 		}
 		return "SignIn/temploginpage";
 	}
-    
-    /**
-     * @param model
-     * @return Update Password page
-     */
-    @GetMapping("/changeuserpass")
+
+	/**
+	 * @param model
+	 * @return update-password. Passes current user to password change page
+	 */
+	@GetMapping("/changeuserpass")
 	public String showUpdatePassForm(Model model) {
 		Customers customer = getLoggedInUser();
 		if (customer == null) {
@@ -772,13 +674,13 @@ public class RestaurantController {
 		return "Customer/update-password";
 	}
 
-    /**
-     * @param id Customer Id
-     * @param customer Customer POJO
-     * @param result
-     * @param model
-     * @return loggedin page
-     */
+	/**
+	 * @param id       Customer Id
+	 * @param customer Customer POJO
+	 * @param result
+	 * @param model
+	 * @return loggedinhome. Updates user password and saves to Repository
+	 */
 	@PostMapping("/updateuserpass/{id}")
 	public String updatePass(@PathVariable("id") long id, @Validated Customers customer, BindingResult result,
 			Model model) {
@@ -802,7 +704,7 @@ public class RestaurantController {
 
 	/**
 	 * @param customer
-	 * @return Registration page
+	 * @return register. Shows Customer registration page.
 	 */
 	@RequestMapping({ "/custregistrationpage" })
 	public String showCustRegisterForm(Customers customer) {
@@ -813,7 +715,7 @@ public class RestaurantController {
 	 * @param customers
 	 * @param result
 	 * @param model
-	 * @return login page. Saves user to Customers in DB
+	 * @return login. Saves user entered customer information to new Customer entry.
 	 */
 	@RequestMapping({ "/addregisteredcustomer" })
 	public String addNewCust(@Validated Customers customers, BindingResult result, Model model) {
@@ -838,9 +740,9 @@ public class RestaurantController {
 		customerRepo.save(customers);
 		return "redirect:/login";
 	}
-	
+
 	/**
-	 * @return Contact us page
+	 * @return contact. Shows contact us page.
 	 */
 	@RequestMapping("/contact")
 	public String contactPage() {
@@ -849,10 +751,10 @@ public class RestaurantController {
 		}
 		return "Customer/contact";
 	}
-	
+
 	/**
 	 * @param model
-	 * @return Customer profile page
+	 * @return custviewinfo. Shows current logged in users profile information.
 	 */
 	@RequestMapping("/custviewinfo")
 	public String infoPage(Model model) {
@@ -863,11 +765,11 @@ public class RestaurantController {
 		model.addAttribute("customers", user);
 		return "Customer/custviewinfo";
 	}
-  
+
 	/**
-	 * @param id Customer ID
+	 * @param id    Customer ID
 	 * @param model
-	 * @return Customer profile edit page.
+	 * @return editprofile. Shows edit profile page for current logged in user.
 	 */
 	@GetMapping("/editcustomer/{id}")
 	public String userShowUpdateCustForm(@PathVariable("id") long id, Model model) {
@@ -883,7 +785,7 @@ public class RestaurantController {
 	 * @param customer
 	 * @param result
 	 * @param model
-	 * @return loggedinhome page & Saves Updated customer data.
+	 * @return loggedinhome. Saves the user entered information from profile edit.
 	 */
 	@PostMapping("/usercustomerupdate/{id}")
 	public String userUpdateCust(@PathVariable("id") long id, @Validated Customers customer, BindingResult result,
@@ -906,12 +808,11 @@ public class RestaurantController {
 		return "redirect:/loggedinhome";
 	}
 
-	@RequestMapping({ "/order-placement/cust-order" })
-	public String showCustOrderPage() {
-		return "cust-order";
-	}
-
-	// local admin manager view
+	/**
+	 * @param model
+	 * @return admin-man-view. Shows all current managers from the restaurants that
+	 *         the currently logged in Local Admin is assigned to.
+	 */
 	@RequestMapping({ "/admin-man-view" })
 	public String showManList(Model model) {
 		Admins admin = adminRepo.findById(getUserUID())
@@ -921,19 +822,25 @@ public class RestaurantController {
 		return "LocalAdmin/admin-man-view";
 	}
 
-	// local admin server view
+	/**
+	 * @param model
+	 * @return admin-server-view. Shows all current servers from the restaurants
+	 *         that the currently logged in Local Admin is assigned to.
+	 */
 	@RequestMapping({ "/admin-server-view" })
 	public String showServerList(Model model) {
 		Admins admin = adminRepo.findById(getUserUID())
 				.orElseThrow(() -> new IllegalArgumentException("Invalid admin Id:" + getUserUID()));
 		Restaurants restaurant = restaurantRepo.findByAdmin(admin.getId());
-		
-		
+
 		model.addAttribute("servers", serverRepo.findServerLocation(restaurant.getId()));
 		return "LocalAdmin/admin-server-view";
 	}
 
-	// local admin customer view
+	/**
+	 * @param model
+	 * @return admin-cust-view. Shows all customers to Local Admin.
+	 */
 	@RequestMapping({ "/admin-cust-view" })
 	public String showUserList(Model model) {
 		model.addAttribute("customers", customerRepo.findAll());
@@ -942,7 +849,7 @@ public class RestaurantController {
 
 	/**
 	 * @param model
-	 * @return HQadmin-admin-view. HQ Administrators view of all admins
+	 * @return HQadmin-admin-view. Shows all current Local Admins to HQ Admin
 	 */
 	@RequestMapping({ "/HQadmin-admin-view" })
 	public String showAdminList(Model model) {
@@ -952,7 +859,7 @@ public class RestaurantController {
 
 	/**
 	 * @param model
-	 * @return HQadmin-offices-view. HQ administrators view of all offices
+	 * @return HQadmin-offices-view. Shows all offices to HQ Admin
 	 */
 	@RequestMapping({ "/HQadmin-offices-view" })
 	public String showOfficesList(Model model) {
@@ -962,7 +869,7 @@ public class RestaurantController {
 
 	/**
 	 * @param model
-	 * @return HQadmin-restaurants-view. HQ administrators view of all restaurants
+	 * @return HQadmin-restaurants-view. Shows all restaurants to HQ Admin
 	 */
 	@RequestMapping({ "/HQadmin-restaurants-view" })
 	public String showRestaurantList(Model model) {
@@ -972,7 +879,7 @@ public class RestaurantController {
 
 	/**
 	 * @param model
-	 * @return HQadmin-warehouses-view. HQ Administrators view of all warehouses
+	 * @return HQadmin-warehouses-view. Shows all warehouses to HQ Admin
 	 */
 	@RequestMapping({ "/HQadmin-warehouses-view" })
 	public String showWarehouseList(Model model) {
@@ -982,7 +889,7 @@ public class RestaurantController {
 
 	/**
 	 * @param customer
-	 * @return add-customer. Local Administrators add customer page
+	 * @return add-customer. Shows add customer page to Local Admin
 	 */
 	@RequestMapping({ "/custsignup" })
 	public String showCustSignUpForm(Customers customer) {
@@ -991,7 +898,7 @@ public class RestaurantController {
 
 	/**
 	 * @param server
-	 * @return add-server. Local Administrators add server page
+	 * @return add-server. Shows add server page to Local Admin
 	 */
 	@RequestMapping({ "/serversignup" })
 	public String showServerSignUpForm(Servers server) {
@@ -1000,7 +907,7 @@ public class RestaurantController {
 
 	/**
 	 * @param manager
-	 * @return add-LFmanager. Local Administrators add Local Manager page.
+	 * @return add-LFmanager. Shows add Local Manager page to Local Admin
 	 */
 	@RequestMapping({ "/mansignup" })
 	public String showManagerSignUpForm(Managers manager) {
@@ -1009,7 +916,7 @@ public class RestaurantController {
 
 	/**
 	 * @param admin
-	 * @return add-LFadmin. HQ administrators add local admin page
+	 * @return add-LFadmin. Shows add Local Admin page to HQ Admin
 	 */
 	@RequestMapping({ "/adminsignup" })
 	public String showAdminSignUpForm(Admins admin) {
@@ -1018,7 +925,7 @@ public class RestaurantController {
 
 	/**
 	 * @param office
-	 * @return add-office. HQ administrators add office page
+	 * @return add-office. Shows add office page to HQ Admin
 	 */
 	@RequestMapping({ "/officesignup" })
 	public String showOfficeSignUpForm(Offices office) {
@@ -1047,101 +954,121 @@ public class RestaurantController {
 	 * @param customers
 	 * @param result
 	 * @param model
-	 * @return admin-cust-view & Saves the new customer.
+	 * @return admin-cust-view. Saves entered customer information from Local Admin.
+	 *         Verifies that email does not already exist in Customers table.
 	 */
 	@RequestMapping({ "/addcustomer" })
 	public String addCust(@Validated Customers customers, BindingResult result, Model model) {
 		if (result.hasErrors()) {
 			return "LocalAdmin/add-customer";
 		}
-		
+
 		try {
-		Log log = new Log();
-		log.setDate(date.format(LocalDateTime.now()));
-		log.setTime(time.format(LocalDateTime.now()));
-		if (GetIsLoggedIn()) {
-			log.setLocation(getUserLocation());
-			log.setUserId(getUserUID());
-		} else {
-			log.setLocation(customers.getLocation());
-			log.setUserId(-1);
-		}
-		log.setAction("Create new customer account");
-		log.setActionId(customers.getId());
-		logRepo.save(log);
-		
-		customerRepo.save(customers);
-		}
-		catch(Exception e) {
+			Log log = new Log();
+			log.setDate(date.format(LocalDateTime.now()));
+			log.setTime(time.format(LocalDateTime.now()));
+			if (GetIsLoggedIn()) {
+				log.setLocation(getUserLocation());
+				log.setUserId(getUserUID());
+			} else {
+				log.setLocation(customers.getLocation());
+				log.setUserId(-1);
+			}
+			log.setAction("Create new customer account");
+			log.setActionId(customers.getId());
+			logRepo.save(log);
+
+			customerRepo.save(customers);
+		} catch (Exception e) {
 			result.rejectValue("email", null, "There is already an account registered with the same email");
 			return "LocalAdmin/add-customer";
 		}
-		
+
 		return "redirect:/admin-cust-view";
 	}
 
+	/**
+	 * @param server
+	 * @param result
+	 * @param model
+	 * @return admin-server-view. Saves entered server information from Local Admin.
+	 *         Verifies email does not already exist in Servers table.
+	 */
 	@RequestMapping({ "/addserver" })
 	public String addServer(@Validated Servers server, BindingResult result, Model model) {
 		if (result.hasErrors()) {
 			return "LocalAdmin/add-server";
 		}
-		
-		try {
-		Log log = new Log();
-		log.setDate(date.format(LocalDateTime.now()));
-		log.setTime(time.format(LocalDateTime.now()));
-		log.setLocation(getUserLocation());
-		log.setUserId(getUserUID());
-		log.setAction("Create new server account");
-		log.setActionId(server.getId());
-		logRepo.save(log);
 
-		serverRepo.save(server);
-		
-		}
-		catch(Exception e) {
+		try {
+			Log log = new Log();
+			log.setDate(date.format(LocalDateTime.now()));
+			log.setTime(time.format(LocalDateTime.now()));
+			log.setLocation(getUserLocation());
+			log.setUserId(getUserUID());
+			log.setAction("Create new server account");
+			log.setActionId(server.getId());
+			logRepo.save(log);
+
+			serverRepo.save(server);
+
+		} catch (Exception e) {
 			result.rejectValue("email", null, "There is already an account registered with the same email");
 			return "LocalAdmin/add-server";
 		}
 		return "redirect:/admin-server-view";
 	}
 
+	/**
+	 * @param manager
+	 * @param result
+	 * @param model
+	 * @return add-LFmanager. Saves entered manager information from Local Admin.
+	 *         Verifies email does not already exist in Managers table.
+	 */
 	@RequestMapping({ "/addmanager" })
 	public String addManager(@Validated Managers manager, BindingResult result, Model model) {
 		if (result.hasErrors()) {
 			return "LocalAdmin/add-LFmanager";
 		}
-		
-		try {
-		Log log = new Log();
-		log.setDate(date.format(LocalDateTime.now()));
-		log.setTime(time.format(LocalDateTime.now()));
-		log.setLocation(getUserLocation());
-		log.setUserId(getUserUID());
-		log.setAction("Create new manager account");
-		log.setActionId(manager.getId());
-		logRepo.save(log);
 
-		managerRepo.save(manager);
-		
-		}
-		catch(Exception e) {
+		try {
+			Log log = new Log();
+			log.setDate(date.format(LocalDateTime.now()));
+			log.setTime(time.format(LocalDateTime.now()));
+			log.setLocation(getUserLocation());
+			log.setUserId(getUserUID());
+			log.setAction("Create new manager account");
+			log.setActionId(manager.getId());
+			logRepo.save(log);
+
+			managerRepo.save(manager);
+
+		} catch (Exception e) {
 			result.rejectValue("email", null, "There is already an account registered with the same email");
 			return "HQAdmin/add-LFmanager";
 		}
 		return "redirect:/admin-man-view";
 	}
 
+	/**
+	 * @param admin
+	 * @param result
+	 * @param model
+	 * @return HQAdmin-admin-view. Saves entered Local Admin information from HQ
+	 *         Admin. Verifies email does not already exist in Admins table. Updates
+	 *         restaurant to saved Admin.
+	 */
 	@RequestMapping({ "/addadmin" })
 	public String addAdmin(@Validated Admins admin, BindingResult result, Model model) {
-		
+
 		if (result.hasErrors()) {
 			return "HQAdmin/add-LFadmin";
 		}
 
 		try {
 			adminRepo.save(admin);
-			updateRestaurant(admin);
+			addAdminRestaurant(admin);
 			Log log = new Log();
 			log.setDate(date.format(LocalDateTime.now()));
 			log.setTime(time.format(LocalDateTime.now()));
@@ -1154,16 +1081,22 @@ public class RestaurantController {
 			result.rejectValue("email", null, "There is already an account registered with the same email");
 			return "HQAdmin/add-LFadmin";
 		}
-		
+
 		return "redirect:/HQadmin-admin-view";
 	}
 
+	/**
+	 * @param office
+	 * @param result
+	 * @param model
+	 * @return HQAdmin-offices-view. Saves entered office information from HQ Admin.
+	 */
 	@RequestMapping({ "/addoffice" })
 	public String addOffice(@Validated Offices office, BindingResult result, Model model) {
 		if (result.hasErrors()) {
 			return "HQAdmin/add-office";
 		}
-		
+
 		Log log = new Log();
 		log.setDate(date.format(LocalDateTime.now()));
 		log.setTime(time.format(LocalDateTime.now()));
@@ -1177,6 +1110,13 @@ public class RestaurantController {
 		return "redirect:/HQadmin-offices-view";
 	}
 
+	/**
+	 * @param restaurant
+	 * @param result
+	 * @param model
+	 * @return HQadmin-restaurants-view. Saves entered restaurant information from
+	 *         HQ Admin. Loads a default inventory for New Restaurants location.
+	 */
 	@RequestMapping({ "/addrestaurant" })
 	public String addRestaurant(@Validated Restaurants restaurant, BindingResult result, Model model) {
 		if (result.hasErrors()) {
@@ -1192,7 +1132,7 @@ public class RestaurantController {
 		log.setActionId(restaurant.getId());
 		logRepo.save(log);
 		restaurant.setSales(0);
-		
+
 		restaurantRepo.save(restaurant);
 		try {
 			loadIngredients(ingredientFP, restaurant);
@@ -1203,6 +1143,13 @@ public class RestaurantController {
 		return "redirect:/HQadmin-restaurants-view";
 	}
 
+	/**
+	 * @param warehouse
+	 * @param result
+	 * @param model
+	 * @return HQadmin-warehouses-view. Saves entered warehouse information from HQ
+	 *         Admin. Loads a default inventory for New Warehouses location.
+	 */
 	@RequestMapping({ "/addwarehouse" })
 	public String addWarehouse(@Validated Warehouses warehouse, BindingResult result, Model model) {
 		if (result.hasErrors()) {
@@ -1228,6 +1175,11 @@ public class RestaurantController {
 		return "redirect:/HQadmin-warehouses-view";
 	}
 
+	/**
+	 * @param id
+	 * @param model
+	 * @return update-LFadmin. Shows update admin page to HQ admin.
+	 */
 	@GetMapping("/HQadminadminedit/{id}")
 	public String showUpdateAdminForm(@PathVariable("id") long id, Model model) {
 		Admins admin = adminRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid admin Id:" + id));
@@ -1236,6 +1188,11 @@ public class RestaurantController {
 		return "HQadmin/update-LFadmin";
 	}
 
+	/**
+	 * @param id
+	 * @param model
+	 * @return update-office. Shows update office page to HQ admin.
+	 */
 	@GetMapping("/HQadminofficeedit/{id}")
 	public String showUpdateOfficeForm(@PathVariable("id") long id, Model model) {
 		Offices office = officeRepo.findById(id)
@@ -1245,6 +1202,11 @@ public class RestaurantController {
 		return "HQadmin/update-office";
 	}
 
+	/**
+	 * @param id
+	 * @param model
+	 * @return update-restaurant. Shows update restaurant page to HQ admin.
+	 */
 	@GetMapping("/HQadminrestaurantedit/{id}")
 	public String showUpdateRestaurantForm(@PathVariable("id") long id, Model model) {
 		Restaurants restaurant = restaurantRepo.findById(id)
@@ -1254,6 +1216,11 @@ public class RestaurantController {
 		return "HQadmin/update-restaurant";
 	}
 
+	/**
+	 * @param id
+	 * @param model
+	 * @return update-warehouse. Shows update warehouse page to HQ admin.
+	 */
 	@GetMapping("/HQadminwarehouseedit/{id}")
 	public String showUpdateWarehouseForm(@PathVariable("id") long id, Model model) {
 		Warehouses warehouse = warehouseRepo.findById(id)
@@ -1263,6 +1230,11 @@ public class RestaurantController {
 		return "HQadmin/update-warehouse";
 	}
 
+	/**
+	 * @param id
+	 * @param model
+	 * @return update-customer. Shows update customer page to Local Admin.
+	 */
 	// Mapping for the /edit/user URL to edit a user
 	@GetMapping("/localadmincustedit/{id}")
 	public String showUpdateCustForm(@PathVariable("id") long id, Model model) {
@@ -1273,6 +1245,11 @@ public class RestaurantController {
 		return "LocalAdmin/update-customer";
 	}
 
+	/**
+	 * @param id
+	 * @param model
+	 * @return update-server. Shows update server page to Local Admin.
+	 */
 	@GetMapping("/localadminserveredit/{id}")
 	public String showUpdateServerForm(@PathVariable("id") long id, Model model) {
 		Servers server = serverRepo.findById(id)
@@ -1282,6 +1259,11 @@ public class RestaurantController {
 		return "LocalAdmin/update-server";
 	}
 
+	/**
+	 * @param id
+	 * @param model
+	 * @return update-LFmanager. Shows update Local Manager page to Local Admin.
+	 */
 	@GetMapping("/localadminmanedit/{id}")
 	public String showUpdateManagerForm(@PathVariable("id") long id, Model model) {
 		Managers manager = managerRepo.findById(id)
@@ -1290,8 +1272,16 @@ public class RestaurantController {
 		model.addAttribute("manager", manager);
 		return "LocalAdmin/update-LFmanager";
 	}
-		
-	// Mapping for the /update/id URL to update a user
+
+	/**
+	 * @param id
+	 * @param customer
+	 * @param result
+	 * @param model
+	 * @return admin-cust-view. Saves updated customer information entered by Local
+	 *         Admin. Verifies that email information entered does not exist in
+	 *         Customers table.
+	 */
 	@PostMapping("/localadmincustupdate/{id}")
 	public String updateCust(@PathVariable("id") long id, @Validated Customers customer, BindingResult result,
 			Model model) {
@@ -1299,26 +1289,34 @@ public class RestaurantController {
 			customer.setId(id);
 			return "LocalAdmin/update-customer";
 		}
-		
-		try {
-		Log log = new Log();
-		log.setDate(date.format(LocalDateTime.now()));
-		log.setTime(time.format(LocalDateTime.now()));
-		log.setLocation(getUserLocation());
-		log.setUserId(getUserUID());
-		log.setAction("Update customer account");
-		log.setActionId(customer.getId());
-		logRepo.save(log);
 
-		customerRepo.save(customer);
-		}
-		catch (Exception e) {
+		try {
+			Log log = new Log();
+			log.setDate(date.format(LocalDateTime.now()));
+			log.setTime(time.format(LocalDateTime.now()));
+			log.setLocation(getUserLocation());
+			log.setUserId(getUserUID());
+			log.setAction("Update customer account");
+			log.setActionId(customer.getId());
+			logRepo.save(log);
+
+			customerRepo.save(customer);
+		} catch (Exception e) {
 			result.rejectValue("email", null, "There is already an account registered with the same email");
-			return "HQAdmin/add-LFadmin";
+			return "LocalAdmin/update-customer";
 		}
 		return "redirect:/admin-cust-view";
 	}
 
+	/**
+	 * @param id
+	 * @param server
+	 * @param result
+	 * @param model
+	 * @return admin-server-view. Saves updated server information entered by Local
+	 *         Admin. Verifies that email information entered does not exist in
+	 *         Servers table.
+	 */
 	@PostMapping("/localadminserverupdate/{id}")
 	public String updateServer(@PathVariable("id") long id, @Validated Servers server, BindingResult result,
 			Model model) {
@@ -1326,26 +1324,34 @@ public class RestaurantController {
 			server.setId(id);
 			return "LocalAdmin/update-server";
 		}
-		
-		try {
-		Log log = new Log();
-		log.setDate(date.format(LocalDateTime.now()));
-		log.setTime(time.format(LocalDateTime.now()));
-		log.setLocation(getUserLocation());
-		log.setUserId(getUserUID());
-		log.setAction("Update server account");
-		log.setActionId(server.getId());
-		logRepo.save(log);
 
-		serverRepo.save(server);
-		}
-		catch (Exception e) {
+		try {
+			Log log = new Log();
+			log.setDate(date.format(LocalDateTime.now()));
+			log.setTime(time.format(LocalDateTime.now()));
+			log.setLocation(getUserLocation());
+			log.setUserId(getUserUID());
+			log.setAction("Update server account");
+			log.setActionId(server.getId());
+			logRepo.save(log);
+
+			serverRepo.save(server);
+		} catch (Exception e) {
 			result.rejectValue("email", null, "There is already an account registered with the same email");
-			return "HQAdmin/add-LFadmin";
+			return "LocalAdmin/update-server";
 		}
 		return "redirect:/admin-server-view";
 	}
 
+	/**
+	 * @param id
+	 * @param manager
+	 * @param result
+	 * @param model
+	 * @return admin-manager-view. Saves updated Local Manager information entered
+	 *         by Local Admin. Verifies that email information entered does not
+	 *         exist in Managers table.
+	 */
 	@PostMapping("/localadminmanupdate/{id}")
 	public String updateManager(@PathVariable("id") long id, @Validated Managers manager, BindingResult result,
 			Model model) {
@@ -1353,26 +1359,34 @@ public class RestaurantController {
 			manager.setId(id);
 			return "LocalAdmin/update-LFmanager";
 		}
-		
-		try {
-		Log log = new Log();
-		log.setDate(date.format(LocalDateTime.now()));
-		log.setTime(time.format(LocalDateTime.now()));
-		log.setLocation(getUserLocation());
-		log.setUserId(getUserUID());
-		log.setAction("Update manager account");
-		log.setActionId(manager.getId());
-		logRepo.save(log);
 
-		managerRepo.save(manager);
-		}
-		catch (Exception e) {
+		try {
+			Log log = new Log();
+			log.setDate(date.format(LocalDateTime.now()));
+			log.setTime(time.format(LocalDateTime.now()));
+			log.setLocation(getUserLocation());
+			log.setUserId(getUserUID());
+			log.setAction("Update manager account");
+			log.setActionId(manager.getId());
+			logRepo.save(log);
+
+			managerRepo.save(manager);
+		} catch (Exception e) {
 			result.rejectValue("email", null, "There is already an account registered with the same email");
-			return "HQAdmin/add-LFadmin";
+			return "LocalAdmin/update-LFmanager";
 		}
 		return "redirect:/admin-man-view";
 	}
 
+	/**
+	 * @param id
+	 * @param admin
+	 * @param result
+	 * @param model
+	 * @return HQadmin-admin-view. Saves updated Local admin information entered by
+	 *         HQ Admin. Verifies that email information entered does not exist in
+	 *         Admins table.
+	 */
 	@PostMapping("/HQadminadminupdate/{id}")
 	public String updateAdmin(@PathVariable("id") long id, @Validated Admins admin, BindingResult result, Model model) {
 		if (result.hasErrors()) {
@@ -1381,24 +1395,31 @@ public class RestaurantController {
 		}
 
 		try {
-		Log log = new Log();
-		log.setDate(date.format(LocalDateTime.now()));
-		log.setTime(time.format(LocalDateTime.now()));
-		log.setLocation(getUserLocation());
-		log.setUserId(getUserUID());
-		log.setAction("Update admin account");
-		log.setActionId(admin.getId());
-		logRepo.save(log);
-		
-		adminRepo.save(admin);
-		}
-		catch (Exception e) {
+			Log log = new Log();
+			log.setDate(date.format(LocalDateTime.now()));
+			log.setTime(time.format(LocalDateTime.now()));
+			log.setLocation(getUserLocation());
+			log.setUserId(getUserUID());
+			log.setAction("Update admin account");
+			log.setActionId(admin.getId());
+			logRepo.save(log);
+
+			adminRepo.save(admin);
+		} catch (Exception e) {
 			result.rejectValue("email", null, "There is already an account registered with the same email");
 			return "HQAdmin/add-LFadmin";
 		}
 		return "redirect:/HQadmin-admin-view";
 	}
 
+	/**
+	 * @param id
+	 * @param office
+	 * @param result
+	 * @param model
+	 * @return HQadmin-offices-view. Saves updated office information entered by HQ
+	 *         Admin.
+	 */
 	@PostMapping("/HQadminofficeupdate/{id}")
 	public String updateOffice(@PathVariable("id") long id, @Validated Offices office, BindingResult result,
 			Model model) {
@@ -1420,6 +1441,14 @@ public class RestaurantController {
 		return "redirect:/HQadmin-offices-view";
 	}
 
+	/**
+	 * @param id
+	 * @param warehouse
+	 * @param result
+	 * @param model
+	 * @return HQadmin-warehouses-view. Saves updated warehouse information entered
+	 *         by HQ Admin.
+	 */
 	@PostMapping("/HQadminwarehouseupdate/{id}")
 	public String updateWarehouse(@PathVariable("id") long id, @Validated Warehouses warehouse, BindingResult result,
 			Model model) {
@@ -1441,6 +1470,14 @@ public class RestaurantController {
 		return "redirect:/HQadmin-warehouses-view";
 	}
 
+	/**
+	 * @param id
+	 * @param restaurant
+	 * @param result
+	 * @param model
+	 * @return HQadmin-restaurants-view. Saves updated restaurant information
+	 *         entered by HQ Admin.
+	 */
 	@PostMapping("/HQadminrestaurantupdate/{id}")
 	public String updateRestaurant(@PathVariable("id") long id, @Validated Restaurants restaurant, BindingResult result,
 			Model model) {
@@ -1461,29 +1498,58 @@ public class RestaurantController {
 		restaurantRepo.save(restaurant);
 		return "redirect:/HQadmin-restaurants-view";
 	}
-	
-	public void updateRestaurant(Admins admin) {
-		
+
+	/**
+	 * @param admin. Grabs all restaurants the admin has been assigned and updates
+	 *               their admin FK.
+	 */
+	public void addAdminRestaurant(Admins admin) {
+
 		int count = 0;
 		List<Restaurants> restaurants = admin.getRestaurant();
 		Iterator<Restaurants> iterator = restaurants.iterator();
-		
-		while(iterator.hasNext()) {
+
+		while (iterator.hasNext()) {
 			Restaurants restaurant = restaurants.get(count);
 			restaurant.setAdmin(admin);
 			restaurantRepo.save(restaurant);
 			count++;
 			iterator.next();
-	      }
-		
+		}
+
 	}
 
-	// Mapping for the /delete/id URL to delete a user
+	/**
+	 * @param admin. Removes admin assigned to restaurant so the restaurant does not
+	 *               get deleted when the admin does.
+	 */
+	public void removeAdminRestaurant(Admins admin) {
+		int count = 0;
+		List<Restaurants> restaurants = admin.getRestaurant();
+		Iterator<Restaurants> iterator = restaurants.iterator();
+
+		while (iterator.hasNext()) {
+			Restaurants restaurant = restaurants.get(count);
+			restaurant.setAdmin(null);
+			restaurantRepo.save(restaurant);
+			count++;
+			iterator.next();
+		}
+
+		admin.setRestaurant(null);
+		adminRepo.save(admin);
+	}
+
+	/**
+	 * @param id    Customer
+	 * @param model
+	 * @return admin-cust-view. Deletes customer from Customers table.
+	 */
 	@GetMapping("/localadmincustdelete/{id}")
 	public String deleteCust(@PathVariable("id") long id, Model model) {
 		Customers customer = customerRepo.findById(id)
 				.orElseThrow(() -> new IllegalArgumentException("Invalid customer Id:" + id));
-		
+
 		Log log = new Log();
 		log.setDate(date.format(LocalDateTime.now()));
 		log.setTime(time.format(LocalDateTime.now()));
@@ -1497,6 +1563,11 @@ public class RestaurantController {
 		return "redirect:/admin-cust-view";
 	}
 
+	/**
+	 * @param id    Server
+	 * @param model
+	 * @return admin-server-view. Deletes server from Servers table.
+	 */
 	@GetMapping("/localadminserverdelete/{id}")
 	public String deleteServer(@PathVariable("id") long id, Model model) {
 		Servers server = serverRepo.findById(id)
@@ -1510,11 +1581,16 @@ public class RestaurantController {
 		log.setAction("Delete server account");
 		log.setActionId(server.getId());
 		logRepo.save(log);
-			
+
 		serverRepo.delete(server);
-			return "redirect:/admin-server-view";
+		return "redirect:/admin-server-view";
 	}
 
+	/**
+	 * @param id    Manager
+	 * @param model
+	 * @return admin-man-view. Deletes manager from Managers table.
+	 */
 	@GetMapping("/localadminmandelete/{id}")
 	public String deleteManager(@PathVariable("id") long id, Model model) {
 		Managers manager = managerRepo.findById(id)
@@ -1533,6 +1609,11 @@ public class RestaurantController {
 		return "redirect:/admin-man-view";
 	}
 
+	/**
+	 * @param id    Office
+	 * @param model
+	 * @return HQadmin-offices-view. Deletes office from Offices table.
+	 */
 	@GetMapping("/HQadminofficedelete/{id}")
 	public String deleteOffice(@PathVariable("id") long id, Model model) {
 		Offices office = officeRepo.findById(id)
@@ -1551,6 +1632,11 @@ public class RestaurantController {
 		return "redirect:/HQadmin-offices-view";
 	}
 
+	/**
+	 * @param id    Restaurant
+	 * @param model
+	 * @return HQadmin-restaurants-view. Deletes restaurant from Restaurants table.
+	 */
 	@GetMapping("/HQadminrestaurantdelete/{id}")
 	public String deleteRestaurant(@PathVariable("id") long id, Model model) {
 		Restaurants restaurant = restaurantRepo.findById(id)
@@ -1569,6 +1655,11 @@ public class RestaurantController {
 		return "redirect:/HQadmin-restaurants-view";
 	}
 
+	/**
+	 * @param id    Warehouse
+	 * @param model
+	 * @return HQadmin-warehouses-view. Deletes warehouse from Warehouses table.
+	 */
 	@GetMapping("/HQadminwarehousedelete/{id}")
 	public String deleteWarehouse(@PathVariable("id") long id, Model model) {
 		Warehouses warehouse = warehouseRepo.findById(id)
@@ -1582,11 +1673,17 @@ public class RestaurantController {
 		log.setAction("Delete warehouse");
 		log.setActionId(warehouse.getId());
 		logRepo.save(log);
-			
+
 		warehouseRepo.delete(warehouse);
 		return "redirect:/HQadmin-warehouses-view";
 	}
 
+	/**
+	 * @param id    Admin
+	 * @param model
+	 * @return HQadmin-admin-view. Deletes Local Admin from Admins table. 
+	 * Removes assigned restaurant before deleting admin to avoid deleting restaurant as well. 
+	 */
 	@GetMapping("/HQadminadmindelete/{id}")
 	public String deleteAdmin(@PathVariable("id") long id, Model model) {
 		Admins admin = adminRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid admin Id:" + id));
@@ -1600,226 +1697,228 @@ public class RestaurantController {
 		log.setActionId(admin.getId());
 		logRepo.save(log);
 
+		removeAdminRestaurant(admin);
+
 		adminRepo.delete(admin);
 		return "redirect:/HQadmin-admin-view";
 	}
 
-		@GetMapping("/deleteorder/{id}")
-		public String deleteOrder(@PathVariable("id") long id, Model model) {
-			Orders order = orderRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid order Id:" + id));
+	/**
+	 * @param id	Order
+	 * @param model
+	 * @return servingstaffview. Updates selected order status to "Completed" from "Paid".
+	 */
+	@GetMapping("/deleteorder/{id}")
+	public String deleteOrder(@PathVariable("id") long id, Model model) {
+		Orders order = orderRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid order Id:" + id));
 
-			Log log = new Log();
-			log.setDate(date.format(LocalDateTime.now()));
-			log.setTime(time.format(LocalDateTime.now()));
-			log.setLocation(getUserLocation());
-			log.setUserId(getUserUID());
-			log.setAction("Complete order");
-			log.setActionId(order.getId());
-			logRepo.save(log);
-			order.setStatus("Completed");
+		Log log = new Log();
+		log.setDate(date.format(LocalDateTime.now()));
+		log.setTime(time.format(LocalDateTime.now()));
+		log.setLocation(getUserLocation());
+		log.setUserId(getUserUID());
+		log.setAction("Complete order");
+		log.setActionId(order.getId());
+		logRepo.save(log);
+		order.setStatus("Completed");
 
-			orderRepo.save(order);
+		orderRepo.save(order);
+		return "redirect:/servingstaffview";
+	}
+
+	//Do we use this
+	@GetMapping("/servingstaffview")
+	public String showServerView(Model model) {
+		model.addAttribute("orders", orderRepo.findOrdersByLocation(getUserLocation()));
+		model.addAttribute("menu", menuRepo.findAll());
+		// TO-DO make output of orders more neat
+		return "LocalServingStaff/serving-staff-view";
+	}
+
+	//Do we use this
+	@GetMapping("/servingstaffviewview")
+	public String showLocalManServerView(Model model) {
+		// get all orders paid
+		model.addAttribute("orders", orderRepo.findAll());
+		model.addAttribute("menu", menuRepo.findAll());
+		return "LocalManager/manager-server-view-view";
+	}
+
+	// I wrote this unintuitively but the pathvariable "id" is supposed to be the
+	// customer's email since
+	// order.customer is a String and you can't just do customerRepo.findByEmail()
+	// or anything like that, it
+	// only works with id so I just loop through the customers for one with a
+	// matching email to get their id
+	@GetMapping("/serverviewcustinfo/{id}")
+	public String showCustInfo(@PathVariable("id") Customers orderCust, Model model) {
+		Customers customer = customerRepo.findByEmail(orderCust.getEmail());
+		if (customer == null) {
 			return "redirect:/servingstaffview";
 		}
-
-		@GetMapping("/servingstaffview")
-		public String showServerView(Model model) {
-			model.addAttribute("orders", orderRepo.findOrdersByLocation(getUserLocation()));
-			model.addAttribute("menu", menuRepo.findAll());
-			//TO-DO make output of orders more neat
-			return "LocalServingStaff/serving-staff-view";
+		else {
+			model.addAttribute("customers", customer);
 		}
+				
+		return "LocalServingStaff/server-cust-view";
+	}
 
-		@GetMapping("/servingstaffviewview")
-		public String showLocalManServerView(Model model) {
-			//get all orders paid
-			model.addAttribute("orders", orderRepo.findAll());
-			model.addAttribute("menu", menuRepo.findAll());
-			return "LocalManager/manager-server-view-view";
-		}
+	// For guest order "view customer info and rewards" to not throw 404
+	@GetMapping("/serverviewcustinfo/")
+	public String blankCustInfo() {
+		return "redirect:/servingstaffview";
+	}
 
-		// I wrote this unintuitively but the pathvariable "id" is supposed to be the
-		// customer's email since
-		// order.customer is a String and you can't just do customerRepo.findByEmail()
-		// or anything like that, it
-		// only works with id so I just loop through the customers for one with a
-		// matching email to get their id
-		@GetMapping("/serverviewcustinfo/{id}")
-		public String showCustInfo(@PathVariable("id") String orderCust, Model model) {
-			Iterable<Customers> custs = customerRepo.findAll();
-			List<Customers> temp = new ArrayList<Customers>();
-			boolean flag = false;
-			for (Customers i : custs) {
-				if (i.getEmail().equals(orderCust)) {
-					temp.add(i);
-					flag = true;
-				}
-			}
-			if (!flag) {
-				return "redirect:/servingstaffview";
-			} else {
-				model.addAttribute("customers", temp);
-			}
-			return "LocalServingStaff/server-cust-view";
-		}
-		
-		//For guest order "view customer info and rewards" to not throw 404
-		@GetMapping("/serverviewcustinfo/")
-		public String blankCustInfo() {
-			return "redirect:/servingstaffview";
-		}
+	@GetMapping("/updatemenuitem/{id}")
+	public String showUpdateMenuItemForm(@PathVariable("id") long id, Model model) {
+		Menu item = menuRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid menu Id: " + id));
 
-		@GetMapping("/updatemenuitem/{id}")
-		public String showUpdateMenuItemForm(@PathVariable("id") long id, Model model) {
-			Menu item = menuRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid menu Id: " + id));
+		model.addAttribute("item", item);
+		return "LocalServingStaff/update-menu-item";
+	}
 
-			model.addAttribute("item", item);
+	@PostMapping("/updatemenuitem/{id}")
+	public String updateMenuItem(@PathVariable("id") long id, @Validated Menu item, BindingResult result, Model model) {
+		if (result.hasErrors()) {
+			item.setId(id);
 			return "LocalServingStaff/update-menu-item";
 		}
 
-		@PostMapping("/updatemenuitem/{id}")
-		public String updateMenuItem(@PathVariable("id") long id, @Validated Menu item, BindingResult result, Model model) {
-			if (result.hasErrors()) {
-				item.setId(id);
-				return "LocalServingStaff/update-menu-item";
+		Log log = new Log();
+		log.setDate(date.format(LocalDateTime.now()));
+		log.setTime(time.format(LocalDateTime.now()));
+		log.setLocation(getUserLocation());
+		log.setUserId(getUserUID());
+		log.setAction("Update menu item");
+		log.setActionId(item.getId());
+		logRepo.save(log);
+
+		menuRepo.save(item);
+		return "redirect:/servingstaffview";
+	}
+
+	@GetMapping("/logview")
+	public String showLog(Model model) {
+		Customers cust = getLoggedInUser();
+		if (cust == null) {
+			return "redirect:/";
+		}
+		Iterable<Log> fullLog = logRepo.findAll();
+		List<Log> localLog = new ArrayList<Log>();
+		for (Log i : fullLog) {
+			if (i.getLocation() == cust.getLocation()) {
+				localLog.add(i);
 			}
-
-			Log log = new Log();
-			log.setDate(date.format(LocalDateTime.now()));
-			log.setTime(time.format(LocalDateTime.now()));
-			log.setLocation(getUserLocation());
-			log.setUserId(getUserUID());
-			log.setAction("Update menu item");
-			log.setActionId(item.getId());
-			logRepo.save(log);
-
-			menuRepo.save(item);
-			return "redirect:/servingstaffview";
 		}
+		model.addAttribute("log", (Iterable<Log>) localLog);
+		return "LocalManager/log-view";
+	}
 
-		@GetMapping("/logview")
-		public String showLog(Model model) {
-			Customers cust = getLoggedInUser();
-			if (cust == null) {
-				return "redirect:/";
+	@GetMapping("/logadminview")
+	public String showAdminLog(Model model) {
+		Customers cust = getLoggedInUser();
+		if (cust == null) {
+			return "redirect:/";
+		}
+		Iterable<Log> fullLog = logRepo.findAll();
+		List<Log> localLog = new ArrayList<Log>();
+		for (Log i : fullLog) {
+			if (i.getLocation() == cust.getLocation()) {
+				localLog.add(i);
 			}
-			Iterable<Log> fullLog = logRepo.findAll();
-			List<Log> localLog = new ArrayList<Log>();
-			for (Log i : fullLog) {
-				if (i.getLocation() == cust.getLocation()) {
-					localLog.add(i);
-				}
-			}
-			model.addAttribute("log", (Iterable<Log>) localLog);
-			return "LocalManager/log-view";
 		}
+		model.addAttribute("log", (Iterable<Log>) localLog);
+		return "LocalAdmin/log-admin-view";
+	}
 
-		@GetMapping("/logadminview")
-		public String showAdminLog(Model model) {
-			Customers cust = getLoggedInUser();
-			if (cust == null) {
-				return "redirect:/";
-			}
-			Iterable<Log> fullLog = logRepo.findAll();
-			List<Log> localLog = new ArrayList<Log>();
-			for (Log i : fullLog) {
-				if (i.getLocation() == cust.getLocation()) {
-					localLog.add(i);
-				}
-			}
-			model.addAttribute("log", (Iterable<Log>) localLog);
-			return "LocalAdmin/log-admin-view";
-		}
+	@GetMapping("/hqlogview")
+	public String showHQLog(Model model) {
+		model.addAttribute("log", logRepo.findAll());
+		return "HQManager/hq-log-view";
+	}
 
-		@GetMapping("/hqlogview")
-		public String showHQLog(Model model) {
-			model.addAttribute("log", logRepo.findAll());
-			return "HQManager/hq-log-view";
-		}
+	@GetMapping("/hqlogadminview")
+	public String showHQAdminLog(Model model) {
+		model.addAttribute("log", logRepo.findAll());
+		return "HQAdmin/hq-admin-log-view";
+	}
 
-		@GetMapping("/hqlogadminview")
-		public String showHQAdminLog(Model model) {
-			model.addAttribute("log", logRepo.findAll());
-			return "HQAdmin/hq-admin-log-view";
-		}
+	// local manager home page
+	@RequestMapping({ "/local-manager-view" })
+	public String showManagerPage() {
+		return "LocalManager/local-manager-view";
+	}
 
-		// local manager home page
-		@RequestMapping({ "/local-manager-view" })
-		public String showManagerPage() {
-			return "LocalManager/local-manager-view";
-		}
-		
-		@RequestMapping({"/manager-inventory-view"})
-		public String showInventoryView(Model model) {
-			Managers manager = managerRepo.findById(getUserUID())
-					.orElseThrow(() -> new IllegalArgumentException("Invalid admin Id:" + getUserUID()));
-			
-			model.addAttribute("inventoryList", inventoryRepo.findInventoryRestaurant(manager.getRestaurant().getId()));
-			
-			return "LocalManager/manager-inventory-view";
-		}
+	@RequestMapping({ "/manager-inventory-view" })
+	public String showInventoryView(Model model) {
+		Managers manager = managerRepo.findById(getUserUID())
+				.orElseThrow(() -> new IllegalArgumentException("Invalid admin Id:" + getUserUID()));
 
-		@RequestMapping({ "/local-manager-view-view" })
-		public String showHQManManagerPage() {
-			return "HQManager/local-manager-view-view";
-		}
+		model.addAttribute("inventoryList", inventoryRepo.findInventoryRestaurant(manager.getRestaurant().getId()));
 
-		@RequestMapping({ "/manager-cust-view" })
-		public String localManShowUserList(Model model) {
-			
-			
-			model.addAttribute("customers", customerRepo.findAll());
-			return "LocalManager/manager-cust-view";
-		}
+		return "LocalManager/manager-inventory-view";
+	}
 
-		@GetMapping("/localmanagercustedit/{id}")
-		public String localManShowUpdateCustForm(@PathVariable("id") long id, Model model) {
-			Customers customer = customerRepo.findById(id)
-					.orElseThrow(() -> new IllegalArgumentException("Invalid customer Id:" + id));
+	@RequestMapping({ "/local-manager-view-view" })
+	public String showHQManManagerPage() {
+		return "HQManager/local-manager-view-view";
+	}
 
-			model.addAttribute("customer", customer);
-			return "LocalManager/update-customer";
-		}
-		
-		@GetMapping("/managerinventoryedit/{id}")
-		public String localManShowUpdateInventoryForm(@PathVariable("id") long id, Model model) {
-			Inventory inventory = inventoryRepo.findById(id)
-					.orElseThrow(() -> new IllegalArgumentException("Invalid inventory Id:" + id));
+	@RequestMapping({ "/manager-cust-view" })
+	public String localManShowUserList(Model model) {
 
-			model.addAttribute("inventory", inventory);
+		model.addAttribute("customers", customerRepo.findAll());
+		return "LocalManager/manager-cust-view";
+	}
+
+	@GetMapping("/localmanagercustedit/{id}")
+	public String localManShowUpdateCustForm(@PathVariable("id") long id, Model model) {
+		Customers customer = customerRepo.findById(id)
+				.orElseThrow(() -> new IllegalArgumentException("Invalid customer Id:" + id));
+
+		model.addAttribute("customer", customer);
+		return "LocalManager/update-customer";
+	}
+
+	@GetMapping("/managerinventoryedit/{id}")
+	public String localManShowUpdateInventoryForm(@PathVariable("id") long id, Model model) {
+		Inventory inventory = inventoryRepo.findById(id)
+				.orElseThrow(() -> new IllegalArgumentException("Invalid inventory Id:" + id));
+
+		model.addAttribute("inventory", inventory);
+		return "LocalManager/update-inventory";
+	}
+
+	@PostMapping("/managerinventoryupdate/{id}")
+	public String localManUpdateInventory(@PathVariable("id") long id, @Validated Inventory inventory,
+			BindingResult result, Model model) {
+		if (result.hasErrors()) {
+			inventory.setId(id);
 			return "LocalManager/update-inventory";
 		}
-			
-		@PostMapping("/managerinventoryupdate/{id}")
-		public String localManUpdateInventory(@PathVariable("id") long id, @Validated Inventory inventory, BindingResult result,
-				Model model) {
-			if (result.hasErrors()) {
-				inventory.setId(id);
-				return "LocalManager/update-inventory";
-			}
 
-			Log log = new Log();
-			log.setDate(date.format(LocalDateTime.now()));
-			log.setTime(time.format(LocalDateTime.now()));
-			log.setLocation(getUserLocation());
-			log.setUserId(getUserUID());
-			log.setAction("Update Inventory");
-			log.setActionId(inventory.getId());
-			logRepo.save(log);
-			
-			inventoryRepo.save(inventory);
-			return "redirect:/manager-inventory-view";
+		Log log = new Log();
+		log.setDate(date.format(LocalDateTime.now()));
+		log.setTime(time.format(LocalDateTime.now()));
+		log.setLocation(getUserLocation());
+		log.setUserId(getUserUID());
+		log.setAction("Update Inventory");
+		log.setActionId(inventory.getId());
+		logRepo.save(log);
+
+		inventoryRepo.save(inventory);
+		return "redirect:/manager-inventory-view";
+	}
+
+	@PostMapping("/localmanagercustupdate/{id}")
+	public String localManUpdateCust(@PathVariable("id") long id, @Validated Customers customer, BindingResult result,
+			Model model) {
+		if (result.hasErrors()) {
+			customer.setId(id);
+			return "LocalManager/update-customer";
 		}
 
-		@PostMapping("/localmanagercustupdate/{id}")
-		public String localManUpdateCust(@PathVariable("id") long id, @Validated Customers customer, BindingResult result,
-				Model model) {
-			if (result.hasErrors()) {
-				customer.setId(id);
-				return "LocalManager/update-customer";
-			}
-			
-			try {
+		try {
 			Log log = new Log();
 			log.setDate(date.format(LocalDateTime.now()));
 			log.setTime(time.format(LocalDateTime.now()));
@@ -1830,132 +1929,131 @@ public class RestaurantController {
 			logRepo.save(log);
 
 			customerRepo.save(customer);
-			}
-			catch (Exception e) {
-				result.rejectValue("email", null, "There is already an account registered with the same email");
-				return "HQAdmin/add-LFadmin";
-			}
-			return "redirect:/manager-cust-view";
+		} catch (Exception e) {
+			result.rejectValue("email", null, "There is already an account registered with the same email");
+			return "HQAdmin/add-LFadmin";
 		}
+		return "redirect:/manager-cust-view";
+	}
 
-		@GetMapping("/localmanagercustdelete/{id}")
-		public String localManDeleteCust(@PathVariable("id") long id, Model model) {
-			Customers customer = customerRepo.findById(id)
-					.orElseThrow(() -> new IllegalArgumentException("Invalid customer Id:" + id));
+	@GetMapping("/localmanagercustdelete/{id}")
+	public String localManDeleteCust(@PathVariable("id") long id, Model model) {
+		Customers customer = customerRepo.findById(id)
+				.orElseThrow(() -> new IllegalArgumentException("Invalid customer Id:" + id));
 
-			Log log = new Log();
-			log.setDate(date.format(LocalDateTime.now()));
-			log.setTime(time.format(LocalDateTime.now()));
-			log.setLocation(getUserLocation());
-			log.setUserId(getUserUID());
-			log.setAction("Delete customer account");
-			log.setActionId(customer.getId());
-			logRepo.save(log);
+		Log log = new Log();
+		log.setDate(date.format(LocalDateTime.now()));
+		log.setTime(time.format(LocalDateTime.now()));
+		log.setLocation(getUserLocation());
+		log.setUserId(getUserUID());
+		log.setAction("Delete customer account");
+		log.setActionId(customer.getId());
+		logRepo.save(log);
 
-			customerRepo.delete(customer);
-			return "redirect:/manager-cust-view";
-		}
+		customerRepo.delete(customer);
+		return "redirect:/manager-cust-view";
+	}
 
-		@RequestMapping({ "/manager-menu-view" })
-		public String localManShowMenu(Model model) {
-			model.addAttribute("menu", menuRepo.findAll());
-			return "LocalManager/manager-menu-view";
-		}
+	@RequestMapping({ "/manager-menu-view" })
+	public String localManShowMenu(Model model) {
+		model.addAttribute("menu", menuRepo.findAll());
+		return "LocalManager/manager-menu-view";
+	}
 
-		@RequestMapping({ "/localmanageraddmenu" })
-		public String showMenuAddForm(Menu menu) {
+	@RequestMapping({ "/localmanageraddmenu" })
+	public String showMenuAddForm(Menu menu) {
+		return "LocalManager/add-menu-item";
+	}
+
+	@RequestMapping({ "/addmenuitem" })
+	public String addMenuItem(@Validated Menu menu, BindingResult result, Model model) {
+		if (result.hasErrors()) {
 			return "LocalManager/add-menu-item";
 		}
 
-		@RequestMapping({ "/addmenuitem" })
-		public String addMenuItem(@Validated Menu menu, BindingResult result, Model model) {
-			if (result.hasErrors()) {
-				return "LocalManager/add-menu-item";
-			}
+		Log log = new Log();
+		log.setDate(date.format(LocalDateTime.now()));
+		log.setTime(time.format(LocalDateTime.now()));
+		log.setLocation(getUserLocation());
+		log.setUserId(getUserUID());
+		log.setAction("Create new menu item");
+		log.setActionId(menu.getId());
+		logRepo.save(log);
 
-			Log log = new Log();
-			log.setDate(date.format(LocalDateTime.now()));
-			log.setTime(time.format(LocalDateTime.now()));
-			log.setLocation(getUserLocation());
-			log.setUserId(getUserUID());
-			log.setAction("Create new menu item");
-			log.setActionId(menu.getId());
-			logRepo.save(log);
+		menuRepo.save(menu);
+		return "redirect:/manager-menu-view";
+	}
 
-			menuRepo.save(menu);
-			return "redirect:/manager-menu-view";
-		}
+	@GetMapping("/localmanagereditmenu/{id}")
+	public String showLocalManUpdateMenuItemForm(@PathVariable("id") long id, Model model) {
+		Menu item = menuRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid menu Id: " + id));
 
-		@GetMapping("/localmanagereditmenu/{id}")
-		public String showLocalManUpdateMenuItemForm(@PathVariable("id") long id, Model model) {
-			Menu item = menuRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid menu Id: " + id));
+		model.addAttribute("item", item);
+		return "LocalManager/update-menu";
+	}
 
-			model.addAttribute("item", item);
+	@PostMapping("/localmanagerupdatemenu/{id}")
+	public String LocalManUpdateMenu(@PathVariable("id") long id, @Validated Menu item, BindingResult result,
+			Model model) {
+		if (result.hasErrors()) {
+			item.setId(id);
 			return "LocalManager/update-menu";
 		}
 
-		@PostMapping("/localmanagerupdatemenu/{id}")
-		public String LocalManUpdateMenu(@PathVariable("id") long id, @Validated Menu item, BindingResult result,
-				Model model) {
-			if (result.hasErrors()) {
-				item.setId(id);
-				return "LocalManager/update-menu";
-			}
+		Log log = new Log();
+		log.setDate(date.format(LocalDateTime.now()));
+		log.setTime(time.format(LocalDateTime.now()));
+		log.setLocation(getUserLocation());
+		log.setUserId(getUserUID());
+		log.setAction("Update menu item");
+		log.setActionId(item.getId());
+		logRepo.save(log);
 
-			Log log = new Log();
-			log.setDate(date.format(LocalDateTime.now()));
-			log.setTime(time.format(LocalDateTime.now()));
-			log.setLocation(getUserLocation());
-			log.setUserId(getUserUID());
-			log.setAction("Update menu item");
-			log.setActionId(item.getId());
-			logRepo.save(log);
+		menuRepo.save(item);
+		return "redirect:/manager-menu-view";
+	}
 
-			menuRepo.save(item);
-			return "redirect:/manager-menu-view";
-		}
+	@GetMapping("/localmanagerdeletemenu/{id}")
+	public String deleteMenuItem(@PathVariable("id") long id, Model model) {
+		Menu item = menuRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid Menu Id:" + id));
 
-		@GetMapping("/localmanagerdeletemenu/{id}")
-		public String deleteMenuItem(@PathVariable("id") long id, Model model) {
-			Menu item = menuRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid Menu Id:" + id));
+		Log log = new Log();
+		log.setDate(date.format(LocalDateTime.now()));
+		log.setTime(time.format(LocalDateTime.now()));
+		log.setLocation(getUserLocation());
+		log.setUserId(getUserUID());
+		log.setAction("Delete menu item");
+		log.setActionId(item.getId());
+		logRepo.save(log);
 
-			Log log = new Log();
-			log.setDate(date.format(LocalDateTime.now()));
-			log.setTime(time.format(LocalDateTime.now()));
-			log.setLocation(getUserLocation());
-			log.setUserId(getUserUID());
-			log.setAction("Delete menu item");
-			log.setActionId(item.getId());
-			logRepo.save(log);
+		menuRepo.delete(item);
+		return "redirect:/manager-menu-view";
+	}
 
-			menuRepo.delete(item);
-			return "redirect:/manager-menu-view";
-		}
+	@RequestMapping({ "/manager-server-view" })
+	public String localManShowServers(Model model) {
+		model.addAttribute("servers", serverRepo.findServerLocation(getUserLocation()));
+		return "LocalManager/manager-server-view";
+	}
 
-		@RequestMapping({ "/manager-server-view" })
-		public String localManShowServers(Model model) {
-			model.addAttribute("servers", serverRepo.findServerLocation(getUserLocation()));
-			return "LocalManager/manager-server-view";
-		}
+	@GetMapping("/localmanagerserveredit/{id}")
+	public String showLocalManUpdateServerForm(@PathVariable("id") long id, Model model) {
+		Servers server = serverRepo.findById(id)
+				.orElseThrow(() -> new IllegalArgumentException("Invalid server Id:" + id));
 
-		@GetMapping("/localmanagerserveredit/{id}")
-		public String showLocalManUpdateServerForm(@PathVariable("id") long id, Model model) {
-			Servers server = serverRepo.findById(id)
-					.orElseThrow(() -> new IllegalArgumentException("Invalid server Id:" + id));
+		model.addAttribute("server", server);
+		return "LocalManager/update-server";
+	}
 
-			model.addAttribute("server", server);
+	@PostMapping("/localmanagerserverupdate/{id}")
+	public String localManUpdateServer(@PathVariable("id") long id, @Validated Servers server, BindingResult result,
+			Model model) {
+		if (result.hasErrors()) {
+			server.setId(id);
 			return "LocalManager/update-server";
 		}
 
-		@PostMapping("/localmanagerserverupdate/{id}")
-		public String localManUpdateServer(@PathVariable("id") long id, @Validated Servers server, BindingResult result,
-				Model model) {
-			if (result.hasErrors()) {
-				server.setId(id);
-				return "LocalManager/update-server";
-			}
-			
-			try {
+		try {
 			Log log = new Log();
 			log.setDate(date.format(LocalDateTime.now()));
 			log.setTime(time.format(LocalDateTime.now()));
@@ -1966,138 +2064,137 @@ public class RestaurantController {
 			logRepo.save(log);
 
 			serverRepo.save(server);
-			}
-			catch (Exception e) {
-				result.rejectValue("email", null, "There is already an account registered with the same email");
-				return "HQAdmin/add-LFadmin";
-			}
-			return "redirect:/manager-server-view";
+		} catch (Exception e) {
+			result.rejectValue("email", null, "There is already an account registered with the same email");
+			return "HQAdmin/add-LFadmin";
 		}
+		return "redirect:/manager-server-view";
+	}
 
-		@GetMapping("/localmanagerserverdelete/{id}")
-		public String localManDeleteServer(@PathVariable("id") long id, Model model) {
-			Servers server = serverRepo.findById(id)
-					.orElseThrow(() -> new IllegalArgumentException("Invalid server Id:" + id));
+	@GetMapping("/localmanagerserverdelete/{id}")
+	public String localManDeleteServer(@PathVariable("id") long id, Model model) {
+		Servers server = serverRepo.findById(id)
+				.orElseThrow(() -> new IllegalArgumentException("Invalid server Id:" + id));
 
-			Log log = new Log();
-			log.setDate(date.format(LocalDateTime.now()));
-			log.setTime(time.format(LocalDateTime.now()));
-			log.setLocation(getUserLocation());
-			log.setUserId(getUserUID());
-			log.setAction("Delete server account");
-			log.setActionId(server.getId());
-			logRepo.save(log);
+		Log log = new Log();
+		log.setDate(date.format(LocalDateTime.now()));
+		log.setTime(time.format(LocalDateTime.now()));
+		log.setLocation(getUserLocation());
+		log.setUserId(getUserUID());
+		log.setAction("Delete server account");
+		log.setActionId(server.getId());
+		logRepo.save(log);
 
-			serverRepo.delete(server);
-			return "redirect:/manager-server-view";
-		}
+		serverRepo.delete(server);
+		return "redirect:/manager-server-view";
+	}
 
-		// HQ Manager home page
-		@RequestMapping({ "/HQ-manager-view" })
-		public String showHQManagerPage() {
-			return "HQManager/HQ-manager-view";
-		}
+	// HQ Manager home page
+	@RequestMapping({ "/HQ-manager-view" })
+	public String showHQManagerPage() {
+		return "HQManager/HQ-manager-view";
+	}
 
-		@RequestMapping({ "/HQmanager-managers-view" })
-		public String hqManShowManagers(Model model) {
-			model.addAttribute("managers", managerRepo.findAll());
-			return "HQManager/HQManager-managers-view";
-		}
+	@RequestMapping({ "/HQmanager-managers-view" })
+	public String hqManShowManagers(Model model) {
+		model.addAttribute("managers", managerRepo.findAll());
+		return "HQManager/HQManager-managers-view";
+	}
 
-		@GetMapping("/HQmanagermanedit/{id}")
-		public String showHQManUpdateManagerForm(@PathVariable("id") long id, Model model) {
-			Managers manager = managerRepo.findById(id)
-					.orElseThrow(() -> new IllegalArgumentException("Invalid manager Id:" + id));
+	@GetMapping("/HQmanagermanedit/{id}")
+	public String showHQManUpdateManagerForm(@PathVariable("id") long id, Model model) {
+		Managers manager = managerRepo.findById(id)
+				.orElseThrow(() -> new IllegalArgumentException("Invalid manager Id:" + id));
 
-			model.addAttribute("manager", manager);
+		model.addAttribute("manager", manager);
+		return "HQManager/update-LFmanager";
+	}
+
+	@PostMapping("/hqmanagermanupdate/{id}")
+	public String hqManUpdateManager(@PathVariable("id") long id, @Validated Managers manager, BindingResult result,
+			Model model) {
+		if (result.hasErrors()) {
+			manager.setId(id);
 			return "HQManager/update-LFmanager";
 		}
 
-		@PostMapping("/hqmanagermanupdate/{id}")
-		public String hqManUpdateManager(@PathVariable("id") long id, @Validated Managers manager, BindingResult result,
-				Model model) {
-			if (result.hasErrors()) {
-				manager.setId(id);
-				return "HQManager/update-LFmanager";
-			}
+		Log log = new Log();
+		log.setDate(date.format(LocalDateTime.now()));
+		log.setTime(time.format(LocalDateTime.now()));
+		log.setLocation(1 /* HQ */);
+		log.setUserId(getUserUID());
+		log.setAction("Update manager account");
+		log.setActionId(manager.getId());
+		logRepo.save(log);
 
-			Log log = new Log();
-			log.setDate(date.format(LocalDateTime.now()));
-			log.setTime(time.format(LocalDateTime.now()));
-			log.setLocation(1 /* HQ */);
-			log.setUserId(getUserUID());
-			log.setAction("Update manager account");
-			log.setActionId(manager.getId());
-			logRepo.save(log);
+		managerRepo.save(manager);
+		return "redirect:/HQmanager-managers-view";
+	}
 
-			managerRepo.save(manager);
-			return "redirect:/HQmanager-managers-view";
-		}
+	@GetMapping("/HQmanagermandelete/{id}")
+	public String hqManDeleteManager(@PathVariable("id") long id, Model model) {
+		Managers manager = managerRepo.findById(id)
+				.orElseThrow(() -> new IllegalArgumentException("Invalid manager Id:" + id));
 
-		@GetMapping("/HQmanagermandelete/{id}")
-		public String hqManDeleteManager(@PathVariable("id") long id, Model model) {
-			Managers manager = managerRepo.findById(id)
-					.orElseThrow(() -> new IllegalArgumentException("Invalid manager Id:" + id));
+		Log log = new Log();
+		log.setDate(date.format(LocalDateTime.now()));
+		log.setTime(time.format(LocalDateTime.now()));
+		log.setLocation(1 /* HQ */);
+		log.setUserId(getUserUID());
+		log.setAction("Delete manager account");
+		log.setActionId(manager.getId());
+		logRepo.save(log);
 
-			Log log = new Log();
-			log.setDate(date.format(LocalDateTime.now()));
-			log.setTime(time.format(LocalDateTime.now()));
-			log.setLocation(1 /* HQ */);
-			log.setUserId(getUserUID());
-			log.setAction("Delete manager account");
-			log.setActionId(manager.getId());
-			logRepo.save(log);
+		managerRepo.delete(manager);
+		return "redirect:/HQmanager-managers-view";
+	}
 
-			managerRepo.delete(manager);
-			return "redirect:/HQmanager-managers-view";
-		}
+	@RequestMapping({ "/HQmanageraddmanager" })
+	public String showLFManagerAddForm(Managers manager) {
+		return "HQManager/add-LFmanager";
+	}
 
-		@RequestMapping({ "/HQmanageraddmanager" })
-		public String showLFManagerAddForm(Managers manager) {
+	@RequestMapping({ "/addlfmanager" })
+	public String addLFManager(@Validated Managers manager, BindingResult result, Model model) {
+		if (result.hasErrors()) {
 			return "HQManager/add-LFmanager";
 		}
 
-		@RequestMapping({ "/addlfmanager" })
-		public String addLFManager(@Validated Managers manager, BindingResult result, Model model) {
-			if (result.hasErrors()) {
-				return "HQManager/add-LFmanager";
-			}
+		Log log = new Log();
+		log.setDate(date.format(LocalDateTime.now()));
+		log.setTime(time.format(LocalDateTime.now()));
+		log.setLocation(1 /* HQ */);
+		log.setUserId(getUserUID());
+		log.setAction("Create new LF manager");
+		log.setActionId(manager.getId());
+		logRepo.save(log);
 
-			Log log = new Log();
-			log.setDate(date.format(LocalDateTime.now()));
-			log.setTime(time.format(LocalDateTime.now()));
-			log.setLocation(1 /* HQ */);
-			log.setUserId(getUserUID());
-			log.setAction("Create new LF manager");
-			log.setActionId(manager.getId());
-			logRepo.save(log);
+		managerRepo.save(manager);
+		return "redirect:/HQmanager-managers-view";
+	}
 
-			managerRepo.save(manager);
-			return "redirect:/HQmanager-managers-view";
-		}
+	@RequestMapping({ "/HQmanager-location-view" })
+	public String showHQManagerLocationPage() {
+		return "HQManager/HQManager-locations-view";
+	}
 
-		@RequestMapping({ "/HQmanager-location-view" })
-		public String showHQManagerLocationPage() {
-			return "HQManager/HQManager-locations-view";
-		}
+	@RequestMapping({ "/HQmanager-restaurants-view" })
+	public String hqManShowRestaurants(Model model) {
+		model.addAttribute("restaurants", restaurantRepo.findAll());
+		return "HQManager/HQManager-restaurants-view";
+	}
 
-		@RequestMapping({ "/HQmanager-restaurants-view" })
-		public String hqManShowRestaurants(Model model) {
-			model.addAttribute("restaurants", restaurantRepo.findAll());
-			return "HQManager/HQManager-restaurants-view";
-		}
+	@RequestMapping({ "/HQmanager-offices-view" })
+	public String hqManShowOffices(Model model) {
+		model.addAttribute("offices", officeRepo.findAll());
+		return "HQManager/HQManager-offices-view";
+	}
 
-		@RequestMapping({ "/HQmanager-offices-view" })
-		public String hqManShowOffices(Model model) {
-			model.addAttribute("offices", officeRepo.findAll());
-			return "HQManager/HQManager-offices-view";
-		}
-
-		@RequestMapping({ "/HQmanager-warehouses-view" })
-		public String hqManShowWarehouses(Model model) {
-			model.addAttribute("warehouses", warehouseRepo.findAll());
-			return "HQManager/HQManager-warehouses-view";
-		}
+	@RequestMapping({ "/HQmanager-warehouses-view" })
+	public String hqManShowWarehouses(Model model) {
+		model.addAttribute("warehouses", warehouseRepo.findAll());
+		return "HQManager/HQManager-warehouses-view";
+	}
 		
 		@RequestMapping({"/Customer-ordertype-view"})
 		public String showOrderType(Model model){
@@ -2145,6 +2242,7 @@ public class RestaurantController {
 			
 			removeFromInventory(order);
 			order.setStatus("Paid");
+			addToSales(order);
 			orderRepo.save(order);
 			deleteCartItems();
 			
@@ -2439,52 +2537,53 @@ public class RestaurantController {
 			else {
 				order.setCustomer_id(getGuestCust());
 			}
-			order.setDate(date.format(LocalDateTime.now()));
-			
-			Set<Menu> items = order.getItems();
-			Iterator<Menu> it = items.iterator();
-			float totalPrice = 0.00F;
-			
-			//finds restaurant corresponding to order
-			Restaurants restaurant = new Restaurants();
-			restaurant.setId(order.getRestaurant().getId());
-			
-			//find inventory corresponding to restaurant
-			List<Inventory> inventoryList = inventoryRepo.findInventoryRestaurant(restaurant.getId());
-			
-			//iterate over all menu ID's for order
-			while(it.hasNext()) {
-				Menu menu = it.next();
-				totalPrice += menu.getPrice();
-				//find ingredients for menu item and add it to an array and then create an iterator for array
-				Ingredients menuIngredients = ingredientsRepo.findByMenuItem(menu.getId());
-				try {
-					Vector ingredientList = menuIngredients.getIngredient();
-					Iterator ingredientIT = ingredientList.iterator();
-					//iterate over each ingredient for a menu item
-					while(ingredientIT.hasNext()) {
-						String ingredient = ingredientIT.next().toString();
-						//Create inventoryiterator so it resets per new ingredient to top of list
-						Iterator<Inventory> inventoryIT = inventoryList.iterator();
-						//iterate over each inventory item to compare current ingredient to selected ingredient in Repo
-						while(inventoryIT.hasNext()) {
-							Inventory inventory = inventoryIT.next();
-							System.out.println("--------------------------------------------------------------------------------------------------");
-							System.out.println(inventory.getIngredient() + " get ingredient");
-							System.out.println(ingredient + " ingredient");
-							if(inventory.getIngredient().compareTo(ingredient) == 0) {
-								System.out.println(inventory.getIngredient() + " is equal to " + ingredient);
-								inventory.setQuantity(inventory.getQuantity() - 1);
-								inventoryRepo.save(inventory);
-								break;
-							}
+		}
+		return "redirect:/pay";
+	}
+
+	public void removeFromInventory(Orders order) {
+		Set<Menu> items = order.getItems();
+		Iterator<Menu> it = items.iterator();
+
+		// finds restaurant corresponding to order
+		Restaurants restaurant = new Restaurants();
+		restaurant.setId(order.getRestaurant().getId());
+
+		// find inventory corresponding to restaurant
+		List<Inventory> inventoryList = inventoryRepo.findInventoryRestaurant(restaurant.getId());
+
+		// iterate over all menu ID's for order
+		while (it.hasNext()) {
+			Menu menu = it.next();
+			// find ingredients for menu item and add it to an array and then create an
+			// iterator for array
+			Ingredients menuIngredients = ingredientsRepo.findByMenuItem(menu.getId());
+			try {
+				Vector ingredientList = menuIngredients.getIngredient();
+				Iterator ingredientIT = ingredientList.iterator();
+				// iterate over each ingredient for a menu item
+				while (ingredientIT.hasNext()) {
+					String ingredient = ingredientIT.next().toString();
+					// Create inventoryiterator so it resets per new ingredient to top of list
+					Iterator<Inventory> inventoryIT = inventoryList.iterator();
+					// iterate over each inventory item to compare current ingredient to selected
+					// ingredient in Repo
+					while (inventoryIT.hasNext()) {
+						Inventory inventory = inventoryIT.next();
+						System.out.println(
+								"--------------------------------------------------------------------------------------------------");
+						System.out.println(inventory.getIngredient() + " get ingredient");
+						System.out.println(ingredient + " ingredient");
+						if (inventory.getIngredient().compareTo(ingredient) == 0) {
+							System.out.println(inventory.getIngredient() + " is equal to " + ingredient);
+							inventory.setQuantity(inventory.getQuantity() - 1);
+							inventoryRepo.save(inventory);
+							break;
 						}
 					}
 				}
-				catch(Exception e){
-					System.out.println("No ingredients for Menu Item");
-				}
-				
+			} catch (Exception e) {
+				System.out.println("No ingredients for Menu Item");
 			}
 			order.setPrice(totalPrice);
 			orderRepo.save(order);
@@ -2537,23 +2636,18 @@ public class RestaurantController {
 					discount.setPrice(0 - discountPrice);
 					menuRepo.save(discount);
 					cartItemsRepo.save(new CartItems(discount, user, 1));
+
 				}
-			}
-			
-			return "redirect:/Customer-cart-view";
 		}
-		
-		@RequestMapping({})
-		public String addInventoryRequest() {
-			
-			return null;
+
+		return "redirect:/Customer-cart-view";
 		}
-		
+	
 		@GetMapping("/rewardsinfo")
 		public String custRewardsInfo(Model model) {
 			model.addAttribute("customers", getLoggedInUser());
 			return "Customer/rewards";
-		}
+		}	
 	
 	/*
 	 * @return Customer object for hardcoded guest customer of id -1
@@ -2571,6 +2665,7 @@ public class RestaurantController {
 	}
 	
     public int getUserLocation() {
+
 		Customers user = getLoggedInUser();
 		if (user == null) {
 			return -1;
@@ -2585,5 +2680,5 @@ public class RestaurantController {
 		}
 		return user.getId();
 	}
-    
+
 }
