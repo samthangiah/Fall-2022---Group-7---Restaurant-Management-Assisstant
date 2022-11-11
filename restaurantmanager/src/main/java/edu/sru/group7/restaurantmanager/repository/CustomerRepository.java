@@ -21,4 +21,7 @@ public interface CustomerRepository extends CrudRepository<Customers, Long> {
 	 */
 	@Query(value="SELECT customers.* FROM ((restaurantmanagerdb.customers INNER JOIN orders ON orders.restaurant = :id AND orders.customer_id = id)", nativeQuery=true)
 	public List<Customers> findByOrderLocation(long id);
+
+	@Query(value ="SELECT * FROM restaurantmanagerdb.customers WHERE email = :email", nativeQuery=true)
+	public Customers findByEmail(String email);
 }

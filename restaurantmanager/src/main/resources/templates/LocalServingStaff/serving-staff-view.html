@@ -87,7 +87,7 @@ table, th, td {
         						<td th:text="${order.date}"></td>
         						<td th:text="${order.price}"></td>
         						<td th:text="${order.customer_id}"></td>
-        						<td><a th:href="@{/serverviewcustinfo/{id}(id=${order.customer_id})}">View info and rewards</a></td>
+        						<td><a th:href="@{/serverviewcustinfo/{id}(id=${order.customer_id.id})}">View info and rewards</a></td>
         						<td th:text="${order.items}"></td>
         						<td th:text="${order.instructions}"></td>
         						<td th:text="${order.restaurant}"></td>
