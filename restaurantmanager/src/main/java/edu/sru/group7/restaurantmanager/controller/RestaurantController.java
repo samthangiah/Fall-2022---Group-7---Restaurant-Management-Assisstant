@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import edu.sru.group7.restaurantmanager.authentication.ApplicationUser;
 import edu.sru.group7.restaurantmanager.authentication.FakeApplicationUserDaoService;
@@ -53,6 +55,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.*;
 
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -138,6 +141,15 @@ public class RestaurantController {
 		this.logRepo = logRepo;
 		isLoggedIn = false;
 	}
+    
+    /*
+     * @return Current HttpSession object to be used for guest users
+     */
+    public HttpSession getCurrentSession() {
+    	HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();
+    	HttpSession session = request.getSession();
+    	return session;
+    }
 
 	public boolean GetIsLoggedIn() {
 		return isLoggedIn;
@@ -2212,171 +2224,300 @@ public class RestaurantController {
 		model.addAttribute("warehouses", warehouseRepo.findAll());
 		return "HQManager/HQManager-warehouses-view";
 	}
-
-	@RequestMapping({ "/Customer-ordertype-view" })
-	public String showOrderType(Model model) {
-		final Customers customer = getLoggedInUser();
-
-		final Orders order = new Orders();
-		model.addAttribute("Order", order);
-		if (customer != null) {
-			return "Customer/orderpage";
+		
+		@RequestMapping({"/Customer-ordertype-view"})
+		public String showOrderType(Model model){
+			final Orders order = new Orders();
+			model.addAttribute("Order", order);
+			
+			if (getLoggedInUser() != null) {
+				return "Customer/orderpage";
+			}
+			return "Guest/order-as-guest";
 		}
-
-		return "Guest/order-as-guest";
-	}
-
-	@RequestMapping({ "/ordersuccessful" })
-	public String showOrderSuccess() {
-		if (getLoggedInUser() != null) {
-			return "Customer/ordersuccessful";
+		
+		@RequestMapping({"/ordersuccessful"})
+		public String showOrderSuccess(){
+			if (getLoggedInUser() != null) {
+				return "Customer/ordersuccessful";
+			}
+			return "Guest/guestordersuccess";
 		}
-		return "Guest/guestordersuccess";
-	}
-
-	@RequestMapping("/pay")
-	public String showPaymentPage(Model model) {
-		PaymentDetails_Form payForm = new PaymentDetails_Form();
-		model.addAttribute("PaymentDetails_Form", payForm);
-		if (getLoggedInUser() != null) {
-			return "Customer/pay";
+		
+		@RequestMapping("/pay")
+		public String showPaymentPage(Model model) {
+			PaymentDetails_Form payForm = new PaymentDetails_Form();
+			model.addAttribute("PaymentDetails_Form", payForm);
+			if (getLoggedInUser() != null) {
+				return "Customer/pay";
+			}
+			return "Guest/guestpay";
 		}
-		return "Guest/guestpay";
-	}
-
-	@RequestMapping("/processpayment")
-	public String processPayment(@Validated PaymentDetails_Form form, BindingResult result, Model model) {
-		if (result.hasErrors()) {
-			return "Customer/pay";
-		}
-		PaymentDetails details = new PaymentDetails();
-		details.buildFromForm(form);
-
-		if (getLoggedInUser() != null) {
-			Orders order = orderRepo.findByCustomerIdUnpaid(getUserUID());
+		
+		@RequestMapping("/processpayment")
+		public String processPayment(@Validated PaymentDetails_Form form, BindingResult result, Model model) {
+			if (result.hasErrors()) {
+				return "redirect:/pay";
+			}
+			PaymentDetails details = new PaymentDetails();
+			details.buildFromForm(form);
+			Orders order;
+			
+			if (getLoggedInUser() != null) {
+				order = orderRepo.findByCustomerIdUnpaid(getUserUID());
+			} else {
+				order = (Orders) getCurrentSession().getAttribute("order");
+			}
+			
 			removeFromInventory(order);
-			addToSales(order);
 			order.setStatus("Paid");
 			orderRepo.save(order);
-
 			deleteCartItems();
+			
+			//add payment gateway such as stripe to handle payment processing
+			//if (payment can be processed) {
+				paymentDetailsRepo.delete(details);
+				return "redirect:/ordersuccessful";
+			//}
+			//else {
+			//	paymentDetailsRepo.delete(details);
+			//	return "redirect:/pay";
+			//}
 		}
+		
+    /**
+	  * @param model
+	  * @return Customer Cart page
+	  */
+		@RequestMapping("/Customer-cart-view")
+		public String viewCart(Model model) {
+			float finalPrice = 0;
+			List<CartItems> cartItems;
+			
+			if (getLoggedInUser() != null) {
+				cartItems = cartItemsRepo.findByCustomer(getLoggedInUser());
+			}
+			else {
+				//Guest users cart is handled through HttpSession instead of Customer account
+				if (getCurrentSession().getAttribute("cartItems") != null) {
+					//cartItems attribute is set in createNewOrder() and custAddToOrder() if getLoggedInUser() is null
+					cartItems = (List<CartItems>) getCurrentSession().getAttribute("cartItems");
+				} else {
+					cartItems = new ArrayList<CartItems>();
+				}
+			}
 
-		// add payment gateway such as stripe to handle payment processing
-		// if (payment can be processed) {
-		paymentDetailsRepo.delete(details);
-		return "redirect:/ordersuccessful";
-		// }
-		// else {
-		// paymentDetailsRepo.delete(details);
-		// return "redirect:/pay";
-		// }
-	}
-
-	private void addToSales(Orders order) {
-		Restaurants restaurant = order.getRestaurant();
-		restaurant.setSales(restaurant.getSales() + order.getPrice());
-		restaurantRepo.save(restaurant);
-
-	}
-
-	@GetMapping("/editcart/{id}")
-	public String deleteCartItem(@PathVariable("id") long id, Model model) {
-		CartItems item = cartItemsRepo.findById(id)
-				.orElseThrow(() -> new IllegalArgumentException("Invalid cartItems Id:" + id));
-		cartItemsRepo.delete(item);
-
-		return "redirect:/Customer-cart-view";
-	}
-
-	public void deleteCartItems() {
-		Customers customer = getLoggedInUser();
-		List<CartItems> cartItems = cartItemsRepo.findByCustomer(customer);
-
-		cartItemsRepo.deleteAll(cartItems);
-	}
-
-	@GetMapping({ "/addtoorder/{id}" })
-	public String custAddToOrder(@PathVariable("id") long id, @Validated CartItems cartItem, BindingResult result,
-			Model model) {
-		if (result.hasErrors()) {
-			return "Customer/orderpage";
+			model.addAttribute("listCart",cartItems);
+			Iterator<CartItems> it = cartItems.iterator();
+			while(it.hasNext()) {
+				CartItems cartItem = it.next();
+				finalPrice = finalPrice + (cartItem.getMenu_id().getPrice() * cartItem.getQuantity());
+			}
+			String roundOff = String.format("%.2f", finalPrice);
+			String displayTotal = "$" + roundOff;
+			model.addAttribute("totalprice", displayTotal);
+			
+			Orders order = new Orders();
+			model.addAttribute("Order", order);
+			
+			if (getLoggedInUser() != null) {
+				return "Customer/cart";
+			}
+			return "Guest/cart";
 		}
-
-		cartItem = cartItemsRepo.findByCustMenuId(id, getLoggedInUser().getId());
-
-		if (cartItem == null) {
-			cartItem = createNewOrder(id, cartItem);
-		} else {
-
-			cartItem.setQuantity(cartItem.getQuantity() + 1);
+		
+		private void addToSales(Orders order) {
+			Restaurants restaurant = order.getRestaurant();
+			restaurant.setSales(restaurant.getSales() + order.getPrice());
+			restaurantRepo.save(restaurant);
+			
 		}
-		try {
-			cartItemsRepo.save(cartItem);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return "Customer/orderpage";
+    
+		@GetMapping("/editcart/{id}")
+		public String deleteCartItem(@PathVariable("id") long id, Model model) {
+			CartItems item = cartItemsRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid cartItems Id:" + id));
+						
+			if (getLoggedInUser() == null) {
+				//Manually remove specified item from guest cart HttpSession attribute so it doesnt stay visible on the page
+				List<CartItems> cartItems = (List<CartItems>) getCurrentSession().getAttribute("cartItems");
+				List<CartItems> newCart = new ArrayList<CartItems>();
+								
+				for (CartItems i : cartItems) {
+					//Find menu item from cart items
+					if (!(i.getMenu_id().toString().equals(item.getMenu_id().toString()))) {
+						newCart.add(i);
+					}
+				}
+				getCurrentSession().setAttribute("cartItems", newCart);
+			}
+			cartItemsRepo.delete(item);
+			
+			return "redirect:/Customer-cart-view";
 		}
-
-		return "Customer/orderpage";
-	}
-
-	private CartItems createNewOrder(long id, CartItems cartItem) {
-		Customers cust = getLoggedInUser();
-		Menu menu = menuRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid menu Id:" + id));
-		cartItem = new CartItems();
-		cartItem.setCustomer_id(cust);
-		cartItem.setMenu_id(menu);
-		cartItem.setQuantity(1);
-
-		if (menu.getId() == -1) {
-			cartItem.setQuantity(null);
+		
+		public void deleteCartItems() {
+			Customers customer = getLoggedInUser();
+			List<CartItems> cartItems;
+			if (customer != null) {
+				cartItems = cartItemsRepo.findByCustomer(customer);
+			}
+			else {
+				//cartItems either retrieved from HttpSession attribute or set to empty list if no cart items were set
+				if (getCurrentSession().getAttribute("cartItems") != null) {
+					cartItems = (List<CartItems>) getCurrentSession().getAttribute("cartItems");
+					getCurrentSession().removeAttribute("cartItems");
+				} else {
+					cartItems = new ArrayList<CartItems>();
+				}
+			}
+			
+			cartItemsRepo.deleteAll(cartItems);
 		}
-		return cartItem;
-	}
+		
+		@GetMapping({"/addtoorder/{id}"})
+		public String custAddToOrder(@PathVariable("id") long id, @Validated CartItems cartItem, BindingResult result, Model model) {
+			if (result.hasErrors()) {
+				return "redirect:/Customer-ordertype-view";
+			}
+			
+			if (getLoggedInUser() != null) {
+				cartItem = cartItemsRepo.findByCustMenuId(id, getUserUID());
+				if (cartItem == null) {
+					//Begin new order if customer has no items in cart
+					cartItem = createNewOrder(id, cartItem);
+				} else {
+					//Add to item quantity if customer already has said item in their cart
+					cartItem.setQuantity(cartItem.getQuantity() + 1);
+				}
+			} else {
+				//Dealing with guest cart information
+				//Retrieve cart information from HttpSession attribute instead of Customer account
+				if (getCurrentSession().getAttribute("cartItems") == null) {
+					cartItem = createNewOrder(id, cartItem);
+				} else {
+					//Manually appending to cart necessary
+					List<CartItems> items = (List<CartItems>) getCurrentSession().getAttribute("cartItems");
+					Menu menu = menuRepo.findById(id)
+							.orElseThrow(() -> new IllegalArgumentException("Invalid menu Id:" + id));
+					boolean flag = false;
+					//Looping through current cart items to check if guest already has at least 1 of the same item in their cart
+					for (CartItems i : items) {
+						if (i.getMenu_id().toString().equals(menu.toString())) {
+							i.setQuantity(i.getQuantity() + 1);
+							flag = true;
+						}
+					}
+					if (flag == false) {
+						cartItem = new CartItems(menu, getGuestCust(), 1);
+						items.add(cartItem);
+					}
+					//cartItems attribute is set to new appended list
+					getCurrentSession().setAttribute("cartItems", items);
+				}
+			}
+			
+			//cartItemsRepo is saved regardless of logged in status for deleteCartItem() to work
+			try {
+				cartItemsRepo.save(cartItem);
+			} catch(Exception e) {
+				e.printStackTrace();
+				return "redirect:/Customer-ordertype-view";
+			}
+			
+			return "redirect:/Customer-ordertype-view";
+		}
+		
+		private CartItems createNewOrder(long id, CartItems cartItem) {
+			Menu menu = menuRepo.findById(id)
+				.orElseThrow(() -> new IllegalArgumentException("Invalid menu Id:" + id));
+			cartItem = new CartItems();
+			
+			cartItem.setMenu_id(menu);
+			cartItem.setQuantity(1);
+			if (menu.getId() == (long) -1) {
+				cartItem.setQuantity(null);
+			}
 
-	@RequestMapping({ "/addNewOrder" })
-	public String custAddOrder(Orders order) {
-		if (orderRepo.findByCustomerIdUnpaid(getUserUID()) != null) {
+			if (getLoggedInUser() != null) {
+				cartItem.setCustomer_id(getLoggedInUser());
+			} else {
+				cartItem.setCustomer_id(getGuestCust());
+				List<CartItems> items = new ArrayList<CartItems>();
+				items.add(cartItem);
+				//Create HttpSession attribute of cartItems for guest customers
+				getCurrentSession().setAttribute("cartItems", items);
+			}
+			
+			return cartItem;
+		}
+		
+		@RequestMapping({"/addNewOrder"})
+		public String custAddOrder(Orders order) {
+			if (orderRepo.findByCustomerIdUnpaid(getUserUID()) != null) {
+				return "redirect:/pay";
+			}
+			float finalPrice = 0;
+			List<CartItems> cartItems;
+			Customers user = getLoggedInUser();
+			
+			if (user != null) {
+				cartItems = cartItemsRepo.findByCustomer(user);
+				order.setCustomer_id(user);
+			} else {
+				if (getCurrentSession().getAttribute("cartItems") != null) {
+					cartItems = (List<CartItems>) getCurrentSession().getAttribute("cartItems");
+				} else {
+					cartItems = new ArrayList<CartItems>();
+				}
+				order.setCustomer_id(getGuestCust());
+			}
+			
+			Iterator<CartItems> cartIt = cartItems.iterator();
+			Set<Menu> menuItems = new HashSet<Menu>();
+			
+			while(cartIt.hasNext()) {
+				CartItems cartItem = cartIt.next();
+				menuItems.add(cartItem.getMenu_id());
+				finalPrice = finalPrice + (cartItem.getMenu_id().getPrice() * cartItem.getQuantity());
+			}
+			
+			order.setDate(date.format(LocalDateTime.now()));
+			order.setItems(menuItems);
+			order.setPrice(finalPrice);
+			order.setStatus("Pending Payment");
+			orderRepo.save(order);
+			
+			//Rewards can only be checked after finalPrice is set
+			if (user != null) {
+				if (user.getRewardsMember() == true) {
+					System.out.println("--------------------------------------------------------------------------------------------------");
+					System.out.println(order.getPrice());
+					//For every $10 spent per order, cust is awarded with 1 rewards point
+					int rewards = (int) order.getPrice() / 10;
+					System.out.println("rewards earned: " + rewards);
+					rewards += user.getRewardsAvailable();
+					
+					user.setRewardsAvailable(rewards);
+					customerRepo.save(user);
+				}
+			} else {
+				//Add order attribute for payment processing to access for guests
+				getCurrentSession().setAttribute("order", order);
+			}
 			return "redirect:/pay";
 		}
-		float finalPrice = 0;
-		// Need function to create temp customer user for guest order so it can be added
-		// to incrementally.
-		List<CartItems> cartItems = cartItemsRepo.findByCustomer(getLoggedInUser());
-		Iterator<CartItems> cartIt = cartItems.iterator();
-		Set<Menu> menuItems = new HashSet<Menu>();
-
-		// Orders order = new Orders();
-		order.setCustomer_id(getLoggedInUser());
-		order.setDate(date.format(LocalDateTime.now()));
-		order.setPrice(0);
-
-		while (cartIt.hasNext()) {
-			CartItems cartItem = cartIt.next();
-			menuItems.add(cartItem.getMenu_id());
-			finalPrice = finalPrice + (cartItem.getMenu_id().getPrice() * cartItem.getQuantity());
-
-		}
-		order.setItems(menuItems);
-		order.setPrice(finalPrice);
-		order.setStatus("Pending Payment");
-		orderRepo.save(order);
-
-		// change this to a /pay method
-		Customers orderCustomer = getLoggedInUser();
-		if (orderCustomer != null) {
-			if (orderCustomer.getRewardsMember() == true) {
-				System.out.println(
-						"--------------------------------------------------------------------------------------------------");
-				System.out.println(order.getPrice());
-				// For every $10 spent per order, cust is awarded with 1 rewards point
-				int rewards = (int) order.getPrice() / 10;
-				System.out.println("rewards earned: " + rewards);
-				rewards += orderCustomer.getRewardsAvailable();
-
-				orderCustomer.setRewardsAvailable(rewards);
-				customerRepo.save(orderCustomer);
+		
+		/**@PostMapping({"/addorder"})
+		public String custAddOrder(@Validated Orders order, BindingResult result, Model model) {
+			if (result.hasErrors()) {
+				return "redirect:/Customer-ordertype-view";
+			}
+      
+			if (getLoggedInUser() != null) {
+				order.setCustomer_id(getLoggedInUser());
+			}
+			else {
+				order.setCustomer_id(getGuestCust());
 			}
 		}
 		return "redirect:/pay";
@@ -2426,82 +2567,58 @@ public class RestaurantController {
 			} catch (Exception e) {
 				System.out.println("No ingredients for Menu Item");
 			}
-
+			order.setPrice(totalPrice);
+			orderRepo.save(order);
+			
+			//Award rewards points to signed in rewards customers
+			Customers orderCustomer = getLoggedInUser();
+			if (orderCustomer != null) {
+				if (orderCustomer.getRewardsMember() == true) {
+					System.out.println("--------------------------------------------------------------------------------------------------");
+					System.out.println(order.getPrice());
+					//For every $10 spent per order, cust is awarded with 1 rewards point
+					int rewards = (int) order.getPrice() / 10;
+					System.out.println("rewards earned: " + rewards);
+					rewards += orderCustomer.getRewardsAvailable();
+					
+					orderCustomer.setRewardsAvailable(rewards);
+					customerRepo.save(orderCustomer);
+				}
+			}
+			
+      		return "redirect:/pay";
 		}
-	}
+		*/
+		
+		@RequestMapping({"/redeem"})
+		public String redeemRewards() {
+			Customers user = getLoggedInUser();
+			if (user == null) {
+				return "redirect:/Customer-cart-view";
+			}
+			if (user.getRewardsMember() == true) {
+				int rewards = user.getRewardsAvailable();
+				//Redeem 5 rewards points at a time
+				if (rewards >= 5) {
+					user.setRewardsAvailable(rewards - 5);
+					
+					List<CartItems> items = cartItemsRepo.findByCustomer(user);
+					float price = 0.00F;
+					for (CartItems i : items) {
+						price += i.getMenu_id().getPrice() * i.getQuantity();
+					}
+					//Discount is 10% of order, rounded to 2 decimal places
+					float discountPrice = Math.round((price / 10) * 100.0) / 100.0F;
+					
+					Menu discount = new Menu();
+					discount.setId(-1);
+					discount.setName("Rewards discount");
+					discount.setAvailability(false);
+					//Price set to negative so that it is subtracted
+					discount.setPrice(0 - discountPrice);
+					menuRepo.save(discount);
+					cartItemsRepo.save(new CartItems(discount, user, 1));
 
-	/**
-	 * @PostMapping({"/addorder"}) public String custAddOrder(@Validated Orders
-	 * order, BindingResult result, Model model) { if (result.hasErrors()) { return
-	 * "Customer/orderpage"; }
-	 * 
-	 * if (getLoggedInUser() == null) { //I would just do this instead of looping
-	 * through the findAll() but it doesnt like the Optional<> type
-	 * //order.setCustomer_id(customerRepo.findById((long) -1)); for (Customers c :
-	 * customerRepo.findAll()) { //Guest user -1 if (c.getId() == (long) -1) {
-	 * order.setCustomer_id(c); } } } else {
-	 * order.setCustomer_id(getLoggedInUser()); }
-	 * order.setDate(date.format(LocalDateTime.now()));
-	 * 
-	 * Set<Menu> items = order.getItems(); Iterator<Menu> it = items.iterator();
-	 * float totalPrice = 0.00F;
-	 * 
-	 * //finds restaurant corresponding to order Restaurants restaurant = new
-	 * Restaurants(); restaurant.setId(order.getRestaurant().getId());
-	 * 
-	 * //find inventory corresponding to restaurant List<Inventory> inventoryList =
-	 * inventoryRepo.findInventoryRestaurant(restaurant.getId());
-	 * 
-	 * //iterate over all menu ID's for order while(it.hasNext()) { Menu menu =
-	 * it.next(); totalPrice += menu.getPrice(); //find ingredients for menu item
-	 * and add it to an array and then create an iterator for array Ingredients
-	 * menuIngredients = ingredientsRepo.findByMenuItem(menu.getId()); try { Vector
-	 * ingredientList = menuIngredients.getIngredient(); Iterator ingredientIT =
-	 * ingredientList.iterator(); //iterate over each ingredient for a menu item
-	 * while(ingredientIT.hasNext()) { String ingredient =
-	 * ingredientIT.next().toString(); //Create inventoryiterator so it resets per
-	 * new ingredient to top of list Iterator<Inventory> inventoryIT =
-	 * inventoryList.iterator(); //iterate over each inventory item to compare
-	 * current ingredient to selected ingredient in Repo
-	 * while(inventoryIT.hasNext()) { Inventory inventory = inventoryIT.next();
-	 * System.out.println("--------------------------------------------------------------------------------------------------");
-	 * System.out.println(inventory.getIngredient() + " get ingredient");
-	 * System.out.println(ingredient + " ingredient");
-	 * if(inventory.getIngredient().compareTo(ingredient) == 0) {
-	 * System.out.println(inventory.getIngredient() + " is equal to " + ingredient);
-	 * inventory.setQuantity(inventory.getQuantity() - 1);
-	 * inventoryRepo.save(inventory); break; } } } } catch(Exception e){
-	 * System.out.println("No ingredients for Menu Item"); }
-	 * 
-	 * } order.setPrice(totalPrice); orderRepo.save(order);
-	 * 
-	 * //Award rewards points to signed in rewards customers Customers orderCustomer
-	 * = getLoggedInUser(); if (orderCustomer != null) { if
-	 * (orderCustomer.getRewardsMember() == true) {
-	 * System.out.println("--------------------------------------------------------------------------------------------------");
-	 * System.out.println(order.getPrice()); //For every $10 spent per order, cust
-	 * is awarded with 1 rewards point int rewards = (int) order.getPrice() / 10;
-	 * System.out.println("rewards earned: " + rewards); rewards +=
-	 * orderCustomer.getRewardsAvailable();
-	 * 
-	 * orderCustomer.setRewardsAvailable(rewards); customerRepo.save(orderCustomer);
-	 * } }
-	 * 
-	 * return "redirect:/pay"; }
-	 */
-
-	@RequestMapping({ "/redeem" })
-	public String redeemRewards() {
-		if (getLoggedInUser().getRewardsMember() == true) {
-			int rewards = getLoggedInUser().getRewardsAvailable();
-			// Redeem 5 rewards points at a time
-			if (rewards >= 5) {
-				getLoggedInUser().setRewardsAvailable(rewards - 5);
-
-				List<CartItems> items = cartItemsRepo.findByCustomer(getLoggedInUser());
-				float price = 0.00F;
-				for (CartItems i : items) {
-					price += i.getMenu_id().getPrice() * i.getQuantity();
 				}
 				// Discount is 10% of order, rounded to 2 decimal places
 				float discountPrice = Math.round((price / 10) * 100.0) / 100.0F;
@@ -2520,20 +2637,24 @@ public class RestaurantController {
 
 		return "redirect:/Customer-cart-view";
 	}
-
-	@RequestMapping({})
-	public String addInventoryRequest() {
-
+	
+	/*
+	 * @return Customer object for hardcoded guest customer of id -1
+	 */
+	public Customers getGuestCust() {
+		//I would just do this instead of looping through the findAll() but it doesnt like the Optional<> type
+		//order.setCustomer_id(customerRepo.findById((long) -1));
+		for (Customers c : customerRepo.findAll()) {
+			//Guest user -1
+			if (c.getId() == (long) -1) {
+				return c;
+			}
+		}
 		return null;
 	}
+	
+    public int getUserLocation() {
 
-	@GetMapping("/rewardsinfo")
-	public String custRewardsInfo(Model model) {
-		model.addAttribute("customers", getLoggedInUser());
-		return "Customer/rewards";
-	}
-
-	public int getUserLocation() {
 		Customers user = getLoggedInUser();
 		if (user == null) {
 			return -1;
