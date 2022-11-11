@@ -80,9 +80,10 @@ input[type=text]:focus, input[type=password]:focus {
   							th:action="@{/managerinventoryupdate/{id}(id=${inventory.id})}" 
   							th:object="${inventory}" 
   							method="post">
-  								<input type="hidden" th:value="*{restaurant_id}" id="restaurant_id" placeholder="RestaurantID" readonly>
+  								<input type="hidden" th:field="*{restaurant_id}" id="restaurant_id" placeholder="RestaurantID">
+  								<input type="hidden" th:field="*{ingredient}" id="ingredientValue" readonly>
     							<label for="ingredient">Ingredient</label>
-    							<input type="text" th:field="*{ingredient}" id="ingredient" placeholder="Ingredient" required>
+    							<input type="text" th:value="*{ingredient}" id="ingredient" readonly>
     							<label for="Quantity">Quantity</label>
     							<input type="text" th:field="*{quantity}" id="quantity" placeholder="Quantity" required>
     							<br>

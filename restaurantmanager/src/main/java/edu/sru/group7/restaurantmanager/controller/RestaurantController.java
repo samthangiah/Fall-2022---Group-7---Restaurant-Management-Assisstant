@@ -1750,6 +1750,11 @@ public class RestaurantController {
 	// or anything like that, it
 	// only works with id so I just loop through the customers for one with a
 	// matching email to get their id
+	/**
+	 * @param orderCust Customer
+	 * @param model
+	 * @return server-cust-view. Shows selected customer information based on their email that we Query the Repository for.
+	 */
 	@GetMapping("/serverviewcustinfo/{id}")
 	public String showCustInfo(@PathVariable("id") Customers orderCust, Model model) {
 		Customers customer = customerRepo.findByEmail(orderCust.getEmail());
@@ -1764,45 +1769,23 @@ public class RestaurantController {
 	}
 
 	// For guest order "view customer info and rewards" to not throw 404
+	//do we use this. I added an exception to null customer objects
 	@GetMapping("/serverviewcustinfo/")
 	public String blankCustInfo() {
 		return "redirect:/servingstaffview";
 	}
 
-	@GetMapping("/updatemenuitem/{id}")
-	public String showUpdateMenuItemForm(@PathVariable("id") long id, Model model) {
-		Menu item = menuRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid menu Id: " + id));
-
-		model.addAttribute("item", item);
-		return "LocalServingStaff/update-menu-item";
-	}
-
-	@PostMapping("/updatemenuitem/{id}")
-	public String updateMenuItem(@PathVariable("id") long id, @Validated Menu item, BindingResult result, Model model) {
-		if (result.hasErrors()) {
-			item.setId(id);
-			return "LocalServingStaff/update-menu-item";
-		}
-
-		Log log = new Log();
-		log.setDate(date.format(LocalDateTime.now()));
-		log.setTime(time.format(LocalDateTime.now()));
-		log.setLocation(getUserLocation());
-		log.setUserId(getUserUID());
-		log.setAction("Update menu item");
-		log.setActionId(item.getId());
-		logRepo.save(log);
-
-		menuRepo.save(item);
-		return "redirect:/servingstaffview";
-	}
-
+	/**
+	 * @param model
+	 * @return log-view. Shows the log view for the Local Manager at that restaurant location.
+	 */
 	@GetMapping("/logview")
 	public String showLog(Model model) {
 		Customers cust = getLoggedInUser();
 		if (cust == null) {
 			return "redirect:/";
 		}
+		//I can optimize this again with a query.
 		Iterable<Log> fullLog = logRepo.findAll();
 		List<Log> localLog = new ArrayList<Log>();
 		for (Log i : fullLog) {
@@ -1814,6 +1797,7 @@ public class RestaurantController {
 		return "LocalManager/log-view";
 	}
 
+	
 	@GetMapping("/logadminview")
 	public String showAdminLog(Model model) {
 		Customers cust = getLoggedInUser();
@@ -1831,24 +1815,30 @@ public class RestaurantController {
 		return "LocalAdmin/log-admin-view";
 	}
 
+	/**
+	 * @param model
+	 * @return hq-log-view. Shows the entire log to the HQ manager.
+	 */
 	@GetMapping("/hqlogview")
 	public String showHQLog(Model model) {
 		model.addAttribute("log", logRepo.findAll());
 		return "HQManager/hq-log-view";
 	}
 
+	/**
+	 * @param model
+	 * @return hq-admin-log-view. Shows the entire log to the HQ Admin
+	 */
 	@GetMapping("/hqlogadminview")
 	public String showHQAdminLog(Model model) {
 		model.addAttribute("log", logRepo.findAll());
 		return "HQAdmin/hq-admin-log-view";
 	}
 
-	// local manager home page
-	@RequestMapping({ "/local-manager-view" })
-	public String showManagerPage() {
-		return "LocalManager/local-manager-view";
-	}
-
+	/**
+	 * @param model
+	 * @return manager-inventory-view. Shows the Inventory page of the current Managers assigned Restaurant
+	 */
 	@RequestMapping({ "/manager-inventory-view" })
 	public String showInventoryView(Model model) {
 		Managers manager = managerRepo.findById(getUserUID())
@@ -1859,11 +1849,19 @@ public class RestaurantController {
 		return "LocalManager/manager-inventory-view";
 	}
 
+	/**
+	 * @return local-manager-view-view. Shows
+	 */
+	//do we use this
 	@RequestMapping({ "/local-manager-view-view" })
 	public String showHQManManagerPage() {
 		return "HQManager/local-manager-view-view";
 	}
 
+	/**
+	 * @param model
+	 * @return manager-cust-view. Shows the list of all customers to Local Manager.
+	 */
 	@RequestMapping({ "/manager-cust-view" })
 	public String localManShowUserList(Model model) {
 
@@ -1871,6 +1869,11 @@ public class RestaurantController {
 		return "LocalManager/manager-cust-view";
 	}
 
+	/**
+	 * @param id
+	 * @param model
+	 * @return update-customer. Shows the selected Customers profile information for Local Manager to change.
+	 */
 	@GetMapping("/localmanagercustedit/{id}")
 	public String localManShowUpdateCustForm(@PathVariable("id") long id, Model model) {
 		Customers customer = customerRepo.findById(id)
@@ -1880,6 +1883,11 @@ public class RestaurantController {
 		return "LocalManager/update-customer";
 	}
 
+	/**
+	 * @param id
+	 * @param model
+	 * @return update-inventory. Shows the selected restaurant 
+	 */
 	@GetMapping("/managerinventoryedit/{id}")
 	public String localManShowUpdateInventoryForm(@PathVariable("id") long id, Model model) {
 		Inventory inventory = inventoryRepo.findById(id)
@@ -1889,6 +1897,13 @@ public class RestaurantController {
 		return "LocalManager/update-inventory";
 	}
 
+	/**
+	 * @param id
+	 * @param inventory
+	 * @param result
+	 * @param model
+	 * @return manager-inventory-view. Shows the Local Managers inventory view. Saves updated Inventory item into repository.
+	 */
 	@PostMapping("/managerinventoryupdate/{id}")
 	public String localManUpdateInventory(@PathVariable("id") long id, @Validated Inventory inventory,
 			BindingResult result, Model model) {
@@ -1910,6 +1925,13 @@ public class RestaurantController {
 		return "redirect:/manager-inventory-view";
 	}
 
+	/**
+	 * @param id
+	 * @param customer
+	 * @param result
+	 * @param model
+	 * @return update-custoemr. Updates entered customer information from Local Manager. Validates email does not already exist.
+	 */
 	@PostMapping("/localmanagercustupdate/{id}")
 	public String localManUpdateCust(@PathVariable("id") long id, @Validated Customers customer, BindingResult result,
 			Model model) {
@@ -1931,7 +1953,7 @@ public class RestaurantController {
 			customerRepo.save(customer);
 		} catch (Exception e) {
 			result.rejectValue("email", null, "There is already an account registered with the same email");
-			return "HQAdmin/add-LFadmin";
+			return "LocalManager/update-customer";
 		}
 		return "redirect:/manager-cust-view";
 	}
@@ -2066,7 +2088,7 @@ public class RestaurantController {
 			serverRepo.save(server);
 		} catch (Exception e) {
 			result.rejectValue("email", null, "There is already an account registered with the same email");
-			return "HQAdmin/add-LFadmin";
+			return "LocalManager/update-server";
 		}
 		return "redirect:/manager-server-view";
 	}

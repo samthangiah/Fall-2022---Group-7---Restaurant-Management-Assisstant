@@ -104,7 +104,6 @@ table, th, td {
         						<th>Side Dish</th>
         						<th>Price</th>
         						<th>Availability</th>
-        						<th></th>
     						</tr>
 						</thead>
 		<tbody>
@@ -114,7 +113,6 @@ table, th, td {
         			<td th:text="${item.sides}"></td>
         			<td th:text="${item.price}"></td>
         			<td th:text="${item.availability}"></td>
-        			<td><a th:href="@{/updatemenuitem/{id}(id=${item.id})}">Edit</a></td>
     			</tr>
 		</tbody>
 		
