@@ -39,6 +39,14 @@ table, th, td {
             <!-- Sidebar-->
             <div class="border-end bg-white" id="sidebar-wrapper">
                 <div class="sidebar-heading border-bottom bg-light">Insert logo here?</div>
+                <div class="list-group list-group-flush">
+                	<a class="list-group-item list-group-item-action list-group-item-light p-3" href="/logview">View Local Action Log</a>
+                	<a class="list-group-item list-group-item-action list-group-item-light p-3" href="/servingstaffviewview">View Serving Staff Pages</a>
+                	<a class="list-group-item list-group-item-action list-group-item-light p-3" href="/manager-cust-view">View Customers</a>
+                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/manager-menu-view">View Menu</a>
+                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/manager-server-view">View Servers</a>
+                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/manager-inventory-view">View Inventory</a>
+                </div>
             </div>
             <!-- Page content wrapper-->
             <div id="page-content-wrapper">
@@ -76,7 +84,6 @@ table, th, td {
         						<th>Customer ID</th>
         						<th>Menu Items</th>
         						<th>Special Instructions</th>
-        						<th>Location</th>
     						</tr>
     					</thead>
     					<tbody>
@@ -85,10 +92,9 @@ table, th, td {
         						<td><a th:href="@{/deleteorder/{id}(id=${order.id})}">Delete order</a></td>
         						<td th:text="${order.date}"></td>
         						<td th:text="${order.price}"></td>
-        						<td th:text="${order.customer}"></td>
+        						<td th:text="${order.customer_id}"></td>
         						<td th:text="${order.items}"></td>
         						<td th:text="${order.instructions}"></td>
-        						<td th:text="${order.location}"></td>
     						</tr>
     					</tbody>
 					</table>
@@ -119,7 +125,6 @@ table, th, td {
 	</table>
 	</div>
 							<div class="btn-group">
-  								<a href="/local-manager-view" class="btn btn-primary" role="button">Return to Manager Page</a>
 							</div>
                     </div>
                 </div>

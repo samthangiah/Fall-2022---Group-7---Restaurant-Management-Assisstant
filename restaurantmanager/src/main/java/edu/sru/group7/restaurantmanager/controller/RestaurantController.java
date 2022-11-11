@@ -207,6 +207,9 @@ public class RestaurantController {
 		return (float) testCell.getNumericCellValue();
 	}
 	
+	/**
+	 * @throws IOException Loads Menu from excel sheet and adds into Menu POJO
+	 */
 	public void loadMenu() throws IOException {
 		// TODO Auto-generated method stub
 		
@@ -265,6 +268,11 @@ public class RestaurantController {
 		 wb.close();
 	}
 	
+	/** 
+	 * @param filepath Ingredients excel filepath
+	 * @param id
+	 * @throws IOException Loads all Ingredients for each menu Items and adds to Restaurant inventory
+	 */
 	public void loadIngredients(String filepath, Restaurants id) throws IOException {
 		
 		FileInputStream thisxls;
@@ -296,6 +304,11 @@ public class RestaurantController {
 		 wb.close();
 	}
 
+	/**
+	 * @param filepath Ingredients excel filepath
+	 * @param id
+	 * @throws IOException Loads all Ingredients for each menu Items and adds to Warehouse inventory
+	 */
 	public void loadIngredients(String filepath, Warehouses id) throws IOException {
 	
 	FileInputStream thisxls;
@@ -329,6 +342,9 @@ public class RestaurantController {
 	 wb.close();
 	}
 	
+	/**
+	 * @throws IOException Default Ingredients loader
+	 */
 	public void loadIngredients() throws IOException {
 		FileInputStream thisxls;
 		 XSSFWorkbook wb;
@@ -423,9 +439,7 @@ public class RestaurantController {
     	
     	listadmins.add(admin);
     	listadmins.add(admin2);
-    	
-    	//String address, String zipcode, String city
-    	
+    	    	
     	adminRepo.save(admin);
     	adminRepo.save(admin2);
     	
@@ -569,6 +583,9 @@ public class RestaurantController {
     
     
     //index page
+	/**
+	 * @return index page
+	 */
     @RequestMapping({"/"})
     public String homePage() {
     	return "Guest/index";
@@ -593,18 +610,22 @@ public class RestaurantController {
     	model.addAttribute("listMenu", availablemenu);
     }
     
-    //403 Error page
+    /**
+     * 403 Error page
+     */
     @GetMapping("/403")
 	public String error403() {
 		return "SignIn/403";
 	}
     
+    //Do we use this?
     @RequestMapping({"/signin"})
     public String signIn() {
     	SetIsLoggedIn(true);
 		return "redirect:/loggedinhome";
     }
     
+    //Do we use this?
     @RequestMapping({"/employeelogin"})
     public String tempEmployeeLoginPage() {
     	SetIsLoggedIn(true);
@@ -612,6 +633,7 @@ public class RestaurantController {
     	return "redirect:/temploginpage";
     }
     
+    //Do we use this?
     @GetMapping("/loggedinhome")
 	public String loggedIn() {
 		return "Customer/loggedinhome";
@@ -699,6 +721,9 @@ public class RestaurantController {
     	}
     }
     
+    /**
+     * @return Menu page
+     */
     @RequestMapping({"/showmenu"})
     public String showMenu() {
     	if (getLoggedInUser() == null) {
@@ -712,16 +737,16 @@ public class RestaurantController {
     	ApplicationUser user = (ApplicationUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     	//Redirect user to staff page of highest authority
     	if (user.getAuthorities().toString().contains("ROLE_HQADMIN")) {
-    		return "redirect:/HQ-admin-view";
+    		return "redirect:/hqlogadminview";
 		}
     	if (user.getAuthorities().toString().contains("ROLE_HQMANAGER")) {
-    		return "redirect:/HQ-manager-view";
+    		return "redirect:/hqlogview";
 		}
     	if (user.getAuthorities().toString().contains("ROLE_ADMIN")) {
-    		return "redirect:/local-admin-view";
+    		return "redirect:/logadminview";
 		}
     	if (user.getAuthorities().toString().contains("ROLE_MANAGER")) {
-    		return "redirect:/local-manager-view";
+    		return "redirect:/logview";
 		}
     	if (user.getAuthorities().toString().contains("ROLE_SERVER")) {
     		return "redirect:/servingstaffview";
@@ -732,11 +757,10 @@ public class RestaurantController {
 		return "SignIn/temploginpage";
 	}
     
-    /*@RequestMapping({"/employeesignin"})
-    public String employeeSignIn() {
-    	return "employeesignin";
-    }*/
-    
+    /**
+     * @param model
+     * @return Update Password page
+     */
     @GetMapping("/changeuserpass")
 	public String showUpdatePassForm(Model model) {
 		Customers customer = getLoggedInUser();
@@ -748,6 +772,13 @@ public class RestaurantController {
 		return "Customer/update-password";
 	}
 
+    /**
+     * @param id Customer Id
+     * @param customer Customer POJO
+     * @param result
+     * @param model
+     * @return loggedin page
+     */
 	@PostMapping("/updateuserpass/{id}")
 	public String updatePass(@PathVariable("id") long id, @Validated Customers customer, BindingResult result,
 			Model model) {
@@ -769,26 +800,26 @@ public class RestaurantController {
 		return "redirect:/loggedinhome";
 	}
 
+	/**
+	 * @param customer
+	 * @return Registration page
+	 */
 	@RequestMapping({ "/custregistrationpage" })
 	public String showCustRegisterForm(Customers customer) {
 		return "SignIn/register";
 	}
 
+	/**
+	 * @param customers
+	 * @param result
+	 * @param model
+	 * @return login page. Saves user to Customers in DB
+	 */
 	@RequestMapping({ "/addregisteredcustomer" })
 	public String addNewCust(@Validated Customers customers, BindingResult result, Model model) {
 		if (result.hasErrors()) {
 			return "SignIn/register";
 		}
-		
-		/*ApplicationUser newCustUser = new ApplicationUser(
-				customers.getEmail(),
-				fakeApplicationUserDaoService.encode(customers.getPassword()),
-				ApplicationUserRole.CUSTOMER.getGrantedAuthorities(),
-				true,
-				true,
-				true,
-				true);
-		*/
 
 		Log log = new Log();
 		log.setDate(date.format(LocalDateTime.now()));
@@ -808,6 +839,9 @@ public class RestaurantController {
 		return "redirect:/login";
 	}
 	
+	/**
+	 * @return Contact us page
+	 */
 	@RequestMapping("/contact")
 	public String contactPage() {
 		if (getLoggedInUser() == null) {
@@ -816,6 +850,10 @@ public class RestaurantController {
 		return "Customer/contact";
 	}
 	
+	/**
+	 * @param model
+	 * @return Customer profile page
+	 */
 	@RequestMapping("/custviewinfo")
 	public String infoPage(Model model) {
 		Customers user = getLoggedInUser();
@@ -825,7 +863,12 @@ public class RestaurantController {
 		model.addAttribute("customers", user);
 		return "Customer/custviewinfo";
 	}
-	
+  
+	/**
+	 * @param id Customer ID
+	 * @param model
+	 * @return Customer profile edit page.
+	 */
 	@GetMapping("/editcustomer/{id}")
 	public String userShowUpdateCustForm(@PathVariable("id") long id, Model model) {
 		Customers customer = customerRepo.findById(id)
@@ -835,6 +878,13 @@ public class RestaurantController {
 		return "Customer/editprofile";
 	}
 
+	/**
+	 * @param id
+	 * @param customer
+	 * @param result
+	 * @param model
+	 * @return loggedinhome page & Saves Updated customer data.
+	 */
 	@PostMapping("/usercustomerupdate/{id}")
 	public String userUpdateCust(@PathVariable("id") long id, @Validated Customers customer, BindingResult result,
 			Model model) {
@@ -854,24 +904,6 @@ public class RestaurantController {
 
 		customerRepo.save(customer);
 		return "redirect:/loggedinhome";
-	}
-	
-	// HQ admin home page
-	@RequestMapping({ "/HQ-admin-view" })
-	public String showHQAdminPage() {
-		return "HQAdmin/HQ-admin-view";
-	}
-
-	// HQ admin all 3 locations view
-	@RequestMapping({ "/HQadmin-locations-view" })
-	public String showLocationsPage() {
-		return "HQAdmin/HQadmin-locations-view";
-	}
-
-	// local admin home page
-	@RequestMapping({ "/local-admin-view" })
-	public String showAdminPage() {
-		return "LocalAdmin/local-admin-view";
 	}
 
 	@RequestMapping({ "/order-placement/cust-order" })
@@ -908,74 +940,115 @@ public class RestaurantController {
 		return "LocalAdmin/admin-cust-view";
 	}
 
-	// HQ admin local admins view
+	/**
+	 * @param model
+	 * @return HQadmin-admin-view. HQ Administrators view of all admins
+	 */
 	@RequestMapping({ "/HQadmin-admin-view" })
 	public String showAdminList(Model model) {
 		model.addAttribute("admins", adminRepo.findAll());
 		return "HQAdmin/HQadmin-admin-view";
 	}
 
-	// HQ admin offices view
+	/**
+	 * @param model
+	 * @return HQadmin-offices-view. HQ administrators view of all offices
+	 */
 	@RequestMapping({ "/HQadmin-offices-view" })
 	public String showOfficesList(Model model) {
 		model.addAttribute("offices", officeRepo.findAll());
 		return "HQAdmin/HQadmin-offices-view";
 	}
 
-	// HQ admin restaurants view
+	/**
+	 * @param model
+	 * @return HQadmin-restaurants-view. HQ administrators view of all restaurants
+	 */
 	@RequestMapping({ "/HQadmin-restaurants-view" })
 	public String showRestaurantList(Model model) {
 		model.addAttribute("restaurants", restaurantRepo.findAll());
 		return "HQAdmin/HQadmin-restaurants-view";
 	}
 
-	// HQ admin warehouses view
+	/**
+	 * @param model
+	 * @return HQadmin-warehouses-view. HQ Administrators view of all warehouses
+	 */
 	@RequestMapping({ "/HQadmin-warehouses-view" })
 	public String showWarehouseList(Model model) {
 		model.addAttribute("warehouses", warehouseRepo.findAll());
 		return "HQAdmin/HQadmin-warehouses-view";
 	}
 
-	// add customer view
+	/**
+	 * @param customer
+	 * @return add-customer. Local Administrators add customer page
+	 */
 	@RequestMapping({ "/custsignup" })
 	public String showCustSignUpForm(Customers customer) {
 		return "LocalAdmin/add-customer";
 	}
 
-	// add server view
+	/**
+	 * @param server
+	 * @return add-server. Local Administrators add server page
+	 */
 	@RequestMapping({ "/serversignup" })
 	public String showServerSignUpForm(Servers server) {
 		return "LocalAdmin/add-server";
 	}
 
-	// add manager view
+	/**
+	 * @param manager
+	 * @return add-LFmanager. Local Administrators add Local Manager page.
+	 */
 	@RequestMapping({ "/mansignup" })
 	public String showManagerSignUpForm(Managers manager) {
 		return "LocalAdmin/add-LFmanager";
 	}
 
-	// add local admin view
+	/**
+	 * @param admin
+	 * @return add-LFadmin. HQ administrators add local admin page
+	 */
 	@RequestMapping({ "/adminsignup" })
 	public String showAdminSignUpForm(Admins admin) {
 		return "HQAdmin/add-LFadmin";
 	}
 
+	/**
+	 * @param office
+	 * @return add-office. HQ administrators add office page
+	 */
 	@RequestMapping({ "/officesignup" })
 	public String showOfficeSignUpForm(Offices office) {
 		return "HQAdmin/add-office";
 	}
 
+	/**
+	 * @param restaurant
+	 * @return add-restaurant. HQ administrators add restaurant page
+	 */
 	@RequestMapping({ "/restaurantsignup" })
 	public String showRestaurantSignUpForm(Restaurants restaurant) {
 		return "HQAdmin/add-restaurant";
 	}
 
+	/**
+	 * @param warehouse
+	 * @return add-warehouse. HQ administrators add warehouse page
+	 */
 	@RequestMapping({ "/warehousesignup" })
 	public String showWarehouseSignUpForm(Warehouses warehouse) {
 		return "HQAdmin/add-warehouse";
 	}
 
-	// Mapping for the /signup URL - to add a user
+	/**
+	 * @param customers
+	 * @param result
+	 * @param model
+	 * @return admin-cust-view & Saves the new customer.
+	 */
 	@RequestMapping({ "/addcustomer" })
 	public String addCust(@Validated Customers customers, BindingResult result, Model model) {
 		if (result.hasErrors()) {
@@ -1118,7 +1191,8 @@ public class RestaurantController {
 		log.setAction("Add new restaurant");
 		log.setActionId(restaurant.getId());
 		logRepo.save(log);
-
+		restaurant.setSales(0);
+		
 		restaurantRepo.save(restaurant);
 		try {
 			loadIngredients(ingredientFP, restaurant);
@@ -1558,6 +1632,7 @@ public class RestaurantController {
 
 		@GetMapping("/servingstaffviewview")
 		public String showLocalManServerView(Model model) {
+			//get all orders paid
 			model.addAttribute("orders", orderRepo.findAll());
 			model.addAttribute("menu", menuRepo.findAll());
 			return "LocalManager/manager-server-view-view";
@@ -1676,8 +1751,10 @@ public class RestaurantController {
 		
 		@RequestMapping({"/manager-inventory-view"})
 		public String showInventoryView(Model model) {
+			Managers manager = managerRepo.findById(getUserUID())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid admin Id:" + getUserUID()));
 			
-			model.addAttribute("inventoryList", inventoryRepo.findInventoryRestaurant(getUserUID()));
+			model.addAttribute("inventoryList", inventoryRepo.findInventoryRestaurant(manager.getRestaurant().getId()));
 			
 			return "LocalManager/manager-inventory-view";
 		}
@@ -2082,6 +2159,10 @@ public class RestaurantController {
 			//}
 		}
 		
+    /**
+	  * @param model
+	  * @return Customer Cart page
+	  */
 		@RequestMapping("/Customer-cart-view")
 		public String viewCart(Model model) {
 			float finalPrice = 0;
@@ -2119,6 +2200,13 @@ public class RestaurantController {
 			return "Guest/cart";
 		}
 		
+		private void addToSales(Orders order) {
+			Restaurants restaurant = order.getRestaurant();
+			restaurant.setSales(restaurant.getSales() + order.getPrice());
+			restaurantRepo.save(restaurant);
+			
+		}
+    
 		@GetMapping("/editcart/{id}")
 		public String deleteCartItem(@PathVariable("id") long id, Model model) {
 			CartItems item = cartItemsRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid cartItems Id:" + id));
@@ -2339,7 +2427,7 @@ public class RestaurantController {
 			}
 		}
 		
-		@PostMapping({"/addorder"})
+		/**@PostMapping({"/addorder"})
 		public String custAddOrder(@Validated Orders order, BindingResult result, Model model) {
 			if (result.hasErrors()) {
 				return "redirect:/Customer-ordertype-view";
@@ -2419,6 +2507,7 @@ public class RestaurantController {
 			
       		return "redirect:/pay";
 		}
+		*/
 		
 		@RequestMapping({"/redeem"})
 		public String redeemRewards() {

@@ -28,6 +28,8 @@ public class Restaurants extends Locations {
 	
 	private String city;
 	
+	private float sales;
+	
 	@ManyToOne
 	@JoinColumn(name="admin_id")
 	private Admins admin;
@@ -130,6 +132,14 @@ public class Restaurants extends Locations {
 	@Override
 	public String toString() {
 		return "id: " + id;
+	}
+
+	public float getSales() {
+		return sales;
+	}
+
+	public void setSales(float sales) {
+		this.sales = sales;
 	}
 	
 	
