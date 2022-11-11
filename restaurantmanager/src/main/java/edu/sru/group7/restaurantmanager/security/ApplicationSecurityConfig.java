@@ -33,10 +33,10 @@ WebSecurityConfigurerAdapter {
 			.antMatchers("/", "/index", "/css/*", "/js/*", "/img/*", "/assets/*", "/403", "/login", "/showlogin", 
 					"/employeelogin", "/showemployeelogin", "/custregistrationpage", "/addregisteredcustomer", "/add-sample-order",
 					"/showmenu", "/contact", "/Customer-ordertype-view", "/ordersuccessful", "/pay", "/processpayment",
-					"/addorder").permitAll()
+					"/addorder", "/redeem", "/addNewOrder", "/addtoorder/*", "/editcart/*", "/Customer-cart-view").permitAll()
 			
 			.antMatchers("/loggedinhome", "/templogout", "/changeuserpass", "/updateuserpass/*", "/custviewinfo",
-					"/editcustomer/*", "/usercustomerupdate/*", "/Customer-cart-view", "/addtoorder", "/redeem").hasAnyRole(ApplicationUserRole.CUSTOMER.name(),
+					"/editcustomer/*", "/usercustomerupdate/*", "/rewardsinfo").hasAnyRole(ApplicationUserRole.CUSTOMER.name(),
 					ApplicationUserRole.ADMIN.name(), ApplicationUserRole.HQADMIN.name(), ApplicationUserRole.MANAGER.name(),
 					ApplicationUserRole.HQMANAGER.name(), ApplicationUserRole.SERVER.name())
 			
