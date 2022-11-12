@@ -30,6 +30,8 @@ public class Restaurants extends Locations {
 	
 	private float sales;
 	
+	private float profits;
+	
 	@ManyToOne
 	@JoinColumn(name="admin_id")
 	private Admins admin;
@@ -53,6 +55,8 @@ public class Restaurants extends Locations {
 		this.city = city;
 		this.state = state;
 		this.admin = admin;
+		this.sales = 0.00F;
+		this.profits = 0.00F;
 	}
 
 	public Restaurants() {
@@ -141,7 +145,12 @@ public class Restaurants extends Locations {
 	public void setSales(float sales) {
 		this.sales = sales;
 	}
-	
-	
-	
+
+	public float getProfits() {
+		return profits;
+	}
+
+	public void setProfits(float profits) {
+		this.profits = profits;
+	}
 }

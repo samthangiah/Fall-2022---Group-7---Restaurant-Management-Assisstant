@@ -8,6 +8,7 @@ package edu.sru.group7.restaurantmanager;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * Class that starts springboot application
@@ -16,6 +17,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  *
  */
 @SpringBootApplication
+@EnableScheduling
 public class RestaurantmanagerApplication {
 
 	public static void main(String[] args) {

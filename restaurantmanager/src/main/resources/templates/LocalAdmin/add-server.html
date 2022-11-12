@@ -85,7 +85,10 @@ input[type=text]:focus, input[type=password]:focus {
     						<br>
     						<label class="label" for="password">Password:</label>
     						<input type="password" th:field="*{password}" id="password" placeholder="Password" required>
-   							 <br>
+    						<br>
+    						<label class="label" for="hourlyRate">Hourly Rate:</label>
+    						<input type="number" th:field="*{hourlyRate}" id="hourlyRate" placeholder="7.25" required>
+   							<br>
    							<label class="label" for="restaurantid">Restaurant Location:</label>
     						<select id="restaurantid" th:field="*{restaurant}" class="form-control" required>
     							<th:block th:each="restaurant : ${listRestaurants}">

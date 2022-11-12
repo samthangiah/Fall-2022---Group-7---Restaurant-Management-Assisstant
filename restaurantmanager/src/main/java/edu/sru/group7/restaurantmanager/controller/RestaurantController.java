@@ -1,6 +1,7 @@
 package edu.sru.group7.restaurantmanager.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -50,6 +51,7 @@ import edu.sru.group7.restaurantmanager.billing.PaymentDetailsController;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -71,6 +73,8 @@ public class RestaurantController {
 
 	DateTimeFormatter date = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 	DateTimeFormatter time = DateTimeFormatter.ofPattern("HH:mm:ss");
+	
+	private final float PA_INCOME_TAX = 3.07F;
 
 	private boolean isLoggedIn;
 
@@ -417,14 +421,13 @@ public class RestaurantController {
 
 		Offices office2 = new Offices("1620 East Maiden", "16057", "Slippery Rock", "PA", listadmins);
 
-		Managers manager = new Managers("Anakin", "Skywalker", "Manager@email.com", "pass", restaurant); // restaurant
-																											// is 2
+		Managers manager = new Managers("Anakin", "Skywalker", "Manager@email.com", "pass", 10.00F, restaurant); 
 
-		Managers manager2 = new Managers("Luke", "Skywalker", "Manager2@email.com", "pass", restaurant2);
+		Managers manager2 = new Managers("Luke", "Skywalker", "Manager2@email.com", "pass", 10.00F, restaurant2);
 
-		Servers server = new Servers("Obi-wan", "Kenobi", "server@email.com", "pass", restaurant);
+		Servers server = new Servers("Obi-wan", "Kenobi", "server@email.com", "pass", 7.25F, restaurant);
 
-		Servers server2 = new Servers("Baby", "Yoda", "server2@email.com", "pass", restaurant2);
+		Servers server2 = new Servers("Baby", "Yoda", "server2@email.com", "pass", 7.25F, restaurant2);
 
 		managerRepo.save(manager);
 		managerRepo.save(manager2);
@@ -1758,6 +1761,157 @@ public class RestaurantController {
 		// TO-DO make output of orders more neat
 		return "LocalServingStaff/serving-staff-view";
 	}
+	
+	/**
+	 * Clock in method to keep track of hours worked
+	 * @return redirect to local server or manager page
+	 */
+	@RequestMapping("/clockin")
+	public String clockIn() {
+		for (Servers s : serverRepo.findAll()) {
+			if (s.getEmail().equals(getLoggedInUser().getEmail()) && s.getIsOnDuty() == false) {
+				s.setLastClockedIn(date.format(LocalDateTime.now()) + " " + time.format(LocalDateTime.now()));
+				s.setIsOnDuty(true);
+				
+				Log log = new Log();
+				log.setDate(date.format(LocalDateTime.now()));
+				log.setTime(time.format(LocalDateTime.now()));
+				log.setLocation(getUserLocation());
+				log.setUserId(getUserUID());
+				log.setAction("Server Clock In");
+				log.setActionId(s.getId());
+				logRepo.save(log);
+				
+				serverRepo.save(s);
+			}
+		}
+		for (Managers m : managerRepo.findAll()) {
+			if (m.getEmail().equals(getLoggedInUser().getEmail()) && m.getIsOnDuty() == false) {
+				m.setLastClockedIn(date.format(LocalDateTime.now()) + " " + time.format(LocalDateTime.now()));
+				m.setIsOnDuty(true);
+				
+				Log log = new Log();
+				log.setDate(date.format(LocalDateTime.now()));
+				log.setTime(time.format(LocalDateTime.now()));
+				log.setLocation(getUserLocation());
+				log.setUserId(getUserUID());
+				log.setAction("Manager Clock In");
+				log.setActionId(m.getId());
+				logRepo.save(log);
+				
+				managerRepo.save(m);
+			}
+		}
+		return "redirect:/loggedinredirect";
+	}
+	
+	/**
+	 * Clock out method to keep track of hours worked
+	 * @return redirect to local server or manager page
+	 */
+	@RequestMapping("/clockout")
+	public String clockOut() {
+		for (Servers s : serverRepo.findAll()) {
+			if (s.getEmail().equals(getLoggedInUser().getEmail()) && s.getIsOnDuty() == true) {
+				String endTime = date.format(LocalDateTime.now()) + " " + time.format(LocalDateTime.now());
+				String beginTime = s.getLastClockedIn();
+				if (s.getLastClockedIn().equals("N/A")) {
+					s.setLastClockedIn(endTime);
+					beginTime = endTime;
+				}
+				s.setIsOnDuty(false);
+				
+				//Get full difference between last clock in and current clock out time
+				DateTimeFormatter clockintime = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+				Duration difference = Duration.between(LocalDateTime.parse(beginTime, clockintime), LocalDateTime.parse(endTime, clockintime));
+				
+				s.setTotalHours(s.getTotalHours() + (float) difference.toHours());
+				s.setWeekHours(s.getWeekHours() + (float) difference.toHours());
+				s.setLastClockedIn(endTime);
+				
+				Log log = new Log();
+				log.setDate(date.format(LocalDateTime.now()));
+				log.setTime(time.format(LocalDateTime.now()));
+				log.setLocation(getUserLocation());
+				log.setUserId(getUserUID());
+				log.setAction("Server Clock Out");
+				log.setActionId(s.getId());
+				logRepo.save(log);
+				
+				serverRepo.save(s);
+			}
+		}
+		for (Managers m : managerRepo.findAll()) {
+			if (m.getEmail().equals(getLoggedInUser().getEmail()) && m.getIsOnDuty() == true) {
+				String endTime = date.format(LocalDateTime.now()) + " " + time.format(LocalDateTime.now());
+				String beginTime = m.getLastClockedIn();
+				if (m.getLastClockedIn().equals("N/A")) {
+					m.setLastClockedIn(endTime);
+					beginTime = endTime;
+				}
+				m.setIsOnDuty(false);
+				
+				//Get full difference between last clock in and current clock out time
+				DateTimeFormatter clockintime = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+				Duration difference = Duration.between(LocalDateTime.parse(beginTime, clockintime), LocalDateTime.parse(endTime, clockintime));
+				
+				m.setTotalHours(m.getTotalHours() + (float) difference.toHours());
+				m.setWeekHours(m.getWeekHours() + (float) difference.toHours());
+				m.setLastClockedIn(endTime);
+				
+				Log log = new Log();
+				log.setDate(date.format(LocalDateTime.now()));
+				log.setTime(time.format(LocalDateTime.now()));
+				log.setLocation(getUserLocation());
+				log.setUserId(getUserUID());
+				log.setAction("Manager Clock Out");
+				log.setActionId(m.getId());
+				logRepo.save(log);
+				
+				managerRepo.save(m);
+			}
+		}
+		return "redirect:/loggedinredirect";
+	}
+	
+	/**
+	 * Scheduled method to execute every Sunday at 00:00:00
+	 * Sets all Serving staff weekly hours to 0 at the beginning of new week
+	 * Calls payCalc() for payment of hourly employees
+	 */
+	@Scheduled(cron = "0 0 0 * * SUN")
+	public void resetWeeklyHours() {
+		for (Servers s : serverRepo.findAll()) {
+			payCalc(s.getWeekHours(), s.getHourlyRate(), s.getRestaurant());
+			
+			s.setWeekHours(0);
+			serverRepo.save(s);
+		}
+		for (Managers m : managerRepo.findAll()) {
+			payCalc(m.getWeekHours(), m.getHourlyRate(), m.getRestaurant());
+			
+			m.setWeekHours(0);
+			managerRepo.save(m);
+		}
+		System.out.println("----- Reset weekly hours for servers and managers -----");
+	}
+	
+	/**
+	 * @param hours. Hours worked since the previous Sunday
+	 * @param rate. Hourly rate of pay
+	 * @param location. Restaurant to take out profits from
+	 * Automatically done weekly, called from scheduled method resetWeeklyHours()
+	 */
+	public void payCalc(float hours, float rate, Restaurants location) {
+		//Do payment logic with their weekly hours and rate
+		float payout = hours * rate;
+		payout -= payout * (PA_INCOME_TAX / 100);
+		//Round to 2 decimal places
+		payout = Math.round(payout * 100.0) / 100.0F;
+		
+		location.setProfits(location.getProfits() - payout);
+		restaurantRepo.save(location);
+	}
 
 	/**
 	 * For managers to view Serving staff home page for outgoing orders, customer information, etc.
@@ -2362,6 +2516,7 @@ public class RestaurantController {
 		private void addToSales(Orders order) {
 			Restaurants restaurant = order.getRestaurant();
 			restaurant.setSales(restaurant.getSales() + order.getPrice());
+			restaurant.setProfits(restaurant.getProfits() + order.getPrice());
 			restaurantRepo.save(restaurant);
 			
 		}

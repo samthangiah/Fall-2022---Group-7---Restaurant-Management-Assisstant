@@ -80,7 +80,11 @@ table, th, td {
 								<th>First Name</th>
 								<th>Last Name</th>
 								<th>Email</th>
-								<th>Location</th>
+								<th>Hourly Rate</th>
+								<th>On Duty</th>
+								<th>Last Worked</th>
+								<th>Hours Past Week</th>
+								<th>Total Hours</th>
 								<th>Edit</th>
 								<th>Delete</th>
 							</tr>
@@ -90,16 +94,17 @@ table, th, td {
                     <td th:text="${server.firstName}"></td>
                     <td th:text="${server.lastName}"></td>
                     <td th:text="${server.email}"></td>
-                    <td th:text="${server.restaurant}"></td>
+                    <td th:text="${server.hourlyRate}"></td>
+                    <td th:text="${server.isOnDuty}"></td>
+                    <td th:text="${server.lastClockedIn}"></td>
+                    <td th:text="${server.weekHours}"></td>
+                    <td th:text="${server.totalHours}"></td>
                     <td><a th:href="@{/localmanagerserveredit/{id}(id=${server.id})}">Edit</a></td>
                     <td><a th:href="@{/localmanagerserverdelete/{id}(id=${server.id})}">Delete</a></td>
                 </tr>
 		</tbody>
 		
 	</table>
-	<div class="btn-group">
-  		<a href="/local-manager-view" class="btn btn-primary" role="button">Return to Manager Page</a>
-	</div>
 	</div>
                     </div>
                 </div>
