@@ -30,12 +30,12 @@ WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity http) throws Exception { 
 		http
 			.authorizeRequests() 
-			.antMatchers("/", "/index", "/css/*", "/js/*", "/img/*", "/assets/*", "/403", "/login", "/showlogin", 
-					"/employeelogin", "/showemployeelogin", "/custregistrationpage", "/addregisteredcustomer", "/add-sample-order",
+			.antMatchers("/", "/index", "/css/*", "/js/*", "/img/*", "/assets/*", "/403", "/login", "/custsignin",
+					"/processcredentials", "/custregistrationpage", "/addregisteredcustomer", "/add-sample-order", 
 					"/showmenu", "/contact", "/Customer-ordertype-view", "/ordersuccessful", "/pay", "/processpayment",
 					"/addorder", "/redeem", "/addNewOrder", "/addtoorder/*", "/editcart/*", "/Customer-cart-view").permitAll()
 			
-			.antMatchers("/loggedinhome", "/templogout", "/changeuserpass", "/updateuserpass/*", "/custviewinfo",
+			.antMatchers("/loggedinhome", "/showlogout", "/changeuserpass", "/updateuserpass/*", "/custviewinfo",
 					"/editcustomer/*", "/usercustomerupdate/*", "/rewardsinfo").hasAnyRole(ApplicationUserRole.CUSTOMER.name(),
 					ApplicationUserRole.ADMIN.name(), ApplicationUserRole.HQADMIN.name(), ApplicationUserRole.MANAGER.name(),
 					ApplicationUserRole.HQMANAGER.name(), ApplicationUserRole.SERVER.name())
@@ -67,7 +67,7 @@ WebSecurityConfigurerAdapter {
 					"/manager-inventory-view", "/managerinventoryupdate/*", "/managerinventoryedit/*", "/update-inventory").hasAnyRole(ApplicationUserRole.MANAGER.name(),
 							ApplicationUserRole.HQMANAGER.name(), ApplicationUserRole.ADMIN.name(), ApplicationUserRole.HQADMIN.name())
 			
-			.antMatchers("/hqlogview", "/local-manager-view-view", "/HQ-manager-view", "/HQmanager-managers-view",
+			.antMatchers("/hqlogview", "/HQ-manager-view", "/HQmanager-managers-view",
 					"/HQmanagermanedit/*", "/HQmanagermanupdate/*", "/HQmanagermandelete/*", "/HQmanageraddmanager",
 					"/addlfmanager", "/HQmanager-restaurants-view", "/HQmanager-offices-view", 
 					"/HQmanager-warehouses-view").hasAnyRole(ApplicationUserRole.HQMANAGER.name(), ApplicationUserRole.HQADMIN.name())
@@ -79,7 +79,7 @@ WebSecurityConfigurerAdapter {
 			.loginProcessingUrl("/processcredentials")
 			.and()
 			.logout()
-				.logoutSuccessUrl("/templogout")
+				.logoutSuccessUrl("/showlogout")
 				.clearAuthentication(true)
 				.invalidateHttpSession(true);
 	}

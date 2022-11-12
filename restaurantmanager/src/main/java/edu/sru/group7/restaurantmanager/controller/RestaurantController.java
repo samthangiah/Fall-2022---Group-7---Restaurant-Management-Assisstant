@@ -142,7 +142,7 @@ public class RestaurantController {
 		isLoggedIn = false;
 	}
     
-    /*
+    /**
      * @return Current HttpSession object to be used for guest users
      */
     public HttpSession getCurrentSession() {
@@ -151,10 +151,17 @@ public class RestaurantController {
     	return session;
     }
 
+    /**
+     * @return Gets boolean value of whether the user is authenticated through login page
+     */
 	public boolean GetIsLoggedIn() {
 		return isLoggedIn;
 	}
 
+	/**
+	 * @param isLoggedIn
+     * Sets boolean value of whether the user is authenticated through login page
+     */
 	public void SetIsLoggedIn(boolean isLoggedIn) {
 		this.isLoggedIn = isLoggedIn;
 	}
@@ -340,7 +347,7 @@ public class RestaurantController {
 		while (curRow.getRowNum() < sheet.getLastRowNum()) {
 			i++;
 			int j = 2;
-			Vector ingredientsList = new Vector();
+			Vector<String> ingredientsList = new Vector<String>();
 			Ingredients ingredient = new Ingredients();
 			curRow = sheet.getRow(i);
 			ingredient.setId(checkIntType(curRow.getCell(0)));
@@ -458,7 +465,7 @@ public class RestaurantController {
 
 		customerRepo.save(cust);
 
-		Set item = new HashSet();
+		Set<Menu> item = new HashSet<Menu>();
 
 		item.add(menuRepo.findById((long) 1).get());
 		item.add(menuRepo.findById((long) 2).get());
@@ -499,7 +506,6 @@ public class RestaurantController {
 
 	}
 
-	// index page
 	/**
 	 * @return index page
 	 */
@@ -528,35 +534,38 @@ public class RestaurantController {
 	}
 
 	/**
-	 * 403 Error page
+	 * Currently unused, not sure how to redirect default error page to 403 url
+	 * @return 403 Error page
 	 */
 	@GetMapping("/403")
 	public String error403() {
 		return "SignIn/403";
 	}
 
-	// Do we use this?
-	@RequestMapping({ "/signin" })
-	public String signIn() {
+	/**
+	 * Redirect to method checking account authorities to show corresponding pages
+	 */
+	@RequestMapping({ "/custsignin" })
+	public String loginPage() {
 		SetIsLoggedIn(true);
-		return "redirect:/loggedinhome";
+		return "redirect:/loggedinredirect";
 	}
-
-	// Do we use this?
-	@RequestMapping({ "/employeelogin" })
-	public String tempEmployeeLoginPage() {
-		SetIsLoggedIn(true);
-
-		return "redirect:/temploginpage";
-	}
-
-	// Do we use this?
+	
+	/**
+	 * Used for Home button on all pages requiring customer authorities
+	 * @return Home page for logged in customer accounts
+	 */
 	@GetMapping("/loggedinhome")
 	public String loggedIn() {
 		return "Customer/loggedinhome";
 	}
 
-	// Manual credential processing to allow user registration
+	/**
+	 * Manual credential processing to allow user registration
+	 * Used in ApplicationSecurityConfig as login processing URL
+	 * @param usernameParameter Email entered from form
+	 * @param passwordParameter Password entered from form
+	 */
 	@PostMapping("/processcredentials")
 	public String processCredentials(String usernameParameter, String passwordParameter) {
 		Optional<ApplicationUser> user = fakeApplicationUserDaoService
@@ -567,22 +576,30 @@ public class RestaurantController {
 		try {
 			ApplicationUser credentials = user.get();
 			if (credentials.getPassword() == fakeApplicationUserDaoService.encode(passwordParameter)) {
-				return "/temploginpage";
+				return "redirect:/loggedinredirect";
 			}
 		} catch (Exception e) {
 		}
 		return "/login?error";
 	}
 
-	@RequestMapping({ "/templogout" })
+	/**
+	 * Logout success URL mapping for ApplicationSecurityConfig
+	 * Redirects to login form by default
+	 */
+	@RequestMapping({ "/showlogout" })
 	public String logout() {
 		SetIsLoggedIn(false);
 		// Clears authentication and invalidates HTTPsession through
 		// ApplicationSecurityConfig
-		return "redirect:/temploginpage";
+		return "redirect:/loggedinredirect";
 	}
 
+	/**
+	 * @return Customer object of currently logged in user, null if user is not logged in
+	 */
 	public Customers getLoggedInUser() {
+		//Principal will be anonymousUser if not authenticated through login page
 		if (SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString()
 				.startsWith("anonymousUser")) {
 			return null;
@@ -624,7 +641,7 @@ public class RestaurantController {
 	}
 
 	/**
-	 * @return menupage. Customers view of the menu
+	 * @return Menu page. View menu loaded from database or excel file
 	 */
 	@RequestMapping({ "/showmenu" })
 	public String showMenu() {
@@ -634,10 +651,13 @@ public class RestaurantController {
 		return "Customer/menupage";
 	}
 
-	@GetMapping("/temploginpage")
-	public String staffLoginPage() {
+	/**
+	 * @return Redirect for home page corresponding to highest authority granted
+	 */
+	@GetMapping("/loggedinredirect")
+	public String authorityCheckForLoginRedirects() {
 		ApplicationUser user = (ApplicationUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		// Redirect user to staff page of highest authority
+		// Redirect user to staff page of highest authority or customer page
 		if (user.getAuthorities().toString().contains("ROLE_HQADMIN")) {
 			return "redirect:/hqlogadminview";
 		}
@@ -656,7 +676,8 @@ public class RestaurantController {
 		if (user.getAuthorities().toString().contains("ROLE_CUSTOMER")) {
 			return "redirect:/loggedinhome";
 		}
-		return "SignIn/temploginpage";
+		//Failsafe index redirect
+		return "redirect:/";
 	}
 
 	/**
@@ -1726,7 +1747,10 @@ public class RestaurantController {
 		return "redirect:/servingstaffview";
 	}
 
-	//Do we use this
+	/**
+	 * @param model
+	 * @return Serving staff home view
+	 */
 	@GetMapping("/servingstaffview")
 	public String showServerView(Model model) {
 		model.addAttribute("orders", orderRepo.findOrdersByLocation(getUserLocation()));
@@ -1735,7 +1759,11 @@ public class RestaurantController {
 		return "LocalServingStaff/serving-staff-view";
 	}
 
-	//Do we use this
+	/**
+	 * For managers to view Serving staff home page for outgoing orders, customer information, etc.
+	 * @param model
+	 * @return Server view with local manager authorities
+	 */
 	@GetMapping("/servingstaffviewview")
 	public String showLocalManServerView(Model model) {
 		// get all orders paid
@@ -1744,13 +1772,8 @@ public class RestaurantController {
 		return "LocalManager/manager-server-view-view";
 	}
 
-	// I wrote this unintuitively but the pathvariable "id" is supposed to be the
-	// customer's email since
-	// order.customer is a String and you can't just do customerRepo.findByEmail()
-	// or anything like that, it
-	// only works with id so I just loop through the customers for one with a
-	// matching email to get their id
 	/**
+	 * @param id	ID of Customer corresponding to order
 	 * @param orderCust Customer
 	 * @param model
 	 * @return server-cust-view. Shows selected customer information based on their email that we Query the Repository for.
@@ -1768,8 +1791,9 @@ public class RestaurantController {
 		return "LocalServingStaff/server-cust-view";
 	}
 
-	// For guest order "view customer info and rewards" to not throw 404
-	//do we use this. I added an exception to null customer objects
+	/**
+	 * For serving staff "view customer info and rewards" to not throw 404 on guest orders or invalid customer IDs
+	 */
 	@GetMapping("/serverviewcustinfo/")
 	public String blankCustInfo() {
 		return "redirect:/servingstaffview";
@@ -1797,7 +1821,10 @@ public class RestaurantController {
 		return "LocalManager/log-view";
 	}
 
-	
+	/**
+	 * @param model
+	 * @return log-admin-view. Local action log page with admin authorities per location
+	 */
 	@GetMapping("/logadminview")
 	public String showAdminLog(Model model) {
 		Customers cust = getLoggedInUser();
@@ -1847,15 +1874,6 @@ public class RestaurantController {
 		model.addAttribute("inventoryList", inventoryRepo.findInventoryRestaurant(manager.getRestaurant().getId()));
 
 		return "LocalManager/manager-inventory-view";
-	}
-
-	/**
-	 * @return local-manager-view-view. Shows
-	 */
-	//do we use this
-	@RequestMapping({ "/local-manager-view-view" })
-	public String showHQManManagerPage() {
-		return "HQManager/local-manager-view-view";
 	}
 
 	/**
@@ -1930,7 +1948,7 @@ public class RestaurantController {
 	 * @param customer
 	 * @param result
 	 * @param model
-	 * @return update-custoemr. Updates entered customer information from Local Manager. Validates email does not already exist.
+	 * @return update-customer. Updates entered customer information from Local Manager. Validates email does not already exist.
 	 */
 	@PostMapping("/localmanagercustupdate/{id}")
 	public String localManUpdateCust(@PathVariable("id") long id, @Validated Customers customer, BindingResult result,
@@ -1958,6 +1976,11 @@ public class RestaurantController {
 		return "redirect:/manager-cust-view";
 	}
 
+	/**
+	 * @param id
+	 * @param model
+	 * @return redirect to manager page list of customers
+	 */
 	@GetMapping("/localmanagercustdelete/{id}")
 	public String localManDeleteCust(@PathVariable("id") long id, Model model) {
 		Customers customer = customerRepo.findById(id)
@@ -1976,17 +1999,31 @@ public class RestaurantController {
 		return "redirect:/manager-cust-view";
 	}
 
+	/**
+	 * @param model
+	 * @return manager-menu-view. Menu page with manager authorities and ability to edit menu manually
+	 */
 	@RequestMapping({ "/manager-menu-view" })
 	public String localManShowMenu(Model model) {
 		model.addAttribute("menu", menuRepo.findAll());
 		return "LocalManager/manager-menu-view";
 	}
 
+	/**
+	 * @param menu
+	 * @return add-menu-item Form for adding new menu item manually
+	 */
 	@RequestMapping({ "/localmanageraddmenu" })
 	public String showMenuAddForm(Menu menu) {
 		return "LocalManager/add-menu-item";
 	}
 
+	/**
+	 * @param menu
+	 * @param result
+	 * @param model
+	 * @return redirect back to manager menu view page
+	 */
 	@RequestMapping({ "/addmenuitem" })
 	public String addMenuItem(@Validated Menu menu, BindingResult result, Model model) {
 		if (result.hasErrors()) {
@@ -2111,7 +2148,9 @@ public class RestaurantController {
 		return "redirect:/manager-server-view";
 	}
 
-	// HQ Manager home page
+	/**
+	 * @return HQ Manager home page
+	 */
 	@RequestMapping({ "/HQ-manager-view" })
 	public String showHQManagerPage() {
 		return "HQManager/HQ-manager-view";
@@ -2279,10 +2318,10 @@ public class RestaurantController {
 			//}
 		}
 		
-    /**
-	  * @param model
-	  * @return Customer Cart page
-	  */
+		/**
+		 * @param model
+		 * @return Cart page, cart loaded through either Customer account or HttpSession if guest user
+		 */
 		@RequestMapping("/Customer-cart-view")
 		public String viewCart(Model model) {
 			float finalPrice = 0;
@@ -2671,7 +2710,7 @@ public class RestaurantController {
 			return "Customer/rewards";
 		}	
 	
-	/*
+	/**
 	 * @return Customer object for hardcoded guest customer of id -1
 	 */
 	public Customers getGuestCust() {
@@ -2686,6 +2725,9 @@ public class RestaurantController {
 		return null;
 	}
 	
+	/**
+	 * @return location attribute of currently signed in Customer account. -1 if not logged in.
+	 */
     public int getUserLocation() {
 
 		Customers user = getLoggedInUser();
@@ -2695,6 +2737,9 @@ public class RestaurantController {
 		return user.getLocation();
 	}
 
+    /**
+	 * @return id attribute of currently signed in Customer account. -1 if not logged in.
+	 */
 	public long getUserUID() {
 		Customers user = getLoggedInUser();
 		if (user == null) {
