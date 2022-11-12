@@ -56,8 +56,9 @@ WebSecurityConfigurerAdapter {
 					"/localadminmandelete/*", "/logadminview").hasAnyRole(ApplicationUserRole.ADMIN.name(), 
 							ApplicationUserRole.HQADMIN.name())
 			
-			.antMatchers("/deleteorder/*", "/servingstaffview", "/serverviewcustinfo/*", "/updatemenuitem/*").hasAnyRole(ApplicationUserRole.SERVER.name(),
-					ApplicationUserRole.ADMIN.name(), ApplicationUserRole.MANAGER.name(), ApplicationUserRole.HQADMIN.name(), ApplicationUserRole.HQMANAGER.name())
+			.antMatchers("/deleteorder/*", "/servingstaffview", "/serverviewcustinfo/*", "/updatemenuitem/*",
+					"/clockin", "/clockout").hasAnyRole(ApplicationUserRole.SERVER.name(), ApplicationUserRole.ADMIN.name(), 
+					ApplicationUserRole.MANAGER.name(), ApplicationUserRole.HQADMIN.name(), ApplicationUserRole.HQMANAGER.name())
 			
 			.antMatchers("/servingstaffviewview", "/logview", "/local-manager-view", "/manager-cust-view",
 					"/localmanagercustedit/*", "/localmanagercustupdate/*", "/localmanagercustdelete/*",

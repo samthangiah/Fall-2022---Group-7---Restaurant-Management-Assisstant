@@ -79,13 +79,24 @@ input[type=text]:focus, input[type=password]:focus {
     						<input type="text" th:field="*{firstName}" id="firstname" placeholder="First Name" required>
     						<label class="label" for="lastname">Last Name:</label>
     						<input type="text" th:field="*{lastName}" id="lastname" placeholder="Last Name" required>
-   							 <br>
+   							<br>
     						<label class="label" for="email">Email:</label>
     						<input type="email" th:field="*{email}" id="email" placeholder="Email" required>
-    						<br>
     						<label class="label" for="password">Password:</label>
     						<input type="text" th:field="*{password}" id="password" placeholder="Password" required>
-   							 <br>
+   							<br>
+   							<label class="label" for="hourlyRate">Hourly Rate:</label>
+    						<input type="number" th:field="*{hourlyRate}" id="hourlyRate" placeholder="Hourly Rate" required>
+   							<br>
+    						<input type="checkbox" th:field="*{isOnDuty}" id="isOnDuty"> Currently clocked In?<br>
+    						<label class="label" for="lastClockedIn">Last Clocked In:</label>
+    						<input type="text" th:field="*{lastClockedIn}" id="lastClockedIn" placeholder="yyyy-MM-dd HH:mm:ss">
+    						<br>
+    						<label class="label" for="totalHours">Total Hours:</label>
+    						<input type="number" th:field="*{totalHours}" id="totalHours" placeholder="0">
+    						<label class="label" for="weekHours">This Week's Hours:</label>
+    						<input type="number" th:field="*{weekHours}" id="weekHours" placeholder="0">
+    						<br>
    							<label class="label" for="restaurantid">Restaurant Location:</label>
     						<select id="restaurantid" th:field="*{restaurant}" class="form-control" required>
     							<th:block th:each="restaurant : ${listRestaurants}">

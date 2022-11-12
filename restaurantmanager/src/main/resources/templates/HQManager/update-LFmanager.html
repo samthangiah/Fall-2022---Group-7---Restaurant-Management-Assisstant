@@ -87,14 +87,23 @@ input[type=text]:focus, input[type=password]:focus {
     							<label for="email">Email</label>
     							<input type="email" th:field="*{email}" id="email" placeholder="Email" required>
     							<br>
-    							<input type="hidden" th:field="*{password}" id="password" placeholder="Password" required>
+    							<label class="label" for="hourlyRate">Hourly Rate</label>
+    							<input type="number" th:field="*{hourlyRate}" id="hourlyRate" placeholder="Hourly Rate" required>
     							<br>
-    							<label class="label" for="restaurantid">Restaurant Location:</label>
+    							<label class="label" for="restaurantid">Restaurant Location</label>
     							<select id="restaurantid" th:field="*{restaurant}" class="form-control" required>
     							<th:block th:each="restaurant : ${listRestaurants}">
     							 <option th:value="${restaurant.id}" th:text="${restaurant.id} + ' ' + ${restaurant.address} + ' ' + ${restaurant.city} + ' ' + ${restaurant.state}"></option>
     							 </th:block>
     							</select>
+    							<br>
+    							<input type="hidden" th:field="*{password}" id="password" placeholder="Password" required>
+    							<input type="hidden" th:field="*{restaurant}" id="restaurant_id" placeholder="Restaurant" required>
+    							<input type="hidden" th:field="*{isOnDuty}" id="isOnDuty" required>
+    							<input type="hidden" th:field="*{lastClockedIn}" id="lastClockedIn" placeholder="yyyy-MM-dd HH:mm:ss" required>
+    							<input type="hidden" th:field="*{totalHours}" id="totalHours" placeholder="Total Hours" required>
+    							<input type="hidden" th:field="*{weekHours}" id="weekHours" placeholder="This Week's Hours" required>
+    							<br>
     							<input type="submit" value="Update Manager">   
 							</form>
 						</div>

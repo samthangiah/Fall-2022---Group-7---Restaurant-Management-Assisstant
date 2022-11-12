@@ -79,7 +79,11 @@ table, th, td {
 								<th>Last Name</th>
 								<th>Email</th>
 								<th>Password</th>
-								<th>Location</th>
+								<th>Hourly Rate</th>
+								<th>On Duty</th>
+								<th>Last Worked</th>
+								<th>Hours Past Week</th>
+								<th>Total Hours</th>
 								<th>Edit</th>
 								<th>Delete</th>
 							</tr>
@@ -90,7 +94,11 @@ table, th, td {
                     <td th:text="${server.lastName}"></td>
                     <td th:text="${server.email}"></td>
                     <td th:text="${server.password}"></td>
-                    <td th:text="${server.restaurant}"></td>
+                    <td th:text="${server.hourlyRate}"></td>
+                    <td th:text="${server.isOnDuty}"></td>
+                    <td th:text="${server.lastClockedIn}"></td>
+                    <td th:text="${server.weekHours}"></td>
+                    <td th:text="${server.totalHours}"></td>
                     <td><a th:href="@{/localadminserveredit/{id}(id=${server.id})}">Edit</a></td>
                     <td><a th:href="@{/localadminserverdelete/{id}(id=${server.id})}">Delete</a></td>
                 </tr>

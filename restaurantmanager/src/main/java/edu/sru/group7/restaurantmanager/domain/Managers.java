@@ -22,6 +22,16 @@ public class Managers {
     
     private String password;
     
+    private float hourlyRate;
+    
+    private boolean isOnDuty;
+    
+    private String lastClockedIn;
+    
+    private float totalHours;
+    
+    private float weekHours;
+    
     @ManyToOne
 	@JoinColumn(name="restaurant_id")
 	private Restaurants restaurant;
@@ -32,14 +42,20 @@ public class Managers {
      * @param lastName
      * @param email
      * @param password
+     * @param hourlyRate
      * @param restaurant
      */
-	public Managers(String firstName, String lastName, String email, String password, Restaurants restaurant) {
+	public Managers(String firstName, String lastName, String email, String password, float hourlyRate, Restaurants restaurant) {
 		super();
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.email = email;
 		this.password = password;
+		this.hourlyRate = hourlyRate;
+		this.isOnDuty = false;
+		this.lastClockedIn = "N/A";
+		this.totalHours = 0;
+		this.weekHours = 0;
 		this.restaurant = restaurant;
 	}
 
@@ -88,6 +104,46 @@ public class Managers {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public float getHourlyRate() {
+		return hourlyRate;
+	}
+
+	public void setHourlyRate(float hourlyRate) {
+		this.hourlyRate = hourlyRate;
+	}
+
+	public boolean getIsOnDuty() {
+		return isOnDuty;
+	}
+
+	public void setIsOnDuty(boolean isOnDuty) {
+		this.isOnDuty = isOnDuty;
+	}
+
+	public String getLastClockedIn() {
+		return lastClockedIn;
+	}
+
+	public void setLastClockedIn(String lastClockedIn) {
+		this.lastClockedIn = lastClockedIn;
+	}
+
+	public float getTotalHours() {
+		return totalHours;
+	}
+
+	public void setTotalHours(float totalHours) {
+		this.totalHours = totalHours;
+	}
+
+	public float getWeekHours() {
+		return weekHours;
+	}
+
+	public void setWeekHours(float weekHours) {
+		this.weekHours = weekHours;
 	}
 
 	/**
