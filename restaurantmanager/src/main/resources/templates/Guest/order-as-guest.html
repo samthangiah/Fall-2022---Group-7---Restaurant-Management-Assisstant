@@ -56,7 +56,9 @@
 								<th>Entree</th>
 								<th>Side</th>
 								<th>Price</th>
+								<!-- <th>Quantity</th> -->
 								<th>Add</th>
+								<th>Remove</th>
 							</tr>
 						</thead>
 		<tbody>
@@ -66,7 +68,9 @@
 				<td th:text="${menu.entree}"></td>
 				<td th:text="${menu.sides}"></td>
 				<td th:text="${menu.price}"></td>
+				<!-- <td>(WIP)</td> -->
 				<td><a th:href="@{/addtoorder/{id}(id = ${menu.id})}" class="btn btn-primary">Add</a></td>
+				<td><a th:href="@{/ordereditcart/{id}(id = ${menu.id})}" class="btn btn-primary">Remove</a></td>
 			</tr>
 			</th:block>
 		</tbody>

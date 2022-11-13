@@ -2422,6 +2422,9 @@ public class RestaurantController {
 			return "Guest/order-as-guest";
 		}
 		
+		/**
+		 * @return Order success page
+		 */
 		@RequestMapping({"/ordersuccessful"})
 		public String showOrderSuccess(){
 			if (getLoggedInUser() != null) {
@@ -2430,6 +2433,10 @@ public class RestaurantController {
 			return "Guest/guestordersuccess";
 		}
 		
+		/**
+		 * @param model
+		 * Display payment input page
+		 */
 		@RequestMapping("/pay")
 		public String showPaymentPage(Model model) {
 			PaymentDetails_Form payForm = new PaymentDetails_Form();
@@ -2440,6 +2447,13 @@ public class RestaurantController {
 			return "Guest/guestpay";
 		}
 		
+		/**
+		 * @param form		mirror of PaymentDetails for form submission
+		 * @param result
+		 * @param model
+		 * Payment processing simulation method
+		 * Currently does not do anything with PaymentDetails generated from form
+		 */
 		@RequestMapping("/processpayment")
 		public String processPayment(@Validated PaymentDetails_Form form, BindingResult result, Model model) {
 			if (result.hasErrors()) {
@@ -2513,6 +2527,10 @@ public class RestaurantController {
 			return "Guest/cart";
 		}
 		
+		/**
+		 * @param order
+		 * Append to sales and profits for restaurant corresponding to order
+		 */
 		private void addToSales(Orders order) {
 			Restaurants restaurant = order.getRestaurant();
 			restaurant.setSales(restaurant.getSales() + order.getPrice());
@@ -2521,6 +2539,11 @@ public class RestaurantController {
 			
 		}
     
+		/**
+		 * @param id	Cart id
+		 * @param model
+		 * Remove cartItem from cart through cart-view page
+		 */
 		@GetMapping("/editcart/{id}")
 		public String deleteCartItem(@PathVariable("id") long id, Model model) {
 			CartItems item = cartItemsRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid cartItems Id:" + id));
@@ -2543,6 +2566,43 @@ public class RestaurantController {
 			return "redirect:/Customer-cart-view";
 		}
 		
+		/**
+		 * @param id	Menu id
+		 * @param model
+		 * Remove cartItem from cart through ordertype-view page
+		 */
+		@GetMapping("/ordereditcart/{id}")
+		public String editCartFromMenu(@PathVariable("id") long id, Model model) {
+			Menu menu = menuRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid menu Id:" + id));
+			CartItems cartItem = null;
+			
+			if (getLoggedInUser() != null) {
+				cartItem = cartItemsRepo.findByCustMenuId(id, getUserUID());
+			} else if (getCurrentSession().getAttribute("cartItems") != null) {
+				List<CartItems> cartItems = (List<CartItems>) getCurrentSession().getAttribute("cartItems");
+				List<CartItems> newCart = new ArrayList<CartItems>();
+				
+				for (CartItems i : cartItems) {
+					//Find menu item from cart items
+					if (!(i.getMenu_id().toString().equals(menu.toString()))) {
+						newCart.add(i);
+					} else {
+						cartItem = i;
+					}
+				}
+				getCurrentSession().setAttribute("cartItems", newCart);
+			}
+			
+			if (cartItem != null) {
+				cartItemsRepo.delete(cartItem);
+			}
+			return "redirect:/Customer-ordertype-view";
+		}
+		
+		/**
+		 * Remove all items from cart
+		 * Used when order is payed to reset cart
+		 */
 		public void deleteCartItems() {
 			Customers customer = getLoggedInUser();
 			List<CartItems> cartItems;
@@ -2562,6 +2622,14 @@ public class RestaurantController {
 			cartItemsRepo.deleteAll(cartItems);
 		}
 		
+		/**
+		 * @param id	Menu id
+		 * @param cartItem
+		 * @param result
+		 * @param model
+		 * Add menu item to cart from ordertype-view page
+		 * If no cart exists, create new cart
+		 */
 		@GetMapping({"/addtoorder/{id}"})
 		public String custAddToOrder(@PathVariable("id") long id, @Validated CartItems cartItem, BindingResult result, Model model) {
 			if (result.hasErrors()) {
@@ -2615,6 +2683,12 @@ public class RestaurantController {
 			return "redirect:/Customer-ordertype-view";
 		}
 		
+		/**
+		 * @param id	Menu id
+		 * @param cartItem
+		 * Populate new cartItem or create cartItems attribute
+		 * @return cartItem
+		 */
 		private CartItems createNewOrder(long id, CartItems cartItem) {
 			Menu menu = menuRepo.findById(id)
 				.orElseThrow(() -> new IllegalArgumentException("Invalid menu Id:" + id));
@@ -2639,6 +2713,10 @@ public class RestaurantController {
 			return cartItem;
 		}
 		
+		/**
+		 * @param order
+		 * Create new order with details from existing cartItems
+		 */
 		@RequestMapping({"/addNewOrder"})
 		public String custAddOrder(Orders order) {
 			if (orderRepo.findByCustomerIdUnpaid(getUserUID()) != null) {
@@ -2695,6 +2773,10 @@ public class RestaurantController {
 			return "redirect:/pay";
 		}
 		
+		/**
+		 * @param order
+		 * Remove menu ingredients from restaurant inventory based on items in order
+		 */
 		public void removeFromInventory(Orders order) {
 			Set<Menu> items = order.getItems();
 			Iterator<Menu> it = items.iterator();
@@ -2824,6 +2906,12 @@ public class RestaurantController {
 		}
 		*/
 		
+		/**
+		 * Customer redeem rewards button
+		 * Redeems 5 rewards points at a time
+		 * Discount is 10% of order
+		 * Creates new discount menu object to be added as a cartItem
+		 */
 		@RequestMapping({"/redeem"})
 		public String redeemRewards() {
 			Customers user = getLoggedInUser();
@@ -2859,6 +2947,9 @@ public class RestaurantController {
 		return "redirect:/Customer-cart-view";
 		}
 	
+		/**
+		 * Rewards info page for customers
+		 */
 		@GetMapping("/rewardsinfo")
 		public String custRewardsInfo(Model model) {
 			model.addAttribute("customers", getLoggedInUser());
