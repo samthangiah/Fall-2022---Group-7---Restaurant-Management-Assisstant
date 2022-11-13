@@ -61,18 +61,18 @@ WebSecurityConfigurerAdapter {
 					"/clockin", "/clockout").hasAnyRole(ApplicationUserRole.SERVER.name(), ApplicationUserRole.ADMIN.name(), 
 					ApplicationUserRole.MANAGER.name(), ApplicationUserRole.HQADMIN.name(), ApplicationUserRole.HQMANAGER.name())
 			
-			.antMatchers("/servingstaffviewview", "/logview", "/local-manager-view", "/manager-cust-view",
+			.antMatchers("/servingstaffviewview", "/logview", "/manager-cust-view",
 					"/localmanagercustedit/*", "/localmanagercustupdate/*", "/localmanagercustdelete/*",
-					"/manager-menu-view", "/localmanageraddmenu", "/addmenuitem", "/localmanagereditmenu/*",
-					"/localmanagerupdatemenu/*", "/localmanagerdeletemenu/*", "/manager-server-view",
-					"/localmanagerserveredit/*", "/localmanagerserverupdate/*", "/localmanagerserverdelete/*",
-					"/manager-inventory-view", "/managerinventoryupdate/*", "/managerinventoryedit/*", "/update-inventory").hasAnyRole(ApplicationUserRole.MANAGER.name(),
+					"/manager-menu-view", "/manager-server-view","/localmanagerserveredit/*", "/localmanagerserverupdate/*", 
+					"/localmanagerserverdelete/*", "/manager-inventory-view", "/managerinventoryupdate/*", "/managerinventoryedit/*", 
+					"/update-inventory").hasAnyRole(ApplicationUserRole.MANAGER.name(),
 							ApplicationUserRole.HQMANAGER.name(), ApplicationUserRole.ADMIN.name(), ApplicationUserRole.HQADMIN.name())
 			
 			.antMatchers("/hqlogview", "/HQ-manager-view", "/HQmanager-managers-view",
 					"/HQmanagermanedit/*", "/HQmanagermanupdate/*", "/HQmanagermandelete/*", "/HQmanageraddmanager",
 					"/addlfmanager", "/HQmanager-restaurants-view", "/HQmanager-offices-view", 
 					"/HQmanager-warehouses-view").hasAnyRole(ApplicationUserRole.HQMANAGER.name(), ApplicationUserRole.HQADMIN.name())
+			.antMatchers("warehouseman-shipment-view").hasAnyRole(ApplicationUserRole.WAREHOUSEMANAGER.name(), ApplicationUserRole.WAREHOUSEMANAGER.name())
 			
 			.anyRequest() 
 			.authenticated() 

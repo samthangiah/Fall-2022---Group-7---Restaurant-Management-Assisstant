@@ -29,6 +29,9 @@ public class Warehouses extends Locations {
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "warehouse_id")
 	private List<Inventory> inventory = new ArrayList<>();
 	
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "warehouse_id")
+	private List<Shipping> shipments = new ArrayList<>();
+	
 	@OneToMany(cascade=CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "warehouse")
     private List<WarehouseManager> manager = new ArrayList<>();
 	
@@ -88,6 +91,14 @@ public class Warehouses extends Locations {
 
 	public void setCity(String city) {
 		this.city = city;
+	}
+
+	public List<Shipping> getShipments() {
+		return shipments;
+	}
+
+	public void setShipments(List<Shipping> shipments) {
+		this.shipments = shipments;
 	}
 
 	

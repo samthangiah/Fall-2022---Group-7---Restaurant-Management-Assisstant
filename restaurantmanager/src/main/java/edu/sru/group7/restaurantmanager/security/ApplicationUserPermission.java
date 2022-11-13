@@ -13,7 +13,9 @@ public enum ApplicationUserPermission {
 	HQMANAGER_READ("hqmanagers:read"),
 	HQMANAGER_WRITE("hqmanagers:write"),
 	HQADMIN_READ("hqadmins:read"),
-	HQADMIN_WRITE("hqadmins:write");
+	HQADMIN_WRITE("hqadmins:write"), 
+	WAREHOUSEMANAGER_READ("warehousemanager:read"),
+	WAREHOUSEMANAGER_WRITE("warehousemanager:write");
 	
 	private final String permission;
 	

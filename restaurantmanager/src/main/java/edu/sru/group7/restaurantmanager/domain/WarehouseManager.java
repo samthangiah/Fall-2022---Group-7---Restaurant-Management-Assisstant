@@ -1,11 +1,17 @@
 package edu.sru.group7.restaurantmanager.domain;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 
 @Entity
 public class WarehouseManager {
@@ -25,10 +31,12 @@ public class WarehouseManager {
     @ManyToOne
 	@JoinColumn(name="warehouse_id")
 	private Warehouses warehouse;
+    
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "warehouse_id")
+	private List<Shipping> shipments = new ArrayList<>();
 
-	public WarehouseManager(long id, String firstName, String lastName, String email, String password, Warehouses warehouse) {
+	public WarehouseManager(String firstName, String lastName, String email, String password, Warehouses warehouse) {
 		super();
-		this.id = id;
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.email = email;
@@ -86,6 +94,14 @@ public class WarehouseManager {
 
 	public void setWarehouse(Warehouses warehouse) {
 		this.warehouse = warehouse;
+	}
+
+	public List<Shipping> getShipments() {
+		return shipments;
+	}
+
+	public void setShipments(List<Shipping> shipments) {
+		this.shipments = shipments;
 	}    
 }
 

@@ -27,6 +27,8 @@ import edu.sru.group7.restaurantmanager.domain.Restaurants;
 import edu.sru.group7.restaurantmanager.domain.Warehouses;
 import edu.sru.group7.restaurantmanager.domain.Managers;
 import edu.sru.group7.restaurantmanager.domain.Servers;
+import edu.sru.group7.restaurantmanager.domain.Shipping;
+import edu.sru.group7.restaurantmanager.domain.WarehouseManager;
 import edu.sru.group7.restaurantmanager.domain.Orders;
 import edu.sru.group7.restaurantmanager.domain.PaymentDetails_Form;
 import edu.sru.group7.restaurantmanager.domain.Menu;
@@ -43,6 +45,8 @@ import edu.sru.group7.restaurantmanager.repository.WarehouseRepository;
 import edu.sru.group7.restaurantmanager.security.ApplicationUserRole;
 import edu.sru.group7.restaurantmanager.repository.ManagerRepository;
 import edu.sru.group7.restaurantmanager.repository.ServerRepository;
+import edu.sru.group7.restaurantmanager.repository.ShippingRepository;
+import edu.sru.group7.restaurantmanager.repository.WarehouseManagerRepository;
 import edu.sru.group7.restaurantmanager.repository.OrderRepository;
 import edu.sru.group7.restaurantmanager.repository.PaymentDetailsRepository;
 import edu.sru.group7.restaurantmanager.repository.MenuRepository;
@@ -119,6 +123,12 @@ public class RestaurantController {
 
 	@Autowired
 	private CartItemsRepository cartItemsRepo;
+	
+	@Autowired
+	private ShippingRepository shippingRepo;
+	
+	@Autowired
+	private WarehouseManagerRepository warehouseManagerRepo;
 
 	private final String menuFP = "src/main/resources/Menu.xlsx";
 
@@ -127,10 +137,12 @@ public class RestaurantController {
 	private FakeApplicationUserDaoService fakeApplicationUserDaoService;
 
 	// create an UserRepository instance - instantiation (new) is done by Spring
-	public RestaurantController(IngredientsRepository ingredientsRepo, RestaurantRepository restaurantRepo,
-			WarehouseRepository warehouseRepo, CartItemsRepository cartItemsRepo, InventoryRepository inventoryRepo,
-			OfficeRepository officeRepo, CustomerRepository customerRepo, ManagerRepository managerRepo,
-			ServerRepository serverRepo, OrderRepository orderRepo, MenuRepository menuRepo, LogRepository logRepo) {
+	public RestaurantController(WarehouseManagerRepository warehouseManagerRepo, IngredientsRepository ingredientsRepo, 
+			RestaurantRepository restaurantRepo,WarehouseRepository warehouseRepo, CartItemsRepository cartItemsRepo, 
+			InventoryRepository inventoryRepo,OfficeRepository officeRepo, CustomerRepository customerRepo, 
+			ManagerRepository managerRepo,ServerRepository serverRepo, OrderRepository orderRepo, MenuRepository menuRepo, 
+			LogRepository logRepo) {
+		this.warehouseManagerRepo = warehouseManagerRepo;
 		this.ingredientsRepo = ingredientsRepo;
 		this.restaurantRepo = restaurantRepo;
 		this.warehouseRepo = warehouseRepo;
@@ -387,6 +399,8 @@ public class RestaurantController {
 		warehouseRepo.deleteAll();
 		orderRepo.deleteAll();
 		menuRepo.deleteAll();
+		warehouseManagerRepo.deleteAll();
+		shippingRepo.deleteAll();
 
 		Customers guest = new Customers("Guest", "", "Guest", "", 0, false, 0, 0);
 		guest.setId(-1);
@@ -502,6 +516,32 @@ public class RestaurantController {
 		cartItemsRepo.save(cartItems);
 		cartItemsRepo.save(cartItems2);
 		cartItemsRepo.save(cartItems3);
+		
+		WarehouseManager warehouseManager = new WarehouseManager();
+		warehouseManager.setFirstName("Emperor");
+		warehouseManager.setLastName("Palpatine");
+		warehouseManager.setEmail("WHmanager@email.com");
+		warehouseManager.setPassword("pass");
+		warehouseManager.setWarehouse(warehouse);
+		warehouseManagerRepo.save(warehouseManager);
+		
+		List<Orders> orders = new ArrayList<>();
+		orders.add(order);
+		restaurant2.setOrder(orders);
+		restaurantRepo.save(restaurant2);
+		
+		Ingredients ingredients = ingredientsRepo.findByMenuItem(restaurant2.getOrder().get(0).getItems().iterator().next().getId());
+		
+		Shipping shipment = new Shipping();
+		shipment.setIngredient(ingredients.getIngredient().firstElement().toString());
+		shipment.setManager_id(manager);
+		shipment.setQuantity(50);
+		shipment.setStatus("pending");
+		shipment.setWarehouse_id(warehouse);
+		shipment.setRestaurant_id(restaurant);
+		shipment.setWarehousemanager_id(warehouseManager);
+		shippingRepo.save(shipment);
+		
 
 		System.out.println(
 				"---------------------------------------------------------------------------------------------------------------------------");
@@ -638,6 +678,14 @@ public class RestaurantController {
 					return c;
 				}
 			}
+			for (WarehouseManager i : warehouseManagerRepo.findAll()) {
+				if (i.getEmail().equals(user.getUsername())) {
+					Customers c = new Customers(i.getFirstName(), i.getLastName(), i.getEmail(), i.getPassword(), 0,
+							false, 0, (int) i.getWarehouse().getId());
+					c.setId(i.getId());
+					return c;
+				}
+			}
 
 			return null;
 		}
@@ -678,6 +726,9 @@ public class RestaurantController {
 		}
 		if (user.getAuthorities().toString().contains("ROLE_CUSTOMER")) {
 			return "redirect:/loggedinhome";
+		}
+		if (user.getAuthorities().toString().contains("ROLE_WAREHOUSEMANAGER")) {
+			return "redirect:/warehouseman-shipment-view";
 		}
 		//Failsafe index redirect
 		return "redirect:/";
@@ -2015,6 +2066,13 @@ public class RestaurantController {
 		model.addAttribute("log", logRepo.findAll());
 		return "HQAdmin/hq-admin-log-view";
 	}
+	
+	@RequestMapping({"warehouseman-shipment-view"})
+	public String showWarehouseShipments(Model model) {
+		model.addAttribute("shipmentList", shippingRepo.findWarehouseManShipment(getUserUID()));
+
+		return "WarehouseManager/warehouseman-shipment-view";
+	}
 
 	/**
 	 * @param model
@@ -2023,11 +2081,22 @@ public class RestaurantController {
 	@RequestMapping({ "/manager-inventory-view" })
 	public String showInventoryView(Model model) {
 		Managers manager = managerRepo.findById(getUserUID())
-				.orElseThrow(() -> new IllegalArgumentException("Invalid admin Id:" + getUserUID()));
+				.orElseThrow(() -> new IllegalArgumentException("Invalid manager Id:" + getUserUID()));
 
 		model.addAttribute("inventoryList", inventoryRepo.findInventoryRestaurant(manager.getRestaurant().getId()));
 
 		return "LocalManager/manager-inventory-view";
+	}
+	
+	/**
+	 * @param model
+	 * @return manager-shipment-view. Shows all shipments for Restaurant Location from logged in Manager.
+	 */
+	@RequestMapping({"/manager-shipment-view"})
+	public String showRestViewShipping(Model model) {
+		model.addAttribute("shipmentList", shippingRepo.findRestaurantShipment(getUserUID()));
+		
+		return "LocalManager/manager-shipment-view";
 	}
 
 	/**
@@ -2161,86 +2230,6 @@ public class RestaurantController {
 	public String localManShowMenu(Model model) {
 		model.addAttribute("menu", menuRepo.findAll());
 		return "LocalManager/manager-menu-view";
-	}
-
-	/**
-	 * @param menu
-	 * @return add-menu-item Form for adding new menu item manually
-	 */
-	@RequestMapping({ "/localmanageraddmenu" })
-	public String showMenuAddForm(Menu menu) {
-		return "LocalManager/add-menu-item";
-	}
-
-	/**
-	 * @param menu
-	 * @param result
-	 * @param model
-	 * @return redirect back to manager menu view page
-	 */
-	@RequestMapping({ "/addmenuitem" })
-	public String addMenuItem(@Validated Menu menu, BindingResult result, Model model) {
-		if (result.hasErrors()) {
-			return "LocalManager/add-menu-item";
-		}
-
-		Log log = new Log();
-		log.setDate(date.format(LocalDateTime.now()));
-		log.setTime(time.format(LocalDateTime.now()));
-		log.setLocation(getUserLocation());
-		log.setUserId(getUserUID());
-		log.setAction("Create new menu item");
-		log.setActionId(menu.getId());
-		logRepo.save(log);
-
-		menuRepo.save(menu);
-		return "redirect:/manager-menu-view";
-	}
-
-	@GetMapping("/localmanagereditmenu/{id}")
-	public String showLocalManUpdateMenuItemForm(@PathVariable("id") long id, Model model) {
-		Menu item = menuRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid menu Id: " + id));
-
-		model.addAttribute("item", item);
-		return "LocalManager/update-menu";
-	}
-
-	@PostMapping("/localmanagerupdatemenu/{id}")
-	public String LocalManUpdateMenu(@PathVariable("id") long id, @Validated Menu item, BindingResult result,
-			Model model) {
-		if (result.hasErrors()) {
-			item.setId(id);
-			return "LocalManager/update-menu";
-		}
-
-		Log log = new Log();
-		log.setDate(date.format(LocalDateTime.now()));
-		log.setTime(time.format(LocalDateTime.now()));
-		log.setLocation(getUserLocation());
-		log.setUserId(getUserUID());
-		log.setAction("Update menu item");
-		log.setActionId(item.getId());
-		logRepo.save(log);
-
-		menuRepo.save(item);
-		return "redirect:/manager-menu-view";
-	}
-
-	@GetMapping("/localmanagerdeletemenu/{id}")
-	public String deleteMenuItem(@PathVariable("id") long id, Model model) {
-		Menu item = menuRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid Menu Id:" + id));
-
-		Log log = new Log();
-		log.setDate(date.format(LocalDateTime.now()));
-		log.setTime(time.format(LocalDateTime.now()));
-		log.setLocation(getUserLocation());
-		log.setUserId(getUserUID());
-		log.setAction("Delete menu item");
-		log.setActionId(item.getId());
-		logRepo.save(log);
-
-		menuRepo.delete(item);
-		return "redirect:/manager-menu-view";
 	}
 
 	@RequestMapping({ "/manager-server-view" })
@@ -2822,89 +2811,6 @@ public class RestaurantController {
 				
 			}
 		}
-		
-		/**@PostMapping({"/addorder"})
-		public String custAddOrder(@Validated Orders order, BindingResult result, Model model) {
-			if (result.hasErrors()) {
-				return "redirect:/Customer-ordertype-view";
-			}
-      
-			if (getLoggedInUser() != null) {
-				order.setCustomer_id(getLoggedInUser());
-			}
-			else {
-				order.setCustomer_id(getGuestCust());
-			}
-		}
-		return "redirect:/pay";
-	}
-
-	public void removeFromInventory(Orders order) {
-		Set<Menu> items = order.getItems();
-		Iterator<Menu> it = items.iterator();
-
-		// finds restaurant corresponding to order
-		Restaurants restaurant = new Restaurants();
-		restaurant.setId(order.getRestaurant().getId());
-
-		// find inventory corresponding to restaurant
-		List<Inventory> inventoryList = inventoryRepo.findInventoryRestaurant(restaurant.getId());
-
-		// iterate over all menu ID's for order
-		while (it.hasNext()) {
-			Menu menu = it.next();
-			// find ingredients for menu item and add it to an array and then create an
-			// iterator for array
-			Ingredients menuIngredients = ingredientsRepo.findByMenuItem(menu.getId());
-			try {
-				Vector ingredientList = menuIngredients.getIngredient();
-				Iterator ingredientIT = ingredientList.iterator();
-				// iterate over each ingredient for a menu item
-				while (ingredientIT.hasNext()) {
-					String ingredient = ingredientIT.next().toString();
-					// Create inventoryiterator so it resets per new ingredient to top of list
-					Iterator<Inventory> inventoryIT = inventoryList.iterator();
-					// iterate over each inventory item to compare current ingredient to selected
-					// ingredient in Repo
-					while (inventoryIT.hasNext()) {
-						Inventory inventory = inventoryIT.next();
-						System.out.println(
-								"--------------------------------------------------------------------------------------------------");
-						System.out.println(inventory.getIngredient() + " get ingredient");
-						System.out.println(ingredient + " ingredient");
-						if (inventory.getIngredient().compareTo(ingredient) == 0) {
-							System.out.println(inventory.getIngredient() + " is equal to " + ingredient);
-							inventory.setQuantity(inventory.getQuantity() - 1);
-							inventoryRepo.save(inventory);
-							break;
-						}
-					}
-				}
-			} catch (Exception e) {
-				System.out.println("No ingredients for Menu Item");
-			}
-			order.setPrice(totalPrice);
-			orderRepo.save(order);
-			
-			//Award rewards points to signed in rewards customers
-			Customers orderCustomer = getLoggedInUser();
-			if (orderCustomer != null) {
-				if (orderCustomer.getRewardsMember() == true) {
-					System.out.println("--------------------------------------------------------------------------------------------------");
-					System.out.println(order.getPrice());
-					//For every $10 spent per order, cust is awarded with 1 rewards point
-					int rewards = (int) order.getPrice() / 10;
-					System.out.println("rewards earned: " + rewards);
-					rewards += orderCustomer.getRewardsAvailable();
-					
-					orderCustomer.setRewardsAvailable(rewards);
-					customerRepo.save(orderCustomer);
-				}
-			}
-			
-      		return "redirect:/pay";
-		}
-		*/
 		
 		/**
 		 * Customer redeem rewards button

@@ -47,7 +47,9 @@ public enum ApplicationUserRole {
 							ApplicationUserPermission.CUSTOMER_WRITE,
 							ApplicationUserPermission.CUSTOMER_READ)),
 	CUSTOMER(Sets.newHashSet(ApplicationUserPermission.CUSTOMER_WRITE,
-							ApplicationUserPermission.CUSTOMER_READ));
+							ApplicationUserPermission.CUSTOMER_READ)), 
+	WAREHOUSEMANAGER(Sets.newHashSet(ApplicationUserPermission.WAREHOUSEMANAGER_WRITE,
+							ApplicationUserPermission.WAREHOUSEMANAGER_READ));
 	
 	private final Set<ApplicationUserPermission> permissions;
 

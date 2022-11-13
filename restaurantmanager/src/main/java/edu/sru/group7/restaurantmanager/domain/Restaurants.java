@@ -48,6 +48,9 @@ public class Restaurants extends Locations {
 	@OneToMany(cascade=CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "restaurant")
     private List<Managers> managers = new ArrayList<>();
 	
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "restaurant_id")
+	private List<Shipping> shipments = new ArrayList<>();
+	
 	public Restaurants(String address, String zipcode, String city, String state, Admins admin) {
 		super();
 		this.address = address;
@@ -152,5 +155,21 @@ public class Restaurants extends Locations {
 
 	public void setProfits(float profits) {
 		this.profits = profits;
+	}
+
+	public List<Shipping> getShipments() {
+		return shipments;
+	}
+
+	public void setShipments(List<Shipping> shipments) {
+		this.shipments = shipments;
+	}
+
+	public List<Orders> getOrder() {
+		return order;
+	}
+
+	public void setOrder(List<Orders> order) {
+		this.order = order;
 	}
 }

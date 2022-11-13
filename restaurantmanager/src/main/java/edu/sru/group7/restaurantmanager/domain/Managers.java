@@ -1,11 +1,17 @@
 package edu.sru.group7.restaurantmanager.domain;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 
 @Entity
 public class Managers {
@@ -35,6 +41,9 @@ public class Managers {
     @ManyToOne
 	@JoinColumn(name="restaurant_id")
 	private Restaurants restaurant;
+    
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "manager_id")
+	private List<Shipping> shipments = new ArrayList<>();
 
     /**
      * Restaurant Manager parameter Constructor
@@ -160,6 +169,14 @@ public class Managers {
 	 */
 	public void setRestaurant(Restaurants restaurant) {
 		this.restaurant = restaurant;
+	}
+
+	public List<Shipping> getShipments() {
+		return shipments;
+	}
+
+	public void setShipments(List<Shipping> shipments) {
+		this.shipments = shipments;
 	}
     
 }

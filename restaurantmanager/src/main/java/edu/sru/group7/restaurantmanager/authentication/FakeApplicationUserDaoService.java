@@ -16,7 +16,9 @@ import edu.sru.group7.restaurantmanager.repository.AdminRepository;
 import edu.sru.group7.restaurantmanager.domain.Managers;
 import edu.sru.group7.restaurantmanager.repository.ManagerRepository;
 import edu.sru.group7.restaurantmanager.domain.Servers;
+import edu.sru.group7.restaurantmanager.domain.WarehouseManager;
 import edu.sru.group7.restaurantmanager.repository.ServerRepository;
+import edu.sru.group7.restaurantmanager.repository.WarehouseManagerRepository;
 
 
 @Repository("fake")
@@ -35,6 +37,9 @@ public class FakeApplicationUserDaoService implements ApplicationUserDao {
 	
 	@Autowired
 	private ServerRepository serverRepo;
+	
+	@Autowired
+	private WarehouseManagerRepository warehouseManagerRepo;
 	
 	@Autowired
 	public FakeApplicationUserDaoService(PasswordEncoder passwordEncoder) {
@@ -106,6 +111,16 @@ public class FakeApplicationUserDaoService implements ApplicationUserDao {
 					server.getEmail(),
 					passwordEncoder.encode(server.getPassword()),
 					ApplicationUserRole.SERVER.getGrantedAuthorities(),
+					true,
+					true,
+					true,
+					true));
+		}
+		for (WarehouseManager warehouseManager : warehouseManagerRepo.findAll()) {
+			applicationUsers.add(new ApplicationUser(
+					warehouseManager.getEmail(),
+					passwordEncoder.encode(warehouseManager.getPassword()),
+					ApplicationUserRole.WAREHOUSEMANAGER.getGrantedAuthorities(),
 					true,
 					true,
 					true,
