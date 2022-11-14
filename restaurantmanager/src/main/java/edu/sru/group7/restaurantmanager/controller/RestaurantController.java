@@ -1809,6 +1809,13 @@ public class RestaurantController {
 	public String showServerView(Model model) {
 		model.addAttribute("orders", orderRepo.findOrdersByLocation(getUserLocation()));
 		model.addAttribute("menu", menuRepo.findAll());
+		Servers server = null;
+		for (Servers s : serverRepo.findAll()) { 
+			if (s.getEmail().equals(getLoggedInUser().getEmail())) {
+				server = s;
+			}
+		}
+		model.addAttribute("server", server);
 		// TO-DO make output of orders more neat
 		return "LocalServingStaff/serving-staff-view";
 	}
@@ -2023,6 +2030,14 @@ public class RestaurantController {
 			}
 		}
 		model.addAttribute("log", (Iterable<Log>) localLog);
+		
+		Managers manager = null;
+		for (Managers m : managerRepo.findAll()) { 
+			if (m.getEmail().equals(getLoggedInUser().getEmail())) {
+				manager = m;
+			}
+		}
+		model.addAttribute("manager", manager);
 		return "LocalManager/log-view";
 	}
 
