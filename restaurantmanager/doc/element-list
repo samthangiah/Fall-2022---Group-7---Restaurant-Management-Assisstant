@@ -1,0 +1,7 @@
+edu.sru.group7.restaurantmanager
+edu.sru.group7.restaurantmanager.authentication
+edu.sru.group7.restaurantmanager.billing
+edu.sru.group7.restaurantmanager.controller
+edu.sru.group7.restaurantmanager.domain
+edu.sru.group7.restaurantmanager.repository
+edu.sru.group7.restaurantmanager.security
