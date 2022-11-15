@@ -28,6 +28,7 @@ import edu.sru.group7.restaurantmanager.domain.Warehouses;
 import edu.sru.group7.restaurantmanager.domain.Managers;
 import edu.sru.group7.restaurantmanager.domain.Servers;
 import edu.sru.group7.restaurantmanager.domain.Shipping;
+import edu.sru.group7.restaurantmanager.domain.StateTax;
 import edu.sru.group7.restaurantmanager.domain.WarehouseManager;
 import edu.sru.group7.restaurantmanager.domain.Orders;
 import edu.sru.group7.restaurantmanager.domain.PaymentDetails_Form;
@@ -42,16 +43,16 @@ import edu.sru.group7.restaurantmanager.repository.InventoryRepository;
 import edu.sru.group7.restaurantmanager.repository.OfficeRepository;
 import edu.sru.group7.restaurantmanager.repository.RestaurantRepository;
 import edu.sru.group7.restaurantmanager.repository.WarehouseRepository;
-import edu.sru.group7.restaurantmanager.security.ApplicationUserRole;
 import edu.sru.group7.restaurantmanager.repository.ManagerRepository;
 import edu.sru.group7.restaurantmanager.repository.ServerRepository;
 import edu.sru.group7.restaurantmanager.repository.ShippingRepository;
+import edu.sru.group7.restaurantmanager.repository.StateTaxRepository;
 import edu.sru.group7.restaurantmanager.repository.WarehouseManagerRepository;
 import edu.sru.group7.restaurantmanager.repository.OrderRepository;
 import edu.sru.group7.restaurantmanager.repository.PaymentDetailsRepository;
 import edu.sru.group7.restaurantmanager.repository.MenuRepository;
 import edu.sru.group7.restaurantmanager.repository.LogRepository;
-import edu.sru.group7.restaurantmanager.billing.PaymentDetailsController;
+//import edu.sru.group7.restaurantmanager.billing.PaymentDetailsController;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -61,7 +62,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import javax.annotation.PostConstruct;
-import javax.servlet.http.*;
+import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -78,8 +80,6 @@ public class RestaurantController {
 	DateTimeFormatter date = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 	DateTimeFormatter time = DateTimeFormatter.ofPattern("HH:mm:ss");
 	
-	private final float PA_INCOME_TAX = 3.07F;
-
 	private boolean isLoggedIn;
 
 	@Autowired
@@ -128,11 +128,16 @@ public class RestaurantController {
 	private ShippingRepository shippingRepo;
 	
 	@Autowired
+	private StateTaxRepository stateTaxRepo;
+	
+	@Autowired
 	private WarehouseManagerRepository warehouseManagerRepo;
 
 	private final String menuFP = "src/main/resources/Menu.xlsx";
 
 	private final String ingredientFP = "src/main/resources/Ingredients.xlsx";
+	
+	private final String taxInfo = "src/main/resources/US-Tax-Info-By-State.xlsx";
 
 	private FakeApplicationUserDaoService fakeApplicationUserDaoService;
 
@@ -378,6 +383,35 @@ public class RestaurantController {
 
 			ingredientsRepo.save(ingredient);
 
+		}
+		wb.close();
+	}
+	
+	/**
+	 * @throws IOException Tax Information loader
+	 */
+	public void loadTaxes() throws IOException {
+		FileInputStream thisxls;
+		XSSFWorkbook wb;
+		XSSFSheet sheet;
+		XSSFRow curRow;
+
+		thisxls = new FileInputStream(taxInfo);
+		wb = new XSSFWorkbook(thisxls);
+		sheet = wb.getSheetAt(0);
+
+		int i = 0;
+
+		curRow = sheet.getRow(i);
+
+		while (curRow.getRowNum() < sheet.getLastRowNum()) {
+			i++;
+			curRow = sheet.getRow(i);
+			StateTax st = new StateTax();
+			st.setState(checkStringType(curRow.getCell(0)));
+			st.setIncomePercent(checkFloatType(curRow.getCell(1)));
+			st.setSalesPercent(checkFloatType(curRow.getCell(2)));
+			stateTaxRepo.save(st);
 		}
 		wb.close();
 	}
@@ -1828,6 +1862,7 @@ public class RestaurantController {
 	public String clockIn() {
 		for (Servers s : serverRepo.findAll()) {
 			if (s.getEmail().equals(getLoggedInUser().getEmail()) && s.getIsOnDuty() == false) {
+				
 				s.setLastClockedIn(date.format(LocalDateTime.now()) + " " + time.format(LocalDateTime.now()));
 				s.setIsOnDuty(true);
 				
@@ -1961,9 +1996,11 @@ public class RestaurantController {
 	 * Automatically done weekly, called from scheduled method resetWeeklyHours()
 	 */
 	public void payCalc(float hours, float rate, Restaurants location) {
+		StateTax state = stateTaxRepo.findByState(location.getState());
+		float incomeTax = state.getincomePercent();
 		//Do payment logic with their weekly hours and rate
 		float payout = hours * rate;
-		payout -= payout * (PA_INCOME_TAX / 100);
+		payout -= payout * (incomeTax / 100);
 		//Round to 2 decimal places
 		payout = Math.round(payout * 100.0) / 100.0F;
 		
@@ -2247,12 +2284,20 @@ public class RestaurantController {
 		return "LocalManager/manager-menu-view";
 	}
 
+	/**
+	 * @param model
+	 * @return manager-server-view. View list of servers
+	 */
 	@RequestMapping({ "/manager-server-view" })
 	public String localManShowServers(Model model) {
 		model.addAttribute("servers", serverRepo.findServerLocation(getUserLocation()));
 		return "LocalManager/manager-server-view";
 	}
-
+	
+	/**
+	 * @param model
+	 * @return update-server. Form to update server information
+	 */
 	@GetMapping("/localmanagerserveredit/{id}")
 	public String showLocalManUpdateServerForm(@PathVariable("id") long id, Model model) {
 		Servers server = serverRepo.findById(id)
@@ -2262,6 +2307,13 @@ public class RestaurantController {
 		return "LocalManager/update-server";
 	}
 
+	/**
+	 * @param id	Server id
+	 * @param server
+	 * @param result
+	 * @param model
+	 * Updates server information in database
+	 */
 	@PostMapping("/localmanagerserverupdate/{id}")
 	public String localManUpdateServer(@PathVariable("id") long id, @Validated Servers server, BindingResult result,
 			Model model) {
@@ -2288,6 +2340,10 @@ public class RestaurantController {
 		return "redirect:/manager-server-view";
 	}
 
+	/**
+	 * @param model
+	 * Deletes server information from database
+	 */
 	@GetMapping("/localmanagerserverdelete/{id}")
 	public String localManDeleteServer(@PathVariable("id") long id, Model model) {
 		Servers server = serverRepo.findById(id)
@@ -2314,12 +2370,21 @@ public class RestaurantController {
 		return "HQManager/HQ-manager-view";
 	}
 
+	/**
+	 * @param model
+	 * @return hqmanager-managers-view. View list of managers
+	 */
 	@RequestMapping({ "/HQmanager-managers-view" })
 	public String hqManShowManagers(Model model) {
 		model.addAttribute("managers", managerRepo.findAll());
 		return "HQManager/HQManager-managers-view";
 	}
 
+	/**
+	 * @param id	Manager id
+	 * @param model
+	 * @return update-lfmanager. Form for updating local managers
+	 */
 	@GetMapping("/HQmanagermanedit/{id}")
 	public String showHQManUpdateManagerForm(@PathVariable("id") long id, Model model) {
 		Managers manager = managerRepo.findById(id)
@@ -2329,6 +2394,13 @@ public class RestaurantController {
 		return "HQManager/update-LFmanager";
 	}
 
+	/**
+	 * @param id	Manager id
+	 * @param manager
+	 * @param result
+	 * @param model
+	 * Updates manager information in database
+	 */
 	@PostMapping("/hqmanagermanupdate/{id}")
 	public String hqManUpdateManager(@PathVariable("id") long id, @Validated Managers manager, BindingResult result,
 			Model model) {
@@ -2350,6 +2422,11 @@ public class RestaurantController {
 		return "redirect:/HQmanager-managers-view";
 	}
 
+	/**
+	 * @param id	Manager id
+	 * @param model
+	 * Deletes manager information from database
+	 */
 	@GetMapping("/HQmanagermandelete/{id}")
 	public String hqManDeleteManager(@PathVariable("id") long id, Model model) {
 		Managers manager = managerRepo.findById(id)
@@ -2368,11 +2445,21 @@ public class RestaurantController {
 		return "redirect:/HQmanager-managers-view";
 	}
 
+	/**
+	 * @param manager
+	 * @return add-lfmanager. Form for adding new local managers
+	 */
 	@RequestMapping({ "/HQmanageraddmanager" })
 	public String showLFManagerAddForm(Managers manager) {
 		return "HQManager/add-LFmanager";
 	}
 
+	/**
+	 * @param manager
+	 * @param result
+	 * @param model
+	 * Adds local manager to database
+	 */
 	@RequestMapping({ "/addlfmanager" })
 	public String addLFManager(@Validated Managers manager, BindingResult result, Model model) {
 		if (result.hasErrors()) {
@@ -2392,29 +2479,48 @@ public class RestaurantController {
 		return "redirect:/HQmanager-managers-view";
 	}
 
+	/**
+	 * @return hqmanager-locations-view. View restaurants, warehouses, offices
+	 */
 	@RequestMapping({ "/HQmanager-location-view" })
 	public String showHQManagerLocationPage() {
 		return "HQManager/HQManager-locations-view";
 	}
 
+	/**
+	 * @param model
+	 * @return hqmanager-restaurants-view. View list of restaurants
+	 */
 	@RequestMapping({ "/HQmanager-restaurants-view" })
 	public String hqManShowRestaurants(Model model) {
 		model.addAttribute("restaurants", restaurantRepo.findAll());
 		return "HQManager/HQManager-restaurants-view";
 	}
 
+	/**
+	 * @param model
+	 * @return hqmanager-offices-view. View list of offices
+	 */
 	@RequestMapping({ "/HQmanager-offices-view" })
 	public String hqManShowOffices(Model model) {
 		model.addAttribute("offices", officeRepo.findAll());
 		return "HQManager/HQManager-offices-view";
 	}
 
+	/**
+	 * @param model
+	 * @return manager-warehouses-view. View list of warehouses
+	 */
 	@RequestMapping({ "/HQmanager-warehouses-view" })
 	public String hqManShowWarehouses(Model model) {
 		model.addAttribute("warehouses", warehouseRepo.findAll());
 		return "HQManager/HQManager-warehouses-view";
 	}
 		
+		/**
+		 * @param model
+		 * @return Order page for customer or guest
+		 */
 		@RequestMapping({"/Customer-ordertype-view"})
 		public String showOrderType(Model model){
 			final Orders order = new Orders();
@@ -2456,7 +2562,7 @@ public class RestaurantController {
 		 * @param result
 		 * @param model
 		 * Payment processing simulation method
-		 * Currently does not do anything with PaymentDetails generated from form
+		 * Does not do anything with PaymentDetails generated from form
 		 */
 		@RequestMapping("/processpayment")
 		public String processPayment(@Validated PaymentDetails_Form form, BindingResult result, Model model) {
@@ -2479,15 +2585,8 @@ public class RestaurantController {
 			orderRepo.save(order);
 			deleteCartItems();
 			
-			//add payment gateway such as stripe to handle payment processing
-			//if (payment can be processed) {
-				paymentDetailsRepo.delete(details);
-				return "redirect:/ordersuccessful";
-			//}
-			//else {
-			//	paymentDetailsRepo.delete(details);
-			//	return "redirect:/pay";
-			//}
+			paymentDetailsRepo.delete(details);
+			return "redirect:/ordersuccessful";
 		}
 		
 		/**
