@@ -221,7 +221,6 @@ public class RestaurantController {
 	 * @throws IOException Loads Menu from excel sheet and adds into Menu POJO
 	 */
 	public void loadMenu() throws IOException {
-		// TODO Auto-generated method stub
 
 		/*
 		 * File test=new File("check.txt"); if (test.createNewFile()) {
@@ -233,7 +232,7 @@ public class RestaurantController {
 		XSSFSheet sheet;
 		XSSFRow curRow;
 
-		thisxls = new FileInputStream("src/main/resources/Menu.xlsx");
+		thisxls = new FileInputStream(menuFP);
 		wb = new XSSFWorkbook(thisxls);
 		sheet = wb.getSheetAt(0);
 
@@ -436,7 +435,7 @@ public class RestaurantController {
 		warehouseManagerRepo.deleteAll();
 		shippingRepo.deleteAll();
 
-		Customers guest = new Customers("Guest", "", "Guest", "", 0, false, 0, 0);
+		Customers guest = new Customers("Guest", "", "Guest", "", false, 0, 0);
 		guest.setId(-1);
 		customerRepo.save(guest);
 
@@ -491,14 +490,13 @@ public class RestaurantController {
 			loadIngredients(ingredientFP, restaurant);
 			loadIngredients(ingredientFP, restaurant2);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
 		// Customer objects for hardcoded logins
-		Customers samThangiah = new Customers("sam", "thangiah", "sam", "thangiah", 0, false, 0, 1);
+		Customers samThangiah = new Customers("sam", "thangiah", "sam", "thangiah", false, 0, 1);
 
-		Customers hqManager = new Customers("hq", "manager", "hqmanager@email.com", "pass", 0, false, 0, 1);
+		Customers hqManager = new Customers("hq", "manager", "hqmanager@email.com", "pass", false, 0, 1);
 
 		customerRepo.save(samThangiah);
 		customerRepo.save(hqManager);
@@ -690,7 +688,7 @@ public class RestaurantController {
 			}
 			for (Servers i : serverRepo.findAll()) {
 				if (i.getEmail().equals(user.getUsername())) {
-					Customers c = new Customers(i.getFirstName(), i.getLastName(), i.getEmail(), i.getPassword(), 0,
+					Customers c = new Customers(i.getFirstName(), i.getLastName(), i.getEmail(), i.getPassword(), 
 							false, 0, (int) i.getRestaurant().getId());
 					c.setId(i.getId());
 					return c;
@@ -698,7 +696,7 @@ public class RestaurantController {
 			}
 			for (Managers i : managerRepo.findAll()) {
 				if (i.getEmail().equals(user.getUsername())) {
-					Customers c = new Customers(i.getFirstName(), i.getLastName(), i.getEmail(), i.getPassword(), 0,
+					Customers c = new Customers(i.getFirstName(), i.getLastName(), i.getEmail(), i.getPassword(), 
 							false, 0, (int) i.getRestaurant().getId());
 					c.setId(i.getId());
 					return c;
@@ -706,7 +704,7 @@ public class RestaurantController {
 			}
 			for (Admins i : adminRepo.findAll()) {
 				if (i.getEmail().equals(user.getUsername())) {
-					Customers c = new Customers(i.getFirstName(), i.getLastName(), i.getEmail(), i.getPassword(), 0,
+					Customers c = new Customers(i.getFirstName(), i.getLastName(), i.getEmail(), i.getPassword(), 
 							false, 0, (int) i.getOffice().getId());
 					c.setId(i.getId());
 					return c;
@@ -714,7 +712,7 @@ public class RestaurantController {
 			}
 			for (WarehouseManager i : warehouseManagerRepo.findAll()) {
 				if (i.getEmail().equals(user.getUsername())) {
-					Customers c = new Customers(i.getFirstName(), i.getLastName(), i.getEmail(), i.getPassword(), 0,
+					Customers c = new Customers(i.getFirstName(), i.getLastName(), i.getEmail(), i.getPassword(), 
 							false, 0, (int) i.getWarehouse().getId());
 					c.setId(i.getId());
 					return c;
@@ -873,6 +871,20 @@ public class RestaurantController {
 		}
 		model.addAttribute("customers", user);
 		return "Customer/custviewinfo";
+	}
+	
+	/**
+	 * @param model
+	 * @return vieworderhistory. Shows customer their full order history
+	 */
+	@RequestMapping("/custorderinfo")
+	public String orderHistoryPage(Model model) {
+		Customers user = getLoggedInUser();
+		if (user == null) {
+			return "redirect:/";
+		}
+		model.addAttribute("orders", user.getOrderHistory());
+		return "Customer/vieworderhistory";
 	}
 
 	/**
@@ -1246,7 +1258,6 @@ public class RestaurantController {
 		try {
 			loadIngredients(ingredientFP, restaurant);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return "redirect:/HQadmin-restaurants-view";
@@ -1278,7 +1289,6 @@ public class RestaurantController {
 		try {
 			loadIngredients(ingredientFP, warehouse);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return "redirect:/HQadmin-warehouses-view";
@@ -2525,10 +2535,48 @@ public class RestaurantController {
 		public String showOrderType(Model model){
 			final Orders order = new Orders();
 			model.addAttribute("Order", order);
+			List<Integer> menuCartQuantity = new ArrayList<Integer>();
 			
 			if (getLoggedInUser() != null) {
+				//Check for quantity of each menu item in current cart
+				for (Menu m : menuRepo.findAll()) {
+					if (m.getAvailability() == true) {
+						CartItems cartItem = cartItemsRepo.findByCustMenuId(m.getId(), getUserUID());
+						if (cartItem != null) {
+							menuCartQuantity.add(cartItem.getQuantity());
+						} else {
+							menuCartQuantity.add(0);
+						}
+					}
+				}
+				model.addAttribute("cartQuantity", menuCartQuantity);
 				return "Customer/orderpage";
 			}
+			//If not logged in,
+			//Get cart items from httpsession if exists
+			List<CartItems> cartItems;
+			if (getCurrentSession().getAttribute("cartItems") != null) {
+				cartItems = (List<CartItems>) getCurrentSession().getAttribute("cartItems");
+			} else {
+				cartItems = new ArrayList<CartItems>();
+			}
+			boolean flag;
+			//Check for quantity by looping through current cart
+			for (Menu m : menuRepo.findAll()) {
+				if (m.getAvailability() == true) {
+					flag = false;
+					for (CartItems c : cartItems) {
+						if (c.getMenu_id().toString().equals(m.toString())) {
+							menuCartQuantity.add(c.getQuantity());
+							flag = true;
+						}
+					}
+					if (flag == false) {
+						menuCartQuantity.add(0);
+					}
+				}
+			}
+			model.addAttribute("cartQuantity", menuCartQuantity);
 			return "Guest/order-as-guest";
 		}
 		
@@ -2575,6 +2623,10 @@ public class RestaurantController {
 			
 			if (getLoggedInUser() != null) {
 				order = orderRepo.findByCustomerIdUnpaid(getUserUID());
+				//Add to customer's order history
+				List<Orders> orderHistory = getLoggedInUser().getOrderHistory();
+				orderHistory.add(order);
+				getLoggedInUser().setOrderHistory(orderHistory);
 			} else {
 				order = (Orders) getCurrentSession().getAttribute("order");
 			}
@@ -2897,8 +2949,8 @@ public class RestaurantController {
 				//find ingredients for menu item and add it to an array and then create an iterator for array
 				Ingredients menuIngredients = ingredientsRepo.findByMenuItem(menu.getId());
 				try {
-					Vector ingredientList = menuIngredients.getIngredient();
-					Iterator ingredientIT = ingredientList.iterator();
+					Vector<String> ingredientList = menuIngredients.getIngredient();
+					Iterator<String> ingredientIT = ingredientList.iterator();
 					//iterate over each ingredient for a menu item
 					while(ingredientIT.hasNext()) {
 						String ingredient = ingredientIT.next().toString();

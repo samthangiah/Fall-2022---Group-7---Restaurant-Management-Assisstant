@@ -60,7 +60,6 @@ public class Inventory {
 	 * Default Inventory Constructor
 	 */
 	public Inventory() {
-		// TODO Auto-generated constructor stub
 	}
 
 	/**

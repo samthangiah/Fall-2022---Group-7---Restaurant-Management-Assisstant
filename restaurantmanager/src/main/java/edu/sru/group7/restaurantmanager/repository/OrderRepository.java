@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Service;
 
-import edu.sru.group7.restaurantmanager.domain.Inventory;
 import edu.sru.group7.restaurantmanager.domain.Orders;
 
 /**

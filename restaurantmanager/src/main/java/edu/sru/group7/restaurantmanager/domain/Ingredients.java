@@ -1,13 +1,10 @@
 package edu.sru.group7.restaurantmanager.domain;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Vector;
 
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
+//import javax.persistence.GeneratedValue;
+//import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -21,15 +18,16 @@ import javax.persistence.ManyToOne;
 public class Ingredients {
 
 	@Id
+	//@GeneratedValue(strategy = GenerationType.AUTO)
 	private long id;
 	
 	@ManyToOne
     @JoinColumn(name = "menu_id")
 	private Menu menu;
 	
-	private Vector ingredient = new Vector<>();
+	private Vector<String> ingredient = new Vector<String>();
 
-	public Ingredients(long id, Menu menu, Vector ingredient) {
+	public Ingredients(long id, Menu menu, Vector<String> ingredient) {
 		super();
 		this.id = id;
 		this.menu = menu;
@@ -63,13 +61,11 @@ public class Ingredients {
 	 * 
 	 * @return Vector of ingredients belonging to Menu object
 	 */
-	public Vector getIngredient() {
+	public Vector<String> getIngredient() {
 		return ingredient;
 	}
 
-	public void setIngredient(Vector ingredient) {
+	public void setIngredient(Vector<String> ingredient) {
 		this.ingredient = ingredient;
 	}
-	
-	
 }

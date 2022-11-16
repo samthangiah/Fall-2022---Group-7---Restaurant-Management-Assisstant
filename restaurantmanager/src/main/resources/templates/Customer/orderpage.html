@@ -87,13 +87,13 @@ table, th, td {
 							</tr>
 						</thead>
 		<tbody>
-		 	<th:block th:each="menu : ${listMenu}">
+		 	<th:block th:each="menu,menuStat : ${listMenu}">
 			<tr>
 				<td th:text="${menu.name}"></td>
 				<td th:text="${menu.entree}"></td>
 				<td th:text="${menu.sides}"></td>
 				<td th:text="${menu.price}"></td>
-				<td>(WIP)</td>
+		 		<td th:text="${cartQuantity[menuStat.index]}"></td>
 				<td><a th:href="@{/addtoorder/{id}(id = ${menu.id})}" class="btn btn-primary">Add</a></td>
 				<td><a th:href="@{/ordereditcart/{id}(id = ${menu.id})}" class="btn btn-primary">Remove</a></td>
 			</tr>

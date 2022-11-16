@@ -32,9 +32,7 @@ public class Customers {
     private String email;
     
     private String password;
-    
-    private int orderHistory;
-    
+
     private boolean rewardsMember;
     
     private int rewardsAvailable;
@@ -42,10 +40,10 @@ public class Customers {
     private int location;
     
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "customer_id")
-	private List<Orders> order = new ArrayList<>();
+	private List<Orders> orderHistory = new ArrayList<Orders>();
     
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "customer_id")
-	private Set<CartItems> cartItems = new HashSet<>();
+	private Set<CartItems> cartItems = new HashSet<CartItems>();
     
     /**
      * Default Constructor
@@ -63,17 +61,17 @@ public class Customers {
      * @param rewardsAvailable
      * @param location
      */
-	public Customers(String firstName, String lastName, String email, String password, int orderHistory,
+	public Customers(String firstName, String lastName, String email, String password,
 			boolean rewardsMember, int rewardsAvailable, int location) {
 		super();
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.email = email;
 		this.password = password;
-		this.orderHistory = orderHistory;
 		this.rewardsMember = rewardsMember;
 		this.rewardsAvailable = rewardsAvailable;
 		this.location = location;
+		this.orderHistory = new ArrayList<Orders>();
 	}
 	
 	public long getId() {
@@ -116,14 +114,6 @@ public class Customers {
 		this.password = password;
 	}
 	
-	public int getOrderHistory() {
-		return orderHistory;
-	}
-
-	public void setOrderHistory(int orderHistory) {
-		this.orderHistory = orderHistory;
-	}
-	
 	public boolean getRewardsMember() {
 		return rewardsMember;
 	}
@@ -151,15 +141,15 @@ public class Customers {
 	/**
 	 * @return List of Orders belonging to that Customer
 	 */
-	public List<Orders> getOrder() {
-		return order;
+	public List<Orders> getOrderHistory() {
+		return orderHistory;
 	}
 
 	/**
 	 * @param order Assigns list of Orders to that Customer
 	 */
-	public void setOrder(List<Orders> order) {
-		this.order = order;
+	public void setOrderHistory(List<Orders> order) {
+		this.orderHistory = order;
 	}
 
 	@Override

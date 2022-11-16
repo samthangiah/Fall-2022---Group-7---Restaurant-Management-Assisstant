@@ -1,7 +1,6 @@
 package edu.sru.group7.restaurantmanager.repository;
 
 import java.util.List;
-import java.util.Vector;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;

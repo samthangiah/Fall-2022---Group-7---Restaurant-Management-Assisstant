@@ -7,8 +7,6 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Service;
 
 import edu.sru.group7.restaurantmanager.domain.Managers;
-import edu.sru.group7.restaurantmanager.domain.Restaurants;
-import edu.sru.group7.restaurantmanager.domain.Servers;
 
 /**
  * CRUD Interface for Manager POJO
@@ -25,4 +23,3 @@ public interface ManagerRepository extends CrudRepository<Managers, Long> {
 	public List<Managers> findByRestaurant(long id);
 	
 }
-

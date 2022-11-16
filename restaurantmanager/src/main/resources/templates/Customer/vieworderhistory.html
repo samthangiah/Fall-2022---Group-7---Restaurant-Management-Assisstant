@@ -73,31 +73,30 @@ table, th, td {
                 <!-- Page content-->
                 <div class="container-fluid">
                     <div class="container mt-3">
-						<h2 class="h2">Customer Information</h2>
+						<h2 class="h2">Order History</h2>
 						<table class = "table table-striped table-hover">
 						<thead class="table-dark">
 							<tr>
-								<th>First Name</th>
-								<th>Last Name</th>
-								<th>Email</th>
-								<th>Rewards Points</th>
-								<th></th>
+								<th>Date</th>
+								<th>Price</th>
+								<th>Restaurant</th>
+								<th>Items</th>
+								<th>Special Instructions</th>
 							</tr>
 						</thead>
 		<tbody>
-			<tr th:each="customer : ${customers}">
-                    <td th:text="${customer.firstName}"></td>
-                    <td th:text="${customer.lastName}"></td>
-                    <td th:text="${customer.email}"></td>
-                    <td th:text="${customer.rewardsAvailable}"></td>
-                    <td><a th:href="@{/editcustomer/{id}(id=${customer.id})}">Edit Profile</a></td>
+			<tr th:each="order : ${orders}">
+                    <td th:text="${order.date}"></td>
+                    <td th:text="${order.price}"></td>
+                    <td th:text="${order.restaurant}"></td>
+                    <td th:text="${order.items}"></td>
+                    <td th:text="${order.instructions}"></td>
                 </tr>
 		</tbody>
 		
 	</table>
 							<div class="btn-group">
-								<a href="/rewardsinfo" class="btn btn-primary" role="button">More info on rewards</a>
-								<a href="/custorderinfo" class="btn btn-primary" role="button">View order history</a>
+								<a href="/custviewinfo" class="btn btn-primary" role="button">Return to profile</a>
 							</div>
 	</div>
                     </div>
