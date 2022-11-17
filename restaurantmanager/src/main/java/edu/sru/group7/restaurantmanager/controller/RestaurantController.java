@@ -32,9 +32,12 @@ import edu.sru.group7.restaurantmanager.domain.StateTax;
 import edu.sru.group7.restaurantmanager.domain.WarehouseManager;
 import edu.sru.group7.restaurantmanager.domain.Orders;
 import edu.sru.group7.restaurantmanager.domain.PaymentDetails_Form;
+import edu.sru.group7.restaurantmanager.domain.Paypal_Form;
 import edu.sru.group7.restaurantmanager.domain.Menu;
+//import edu.sru.group7.restaurantmanager.domain.Locations;
 import edu.sru.group7.restaurantmanager.domain.Log;
 import edu.sru.group7.restaurantmanager.billing.PaymentDetails;
+import edu.sru.group7.restaurantmanager.billing.Paypal;
 import edu.sru.group7.restaurantmanager.repository.AdminRepository;
 import edu.sru.group7.restaurantmanager.repository.CartItemsRepository;
 import edu.sru.group7.restaurantmanager.repository.CustomerRepository;
@@ -50,6 +53,7 @@ import edu.sru.group7.restaurantmanager.repository.StateTaxRepository;
 import edu.sru.group7.restaurantmanager.repository.WarehouseManagerRepository;
 import edu.sru.group7.restaurantmanager.repository.OrderRepository;
 import edu.sru.group7.restaurantmanager.repository.PaymentDetailsRepository;
+import edu.sru.group7.restaurantmanager.repository.PaypalRepository;
 import edu.sru.group7.restaurantmanager.repository.MenuRepository;
 import edu.sru.group7.restaurantmanager.repository.LogRepository;
 //import edu.sru.group7.restaurantmanager.billing.PaymentDetailsController;
@@ -82,6 +86,7 @@ public class RestaurantController {
 	
 	private boolean isLoggedIn;
 
+	//Repository instances
 	@Autowired
 	private CustomerRepository customerRepo;
 
@@ -117,6 +122,9 @@ public class RestaurantController {
 
 	@Autowired
 	private PaymentDetailsRepository paymentDetailsRepo;
+	
+	@Autowired
+	private PaypalRepository paypalRepo;
 
 	@Autowired
 	private IngredientsRepository ingredientsRepo;
@@ -133,6 +141,7 @@ public class RestaurantController {
 	@Autowired
 	private WarehouseManagerRepository warehouseManagerRepo;
 
+	//Filepaths for loading data
 	private final String menuFP = "src/main/resources/Menu.xlsx";
 
 	private final String ingredientFP = "src/main/resources/Ingredients.xlsx";
@@ -141,23 +150,31 @@ public class RestaurantController {
 
 	private FakeApplicationUserDaoService fakeApplicationUserDaoService;
 
-	// create an UserRepository instance - instantiation (new) is done by Spring
+	/**
+	 * Create a repository instance - instantiation (new) is done by Spring
+	 */
 	public RestaurantController(WarehouseManagerRepository warehouseManagerRepo, IngredientsRepository ingredientsRepo, 
 			RestaurantRepository restaurantRepo,WarehouseRepository warehouseRepo, CartItemsRepository cartItemsRepo, 
 			InventoryRepository inventoryRepo,OfficeRepository officeRepo, CustomerRepository customerRepo, 
 			ManagerRepository managerRepo,ServerRepository serverRepo, OrderRepository orderRepo, MenuRepository menuRepo, 
-			LogRepository logRepo) {
+			LogRepository logRepo, AdminRepository adminRepo, PaymentDetailsRepository paymentDetailsRepo, 
+			StateTaxRepository stateTaxRepo, ShippingRepository shippingRepo, PaypalRepository paypalRepo) {
 		this.warehouseManagerRepo = warehouseManagerRepo;
+		this.paymentDetailsRepo = paymentDetailsRepo;
 		this.ingredientsRepo = ingredientsRepo;
 		this.restaurantRepo = restaurantRepo;
 		this.warehouseRepo = warehouseRepo;
 		this.cartItemsRepo = cartItemsRepo;
 		this.inventoryRepo = inventoryRepo;
+		this.stateTaxRepo = stateTaxRepo;
+		this.shippingRepo = shippingRepo;
 		this.customerRepo = customerRepo;
 		this.managerRepo = managerRepo;
+		this.paypalRepo = paypalRepo;
 		this.serverRepo = serverRepo;
 		this.officeRepo = officeRepo;
 		this.orderRepo = orderRepo;
+		this.adminRepo = adminRepo;
 		this.menuRepo = menuRepo;
 		this.logRepo = logRepo;
 		isLoggedIn = false;
@@ -406,6 +423,7 @@ public class RestaurantController {
 		while (curRow.getRowNum() < sheet.getLastRowNum()) {
 			i++;
 			curRow = sheet.getRow(i);
+
 			StateTax st = new StateTax();
 			st.setState(checkStringType(curRow.getCell(0)));
 			st.setIncomePercent(checkFloatType(curRow.getCell(1)));
@@ -434,54 +452,43 @@ public class RestaurantController {
 		menuRepo.deleteAll();
 		warehouseManagerRepo.deleteAll();
 		shippingRepo.deleteAll();
+		stateTaxRepo.deleteAll();
 
-		Customers guest = new Customers("Guest", "", "Guest", "", false, 0, 0);
+		//Hardcoded guest customer with ID -1, this one isnt sample data it is necessary in the code
+		Customers guest = new Customers("Guest", "", "Guest", "", false, 0, "N/A");
 		guest.setId(-1);
 		customerRepo.save(guest);
 
-		Offices office = new Offices("100 Central Loop", "16057", "Slippery Rock", "PA");
-
-		Warehouses warehouse = new Warehouses("150 Branchton Road", "16057", "Slippery Rock", "PA");
-
 		List<Admins> listadmins = new ArrayList<>();
-
+		
+		Offices office = new Offices("100 Central Loop", "16057", "Slippery Rock", "Pennsylvania");
+		Offices office2 = new Offices("1620 East Maiden", "16057", "Slippery Rock", "Pennsylvania", listadmins);
+		Warehouses warehouse = new Warehouses("150 Branchton Road", "16057", "Slippery Rock", "Pennsylvania");
 		officeRepo.save(office);
-
 		warehouseRepo.save(warehouse);
-
+		
 		Admins admin = new Admins("Darth", "Vader", "Administrator@email.com", "pass", office);
-
 		Admins admin2 = new Admins("Kylo", "Ren", "Administrator2@email.com", "pass", office);
-
 		listadmins.add(admin);
 		listadmins.add(admin2);
-
 		adminRepo.save(admin);
 		adminRepo.save(admin2);
+		
+		officeRepo.save(office2);
 
-		Restaurants restaurant = new Restaurants("100 Arrowhead Drive", "16057", "Slippery Rock", "PA", admin2);
-
-		Restaurants restaurant2 = new Restaurants("1 Vineyard Circle", "16057", "Slippery Rock", "PA", admin);
-
+		Restaurants restaurant = new Restaurants("100 Arrowhead Drive", "16057", "Slippery Rock", "Pennsylvania", admin2);
+		Restaurants restaurant2 = new Restaurants("1 Vineyard Circle", "16057", "Slippery Rock", "Pennsylvania", admin);
 		restaurantRepo.save(restaurant);
 		restaurantRepo.save(restaurant2);
 
-		Offices office2 = new Offices("1620 East Maiden", "16057", "Slippery Rock", "PA", listadmins);
-
 		Managers manager = new Managers("Anakin", "Skywalker", "Manager@email.com", "pass", 10.00F, restaurant); 
-
 		Managers manager2 = new Managers("Luke", "Skywalker", "Manager2@email.com", "pass", 10.00F, restaurant2);
-
 		Servers server = new Servers("Obi-wan", "Kenobi", "server@email.com", "pass", 7.25F, restaurant);
-
 		Servers server2 = new Servers("Baby", "Yoda", "server2@email.com", "pass", 7.25F, restaurant2);
-
 		managerRepo.save(manager);
 		managerRepo.save(manager2);
 		serverRepo.save(server);
 		serverRepo.save(server2);
-
-		officeRepo.save(office2);
 
 		try {
 			loadIngredients();
@@ -489,65 +496,29 @@ public class RestaurantController {
 			loadIngredients(ingredientFP, warehouse);
 			loadIngredients(ingredientFP, restaurant);
 			loadIngredients(ingredientFP, restaurant2);
+			loadTaxes();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
-		// Customer objects for hardcoded logins
-		Customers samThangiah = new Customers("sam", "thangiah", "sam", "thangiah", false, 0, 1);
-
-		Customers hqManager = new Customers("hq", "manager", "hqmanager@email.com", "pass", false, 0, 1);
-
+		// Customer objects for hardcoded HQ logins
+		// Used in FakeApplicationUserDaoService
+		Customers samThangiah = new Customers("sam", "thangiah", "sam", "thangiah", false, 0, office.toString());
+		Customers hqManager = new Customers("hq", "manager", "hqmanager@email.com", "pass", false, 0, office.toString());
 		customerRepo.save(samThangiah);
 		customerRepo.save(hqManager);
-
-		Orders order = new Orders();
+		
 		Customers cust = new Customers();
 
 		cust.setEmail("customer@email.com");
 		cust.setFirstName("Test");
 		cust.setLastName("Customer");
-		cust.setLocation((int) restaurant2.getId());
+		cust.setLocation(restaurant.toString());
 		cust.setPassword("password");
 		cust.setRewardsMember(true);
 		cust.setRewardsAvailable(10);
 
 		customerRepo.save(cust);
-
-		Set<Menu> item = new HashSet<Menu>();
-
-		item.add(menuRepo.findById((long) 1).get());
-		item.add(menuRepo.findById((long) 2).get());
-		item.add(menuRepo.findById((long) 3).get());
-
-		order.setDate(date.format(LocalDateTime.now()));
-		order.setPrice(0.00F);
-		order.setCustomer_id(cust);
-		order.setItems(item);
-		order.setInstructions("instructions");
-		order.setRestaurant(restaurant2);
-		order.setStatus("Completed");
-
-		orderRepo.save(order);
-
-		CartItems cartItems = new CartItems();
-		cartItems.setMenu_id(menuRepo.findById((long) 1).get());
-		cartItems.setCustomer_id(cust);
-		cartItems.setQuantity(10);
-
-		CartItems cartItems2 = new CartItems();
-		cartItems2.setMenu_id(menuRepo.findById((long) 2).get());
-		cartItems2.setCustomer_id(cust);
-		cartItems2.setQuantity(10);
-
-		CartItems cartItems3 = new CartItems();
-		cartItems3.setMenu_id(menuRepo.findById((long) 3).get());
-		cartItems3.setCustomer_id(cust);
-		cartItems3.setQuantity(10);
-
-		cartItemsRepo.save(cartItems);
-		cartItemsRepo.save(cartItems2);
-		cartItemsRepo.save(cartItems3);
 		
 		WarehouseManager warehouseManager = new WarehouseManager();
 		warehouseManager.setFirstName("Emperor");
@@ -557,15 +528,10 @@ public class RestaurantController {
 		warehouseManager.setWarehouse(warehouse);
 		warehouseManagerRepo.save(warehouseManager);
 		
-		List<Orders> orders = new ArrayList<>();
-		orders.add(order);
-		restaurant2.setOrder(orders);
 		restaurantRepo.save(restaurant2);
 		
-		Ingredients ingredients = ingredientsRepo.findByMenuItem(restaurant2.getOrder().get(0).getItems().iterator().next().getId());
-		
 		Shipping shipment = new Shipping();
-		shipment.setIngredient(ingredients.getIngredient().firstElement().toString());
+		shipment.setIngredient("Ingredient");
 		shipment.setManager_id(manager);
 		shipment.setQuantity(50);
 		shipment.setStatus("pending");
@@ -574,13 +540,13 @@ public class RestaurantController {
 		shipment.setWarehousemanager_id(warehouseManager);
 		shippingRepo.save(shipment);
 		
-
+		
 		System.out.println(
 				"---------------------------------------------------------------------------------------------------------------------------");
 		System.out.println("DATABASE CREATED" + "\n" + "\n");
-
+		
 	}
-
+	
 	/**
 	 * @return index page
 	 */
@@ -588,7 +554,7 @@ public class RestaurantController {
 	public String homePage() {
 		return "Guest/index";
 	}
-
+	
 	@ModelAttribute
 	public void addAttributes(Model model) {
 		List<Restaurants> listrestaurants = (List<Restaurants>) restaurantRepo.findAll();
@@ -607,16 +573,7 @@ public class RestaurantController {
 		}
 		model.addAttribute("listMenu", availablemenu);
 	}
-
-	/**
-	 * Currently unused, not sure how to redirect default error page to 403 url
-	 * @return 403 Error page
-	 */
-	@GetMapping("/403")
-	public String error403() {
-		return "SignIn/403";
-	}
-
+	
 	/**
 	 * Redirect to method checking account authorities to show corresponding pages
 	 */
@@ -689,7 +646,7 @@ public class RestaurantController {
 			for (Servers i : serverRepo.findAll()) {
 				if (i.getEmail().equals(user.getUsername())) {
 					Customers c = new Customers(i.getFirstName(), i.getLastName(), i.getEmail(), i.getPassword(), 
-							false, 0, (int) i.getRestaurant().getId());
+							false, 0, i.getRestaurant().toString());
 					c.setId(i.getId());
 					return c;
 				}
@@ -697,7 +654,7 @@ public class RestaurantController {
 			for (Managers i : managerRepo.findAll()) {
 				if (i.getEmail().equals(user.getUsername())) {
 					Customers c = new Customers(i.getFirstName(), i.getLastName(), i.getEmail(), i.getPassword(), 
-							false, 0, (int) i.getRestaurant().getId());
+							false, 0, i.getRestaurant().toString());
 					c.setId(i.getId());
 					return c;
 				}
@@ -705,7 +662,7 @@ public class RestaurantController {
 			for (Admins i : adminRepo.findAll()) {
 				if (i.getEmail().equals(user.getUsername())) {
 					Customers c = new Customers(i.getFirstName(), i.getLastName(), i.getEmail(), i.getPassword(), 
-							false, 0, (int) i.getOffice().getId());
+							false, 0, i.getOffice().toString());
 					c.setId(i.getId());
 					return c;
 				}
@@ -713,7 +670,7 @@ public class RestaurantController {
 			for (WarehouseManager i : warehouseManagerRepo.findAll()) {
 				if (i.getEmail().equals(user.getUsername())) {
 					Customers c = new Customers(i.getFirstName(), i.getLastName(), i.getEmail(), i.getPassword(), 
-							false, 0, (int) i.getWarehouse().getId());
+							false, 0, i.getWarehouse().toString());
 					c.setId(i.getId());
 					return c;
 				}
@@ -954,7 +911,7 @@ public class RestaurantController {
 				.orElseThrow(() -> new IllegalArgumentException("Invalid admin Id:" + getUserUID()));
 		Restaurants restaurant = restaurantRepo.findByAdmin(admin.getId());
 
-		model.addAttribute("servers", serverRepo.findServerLocation(restaurant.getId()));
+		model.addAttribute("servers", serverRepo.findServerLocation(restaurant));
 		return "LocalAdmin/admin-server-view";
 	}
 
@@ -1193,7 +1150,7 @@ public class RestaurantController {
 			Log log = new Log();
 			log.setDate(date.format(LocalDateTime.now()));
 			log.setTime(time.format(LocalDateTime.now()));
-			log.setLocation(1 /* HQ */);
+			log.setLocation(getUserLocation());
 			log.setUserId(getUserUID());
 			log.setAction("Create new admin account");
 			log.setActionId(admin.getId());
@@ -1221,7 +1178,7 @@ public class RestaurantController {
 		Log log = new Log();
 		log.setDate(date.format(LocalDateTime.now()));
 		log.setTime(time.format(LocalDateTime.now()));
-		log.setLocation(1 /* HQ */);
+		log.setLocation(getUserLocation());
 		log.setUserId(getUserUID());
 		log.setAction("Add new office");
 		log.setActionId(office.getId());
@@ -1247,7 +1204,7 @@ public class RestaurantController {
 		Log log = new Log();
 		log.setDate(date.format(LocalDateTime.now()));
 		log.setTime(time.format(LocalDateTime.now()));
-		log.setLocation(1 /* HQ */);
+		log.setLocation(getUserLocation());
 		log.setUserId(getUserUID());
 		log.setAction("Add new restaurant");
 		log.setActionId(restaurant.getId());
@@ -1279,7 +1236,7 @@ public class RestaurantController {
 		Log log = new Log();
 		log.setDate(date.format(LocalDateTime.now()));
 		log.setTime(time.format(LocalDateTime.now()));
-		log.setLocation(1 /* HQ */);
+		log.setLocation(getUserLocation());
 		log.setUserId(getUserUID());
 		log.setAction("Add new warehouse");
 		log.setActionId(warehouse.getId());
@@ -1550,7 +1507,7 @@ public class RestaurantController {
 		Log log = new Log();
 		log.setDate(date.format(LocalDateTime.now()));
 		log.setTime(time.format(LocalDateTime.now()));
-		log.setLocation(1 /* HQ */);
+		log.setLocation(getUserLocation());
 		log.setUserId(getUserUID());
 		log.setAction("Update office information");
 		log.setActionId(office.getId());
@@ -1579,7 +1536,7 @@ public class RestaurantController {
 		Log log = new Log();
 		log.setDate(date.format(LocalDateTime.now()));
 		log.setTime(time.format(LocalDateTime.now()));
-		log.setLocation(1 /* HQ */);
+		log.setLocation(getUserLocation());
 		log.setUserId(getUserUID());
 		log.setAction("Update warehouse information");
 		log.setActionId(warehouse.getId());
@@ -1608,7 +1565,7 @@ public class RestaurantController {
 		Log log = new Log();
 		log.setDate(date.format(LocalDateTime.now()));
 		log.setTime(time.format(LocalDateTime.now()));
-		log.setLocation(1 /* HQ */);
+		log.setLocation(getUserLocation());
 		log.setUserId(getUserUID());
 		log.setAction("Update restaurant information");
 		log.setActionId(restaurant.getId());
@@ -1741,7 +1698,7 @@ public class RestaurantController {
 		Log log = new Log();
 		log.setDate(date.format(LocalDateTime.now()));
 		log.setTime(time.format(LocalDateTime.now()));
-		log.setLocation(1 /* HQ */);
+		log.setLocation(getUserLocation());
 		log.setUserId(getUserUID());
 		log.setAction("Delete office");
 		log.setActionId(office.getId());
@@ -1764,7 +1721,7 @@ public class RestaurantController {
 		Log log = new Log();
 		log.setDate(date.format(LocalDateTime.now()));
 		log.setTime(time.format(LocalDateTime.now()));
-		log.setLocation(1 /* HQ */);
+		log.setLocation(getUserLocation());
 		log.setUserId(getUserUID());
 		log.setAction("Delete restaurant");
 		log.setActionId(restaurant.getId());
@@ -1787,7 +1744,7 @@ public class RestaurantController {
 		Log log = new Log();
 		log.setDate(date.format(LocalDateTime.now()));
 		log.setTime(time.format(LocalDateTime.now()));
-		log.setLocation(1 /* HQ */);
+		log.setLocation(getUserLocation());
 		log.setUserId(getUserUID());
 		log.setAction("Delete warehouse");
 		log.setActionId(warehouse.getId());
@@ -1810,7 +1767,7 @@ public class RestaurantController {
 		Log log = new Log();
 		log.setDate(date.format(LocalDateTime.now()));
 		log.setTime(time.format(LocalDateTime.now()));
-		log.setLocation(1 /* HQ */);
+		log.setLocation(getUserLocation());
 		log.setUserId(getUserUID());
 		log.setAction("Delete admin account");
 		log.setActionId(admin.getId());
@@ -1851,7 +1808,13 @@ public class RestaurantController {
 	 */
 	@GetMapping("/servingstaffview")
 	public String showServerView(Model model) {
-		model.addAttribute("orders", orderRepo.findOrdersByLocation(getUserLocation()));
+		Restaurants rest = null;
+		for (Restaurants r : restaurantRepo.findAll()) {
+			if (r.toString().equals(getUserLocation())) {
+				rest = r;
+			}
+		}
+		model.addAttribute("orders", orderRepo.findOrdersByLocation(rest));
 		model.addAttribute("menu", menuRepo.findAll());
 		Servers server = null;
 		for (Servers s : serverRepo.findAll()) { 
@@ -1860,7 +1823,7 @@ public class RestaurantController {
 			}
 		}
 		model.addAttribute("server", server);
-		// TO-DO make output of orders more neat
+		// TODO make output of orders more neat
 		return "LocalServingStaff/serving-staff-view";
 	}
 	
@@ -2300,7 +2263,13 @@ public class RestaurantController {
 	 */
 	@RequestMapping({ "/manager-server-view" })
 	public String localManShowServers(Model model) {
-		model.addAttribute("servers", serverRepo.findServerLocation(getUserLocation()));
+		Restaurants rest = null;
+		for (Restaurants r : restaurantRepo.findAll()) {
+			if (r.toString().equals(getUserLocation())) {
+				rest = r;
+			}
+		}
+		model.addAttribute("servers", serverRepo.findServerLocation(rest));
 		return "LocalManager/manager-server-view";
 	}
 	
@@ -2422,7 +2391,7 @@ public class RestaurantController {
 		Log log = new Log();
 		log.setDate(date.format(LocalDateTime.now()));
 		log.setTime(time.format(LocalDateTime.now()));
-		log.setLocation(1 /* HQ */);
+		log.setLocation(getUserLocation());
 		log.setUserId(getUserUID());
 		log.setAction("Update manager account");
 		log.setActionId(manager.getId());
@@ -2445,7 +2414,7 @@ public class RestaurantController {
 		Log log = new Log();
 		log.setDate(date.format(LocalDateTime.now()));
 		log.setTime(time.format(LocalDateTime.now()));
-		log.setLocation(1 /* HQ */);
+		log.setLocation(getUserLocation());
 		log.setUserId(getUserUID());
 		log.setAction("Delete manager account");
 		log.setActionId(manager.getId());
@@ -2479,7 +2448,7 @@ public class RestaurantController {
 		Log log = new Log();
 		log.setDate(date.format(LocalDateTime.now()));
 		log.setTime(time.format(LocalDateTime.now()));
-		log.setLocation(1 /* HQ */);
+		log.setLocation(getUserLocation());
 		log.setUserId(getUserUID());
 		log.setAction("Create new LF manager");
 		log.setActionId(manager.getId());
@@ -2599,6 +2568,8 @@ public class RestaurantController {
 		public String showPaymentPage(Model model) {
 			PaymentDetails_Form payForm = new PaymentDetails_Form();
 			model.addAttribute("PaymentDetails_Form", payForm);
+			Paypal_Form palForm = new Paypal_Form();
+			model.addAttribute("Paypal_Form", palForm);
 			if (getLoggedInUser() != null) {
 				return "Customer/pay";
 			}
@@ -2638,6 +2609,42 @@ public class RestaurantController {
 			deleteCartItems();
 			
 			paymentDetailsRepo.delete(details);
+			return "redirect:/ordersuccessful";
+		}
+		
+		/**
+		 * @param form		mirror of Paypal details for form submission
+		 * @param result
+		 * @param model
+		 * Paypal login credentials processing simulation method
+		 * Does not actually connect to Paypal, only simulates through credentials
+		 */
+		@RequestMapping("/processpaypal")
+		public String processPaypal(@Validated Paypal_Form form, BindingResult result, Model model) {
+			if (result.hasErrors()) {
+				return "redirect:/pay";
+			}
+			Paypal paypal = new Paypal();
+			paypal.buildFromForm(form);
+			Orders order;
+			
+			if (getLoggedInUser() != null) {
+				order = orderRepo.findByCustomerIdUnpaid(getUserUID());
+				//Add to customer's order history
+				List<Orders> orderHistory = getLoggedInUser().getOrderHistory();
+				orderHistory.add(order);
+				getLoggedInUser().setOrderHistory(orderHistory);
+			} else {
+				order = (Orders) getCurrentSession().getAttribute("order");
+			}
+			
+			removeFromInventory(order);
+			order.setStatus("Paid");
+			addToSales(order);
+			orderRepo.save(order);
+			deleteCartItems();
+			
+			paypalRepo.delete(paypal);
 			return "redirect:/ordersuccessful";
 		}
 		
@@ -2718,6 +2725,9 @@ public class RestaurantController {
 			}
 			cartItemsRepo.delete(item);
 			
+			//Recalculate tax price after removing item
+			//AddTaxes();
+			
 			return "redirect:/Customer-cart-view";
 		}
 		
@@ -2751,18 +2761,29 @@ public class RestaurantController {
 			if (cartItem != null) {
 				cartItemsRepo.delete(cartItem);
 			}
+			
+			//Recalculate tax price after removing item
+			//AddTaxes();
+			
 			return "redirect:/Customer-ordertype-view";
 		}
 		
 		/**
 		 * Remove all items from cart
 		 * Used when order is payed to reset cart
+		 * Also deletes menu objects created during order for displaying in cart (discounts, tax)
 		 */
 		public void deleteCartItems() {
 			Customers customer = getLoggedInUser();
 			List<CartItems> cartItems;
 			if (customer != null) {
 				cartItems = cartItemsRepo.findByCustomer(customer);
+				for (CartItems c : cartItems) {
+					if (c.getMenu_id().getId() < (long) 0) {
+						//Deletes discount and tax objects from repo after order is payed
+						menuRepo.delete(c.getMenu_id());
+					}
+				}
 			}
 			else {
 				//cartItems either retrieved from HttpSession attribute or set to empty list if no cart items were set
@@ -2794,7 +2815,6 @@ public class RestaurantController {
 			if (getLoggedInUser() != null) {
 				cartItem = cartItemsRepo.findByCustMenuId(id, getUserUID());
 				if (cartItem == null) {
-					//Begin new order if customer has no items in cart
 					cartItem = createNewOrder(id, cartItem);
 				} else {
 					//Add to item quantity if customer already has said item in their cart
@@ -2827,6 +2847,9 @@ public class RestaurantController {
 				}
 			}
 			
+			//Calculate order taxes after adding item
+			//AddTaxes();
+			
 			//cartItemsRepo is saved regardless of logged in status for deleteCartItem() to work
 			try {
 				cartItemsRepo.save(cartItem);
@@ -2836,6 +2859,140 @@ public class RestaurantController {
 			}
 			
 			return "redirect:/Customer-ordertype-view";
+		}
+		
+		/**
+		 * Create new sales tax menu object based on cartItems total price
+		 * Append to price of existing tax object if order exists
+		 * TODO not updating existing tax object, setId not giving it a negative number as expected, need to come up with logic for removing last item in cart
+		 * 
+		 * This isnt done yet I only wanted to commit today since I made a lot of other changes unrelated to this
+		 */
+		private void AddTaxes() {
+			List<CartItems> items = new ArrayList<CartItems>();
+			Customers user = getLoggedInUser();
+			float totalPrice = 0.00F;
+			float taxPrice = 0.00F;
+			float salesPercent = 0.00F;
+			Restaurants rest = null;
+			
+			if (user != null) {
+				items = cartItemsRepo.findByCustomer(getLoggedInUser());
+				
+				//Get state sales tax from user's location
+				for (Restaurants r : restaurantRepo.findAll()) {
+					if (r.toString().equals(getUserLocation())) {
+						rest = r;
+					}
+				}
+				if (rest != null) {
+					StateTax tax = stateTaxRepo.findByState(rest.getState());
+					salesPercent = tax.getSalesPercent();
+				}
+				
+				if (items.size() == 1) {
+					//If new cart, create tax object
+					Menu salesTax = new Menu();
+					long id = salesTax.getId();
+					salesTax.setId(0 - id);
+					salesTax.setName("Sales Tax");
+					salesTax.setAvailability(false);
+					
+					totalPrice = items.get(0).getMenu_id().getPrice();
+					taxPrice = Math.round((totalPrice * (salesPercent / 100)) * 100.0) / 100.0F;
+					salesTax.setPrice(taxPrice);
+					
+					menuRepo.save(salesTax);
+					cartItemsRepo.save(new CartItems(salesTax, user, 1));
+				} else {
+					//If existing cart, update existing tax object
+					Menu taxObj = null;
+					
+					for (CartItems i : items) {
+						if (i.getMenu_id().getId() > (long) 0) {
+							totalPrice += i.getMenu_id().getPrice() * i.getQuantity();
+						} else {
+							if (i.getMenu_id().getName().equals("Sales Tax")) {
+								taxObj = i.getMenu_id();
+							}
+						}
+					}
+					
+					if (taxObj != null) {
+						//New object is created with properties of old obj to move it to the bottom of the cartItems list
+						Menu newTaxObj = taxObj;
+						long id = newTaxObj.getId();
+						newTaxObj.setId(0 - id);
+						taxPrice = Math.round((totalPrice * (salesPercent / 100)) * 100.0) / 100.0F;
+						newTaxObj.setPrice(taxPrice);
+						menuRepo.save(newTaxObj);
+						menuRepo.delete(taxObj);
+					}
+				}
+			} else {
+				//Guest user tax info
+				if (getCurrentSession().getAttribute("cartItems") == null) {
+					//If its null no tax info will be added, cart is empty
+				} else {
+					items = (List<CartItems>) getCurrentSession().getAttribute("cartItems");
+					//Assume its PA since IDK what to do otherwise, guests dont have a location
+					//All our locations are in PA regardless so it should be fine for now
+					StateTax tax = stateTaxRepo.findByState("Pennsylvania");
+					salesPercent = tax.getSalesPercent();
+					
+					if (items.size() == 1) {
+						//If new cart, create tax object
+						Menu salesTax = new Menu();
+						long id = salesTax.getId();
+						salesTax.setId(0 - id);
+						salesTax.setName("Sales Tax");
+						salesTax.setAvailability(false);
+						
+						totalPrice = items.get(0).getMenu_id().getPrice();
+						taxPrice = Math.round((totalPrice * (salesPercent / 100)) * 100.0) / 100.0F;
+						salesTax.setPrice(taxPrice);
+						
+						menuRepo.save(salesTax);
+						
+						CartItems item = new CartItems(salesTax, getGuestCust(), 1);
+						cartItemsRepo.save(item);
+						items.add(item);
+						
+						getCurrentSession().setAttribute("cartItems", items);
+					} else {
+						//If existing cart, update existing tax object
+						Menu taxObj = null;
+						CartItems toRemove = null;
+						
+						for (CartItems i : items) {
+							if (i.getMenu_id().getId() > (long) 0) {
+								totalPrice += i.getMenu_id().getPrice() * i.getQuantity();
+							} else {
+								if (i.getMenu_id().getName().equals("Sales Tax")) {
+									taxObj = i.getMenu_id();
+									toRemove = i;
+								}
+							}
+						}
+						
+						if (taxObj != null) {
+							Menu newTaxObj = taxObj;
+							long id = newTaxObj.getId();
+							newTaxObj.setId(0 - id);
+							taxPrice = Math.round((totalPrice * (salesPercent / 100)) * 100.0) / 100.0F;
+							newTaxObj.setPrice(taxPrice);
+							menuRepo.save(newTaxObj);
+							menuRepo.delete(taxObj);
+							
+							CartItems c = cartItemsRepo.findByCustMenuId(newTaxObj.getId(), -1);
+							items.remove(toRemove);
+							items.add(c);
+							
+							getCurrentSession().setAttribute("cartItems", items);
+						}
+					}
+				}
+			}
 		}
 		
 		/**
@@ -2851,7 +3008,7 @@ public class RestaurantController {
 			
 			cartItem.setMenu_id(menu);
 			cartItem.setQuantity(1);
-			if (menu.getId() == (long) -1) {
+			if (menu.getId() < (long) 0) {
 				cartItem.setQuantity(null);
 			}
 
@@ -2994,25 +3151,31 @@ public class RestaurantController {
 				int rewards = user.getRewardsAvailable();
 				//Redeem 5 rewards points at a time
 				if (rewards >= 5) {
+					List<CartItems> items = cartItemsRepo.findByCustomer(user);
+					//Do not redeem any rewards if cart is empty
+					if (items.isEmpty()) {
+						return "redirect:/Customer-cart-view";
+					}
 					user.setRewardsAvailable(rewards - 5);
 					
-					List<CartItems> items = cartItemsRepo.findByCustomer(user);
 					float price = 0.00F;
 					for (CartItems i : items) {
-						price += i.getMenu_id().getPrice() * i.getQuantity();
+						if (i.getMenu_id().getId() > (long) 0) {
+							price += i.getMenu_id().getPrice() * i.getQuantity();
+						}
 					}
 					//Discount is 10% of order, rounded to 2 decimal places
 					float discountPrice = Math.round((price / 10) * 100.0) / 100.0F;
 					
 					Menu discount = new Menu();
-					discount.setId(-1);
+					long id = discount.getId();
+					discount.setId(0 - id);
 					discount.setName("Rewards discount");
 					discount.setAvailability(false);
 					//Price set to negative so that it is subtracted
 					discount.setPrice(0 - discountPrice);
 					menuRepo.save(discount);
 					cartItemsRepo.save(new CartItems(discount, user, 1));
-
 				}
 		}
 
@@ -3044,13 +3207,12 @@ public class RestaurantController {
 	}
 	
 	/**
-	 * @return location attribute of currently signed in Customer account. -1 if not logged in.
+	 * @return location attribute of currently signed in Customer account. "N/A" if not logged in.
 	 */
-    public int getUserLocation() {
-
+    public String getUserLocation() {
 		Customers user = getLoggedInUser();
 		if (user == null) {
-			return -1;
+			return "N/A";
 		}
 		return user.getLocation();
 	}

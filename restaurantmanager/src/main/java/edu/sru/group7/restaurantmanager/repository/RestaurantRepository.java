@@ -11,6 +11,5 @@ public interface RestaurantRepository extends CrudRepository<Restaurants, Long> 
 	
 	@Query(value="SELECT * FROM restaurantmanagerdb.restaurants WHERE admin_id = :id", nativeQuery=true)
 	public Restaurants findByAdmin(long id);
-	
-	
+
 }

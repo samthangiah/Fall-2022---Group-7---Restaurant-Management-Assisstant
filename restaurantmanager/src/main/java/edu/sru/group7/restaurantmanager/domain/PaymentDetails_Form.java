@@ -6,6 +6,8 @@ import javax.validation.constraints.Size;
 //import org.hibernate.validator.constraints.Length;
 import org.springframework.lang.NonNull;
 
+//PaymentDetails code provided by Cody Kuntz from the WebShopping group project
+
 /**
  * A mirror of PaymentDetails used for form submission
  */
