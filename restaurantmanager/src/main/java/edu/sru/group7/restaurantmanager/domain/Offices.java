@@ -106,7 +106,7 @@ public class Offices extends Locations {
 	
 	@Override
 	public String toString() {
-		return "id: " + id;
+		return "Office ID: " + id + " Address: " + address;
 	}
 	
 }

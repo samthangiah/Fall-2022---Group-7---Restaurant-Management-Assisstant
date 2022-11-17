@@ -15,7 +15,7 @@
         <div class="d-flex" id="wrapper">
             <!-- Sidebar-->
             <div class="border-end bg-white" id="sidebar-wrapper">
-                <div class="sidebar-heading border-bottom bg-light">Insert logo here?</div>
+                <div class="sidebar-heading border-bottom bg-light">The Gazebo</div>
                 <div class="list-group list-group-flush">
                 	<a class="list-group-item list-group-item-action list-group-item-light p-3" href="/">Home</a>
                 	<a class="list-group-item list-group-item-action list-group-item-light p-3" href="/showmenu">Menu</a>
@@ -51,9 +51,16 @@
                     <br>
                     <br>
                     <br>
+                    <div>
+                    	<input type="radio" onclick="javascript:radioCheck()" id="paymentDetails_Form" name="paymentType" value="card" checked>
+                    	<label for="card"> Pay with card</label><br>
+                    	<input type="radio" onclick="javascript:radioCheck()" id="paypal_Form" name="paymentType" value="paypal">
+                    	<label for="paypal"> Pay with Paypal</label><br>
+                    </div>
                     <br>
-                    <div style="text-align: center;" >
-                    <form action="#" th:action="@{/processpayment}" th:object="${PaymentDetails_Form}" method="post">
+                    <br>
+                    <div id="payment_form">
+                    <form th:action="@{/processpayment}" th:object="${PaymentDetails_Form}" method="post">
     						<label for="cardType">Card processor: (i.e. Mastercard, Discover, Visa, etc.)</label><br>
     						<input type="text" th:field="*{cardType}" id="cardType" placeholder="Card Type" required><br>
     						<label for="cardholderName">Cardholder Name: </label><br>
@@ -67,14 +74,27 @@
     						<label for="postalCode">Billing ZIP Code: </label><br>
     						<input type="number" th:field="*{postalCode}" id="postalCode" placeholder="Postal Code" required><br>
     						<br>
-    						<input type="submit" value="Submit Payment">  
+    						<input type="submit" value="Submit Payment">
+						</form>
+					</div>
+					<div id="paypal_form" style="display:none">
+					<form th:action="@{/processpaypal}" th:object="${Paypal_Form}" method="post">
+							<label for="paypalLogin">Paypal Login: </label><br>
+							<input type="text" th:field="*{paypalLogin}" id="paypalLogin" placeholder="Login" required><br>
+							<label for="paypalPassword">Paypal Password: </label><br>
+							<input type="password" th:field="*{paypalPassword}" id="paypalPassword" placeholder="Password" required><br>
+							<br>
+    						<input type="submit" value="Submit Paypal Login">
 						</form>
                     </div>
                 </div>
+            </div>
             </div>
         <!-- Bootstrap core JS-->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
         <!-- Core theme JS-->
         <script src="js/scripts.js"></script>
+        <!-- Special payment page script for form visibility -->
+        <script src="js/paymentOptions.js"></script>
     </body>
 </html>

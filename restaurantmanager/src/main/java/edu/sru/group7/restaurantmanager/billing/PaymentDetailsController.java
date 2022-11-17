@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import edu.sru.group7.restaurantmanager.repository.PaymentDetailsRepository;
 
+//PaymentDetails code provided by Cody Kuntz from the WebShopping group project
+
 /**
  * Controller for handling PaymentDetails in database
  */

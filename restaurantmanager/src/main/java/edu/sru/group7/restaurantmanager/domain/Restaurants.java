@@ -36,6 +36,9 @@ public class Restaurants extends Locations {
 	@JoinColumn(name="admin_id")
 	private Admins admin;
 	
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "location")
+	private List<Customers> customers = new ArrayList<>();
+	
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "restaurant")
 	private List<Orders> order = new ArrayList<>();
 	
@@ -135,12 +138,7 @@ public class Restaurants extends Locations {
 	public void setManagers(List<Managers> managers) {
 		this.managers = managers;
 	}
-
-	@Override
-	public String toString() {
-		return "id: " + id;
-	}
-
+	
 	public float getSales() {
 		return sales;
 	}
@@ -171,5 +169,10 @@ public class Restaurants extends Locations {
 
 	public void setOrder(List<Orders> order) {
 		this.order = order;
+	}
+	
+	@Override
+	public String toString() {
+		return "Restaurant ID: " + id + " Address: " + address;
 	}
 }

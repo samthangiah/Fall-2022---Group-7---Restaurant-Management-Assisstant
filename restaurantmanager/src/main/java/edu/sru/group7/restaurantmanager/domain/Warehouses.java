@@ -101,7 +101,10 @@ public class Warehouses extends Locations {
 		this.shipments = shipments;
 	}
 
-	
+	@Override
+	public String toString() {
+		return "Warehouse ID: " + id + " Address: " + address;
+	}
 	
 	
 }

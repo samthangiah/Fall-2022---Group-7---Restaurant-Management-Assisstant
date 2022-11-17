@@ -7,6 +7,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Service;
 
 import edu.sru.group7.restaurantmanager.domain.Orders;
+import edu.sru.group7.restaurantmanager.domain.Restaurants;
 
 /**
  * CRUD interface for Orders POJO
@@ -19,8 +20,8 @@ public interface OrderRepository extends CrudRepository<Orders, Long> {
 	 * @param id Restaurant Id
 	 * @return List of Orders that have status 'Paid' at the Restaurant parameter.
 	 */
-	@Query(value="SELECT * FROM restaurantmanagerdb.orders WHERE restaurant = :id AND status = 'Paid'", nativeQuery=true)
-	public List<Orders> findOrdersByLocation(long id);
+	@Query(value="SELECT * FROM restaurantmanagerdb.orders WHERE restaurant = :rest AND status = 'Paid'", nativeQuery=true)
+	public List<Orders> findOrdersByLocation(Restaurants rest);
 	
 	/**
 	 * @param id Order Id

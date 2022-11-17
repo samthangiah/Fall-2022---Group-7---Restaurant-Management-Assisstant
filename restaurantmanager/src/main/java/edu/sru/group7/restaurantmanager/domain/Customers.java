@@ -37,7 +37,7 @@ public class Customers {
     
     private int rewardsAvailable;
     
-    private int location;
+    private String location;
     
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "customer_id")
 	private List<Orders> orderHistory = new ArrayList<Orders>();
@@ -62,7 +62,7 @@ public class Customers {
      * @param location
      */
 	public Customers(String firstName, String lastName, String email, String password,
-			boolean rewardsMember, int rewardsAvailable, int location) {
+			boolean rewardsMember, int rewardsAvailable, String location) {
 		super();
 		this.firstName = firstName;
 		this.lastName = lastName;
@@ -130,11 +130,11 @@ public class Customers {
 		this.rewardsAvailable = rewardsAvailable;
 	}
 	
-	public int getLocation() {
+	public String getLocation() {
 		return location;
 	}
 	
-	public void setLocation(int location) {
+	public void setLocation(String location) {
 		this.location = location;
 	}
 	
@@ -152,12 +152,20 @@ public class Customers {
 		this.orderHistory = order;
 	}
 
+	public Set<CartItems> getCartItems() {
+		return cartItems;
+	}
+
+	public void setCartItems(Set<CartItems> cartItems) {
+		this.cartItems = cartItems;
+	}
+
 	@Override
 	/**
 	 * To String Override
 	 */
 	public String toString() {
-		return "First name=" + firstName + ", Last name=" + lastName + ", Email=" + email;
+		return "Name: " + firstName + " " + lastName + ", Email: " + email;
 	}
 	
 }
