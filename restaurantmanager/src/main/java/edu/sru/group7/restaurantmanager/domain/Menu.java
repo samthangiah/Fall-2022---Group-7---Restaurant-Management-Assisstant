@@ -19,7 +19,7 @@ import javax.persistence.OneToMany;
 @Entity
 public class Menu {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    //@GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
     private String name;
     private String entree;
@@ -115,6 +115,14 @@ public class Menu {
     public int getQuantity() {
         return quantity;
     }
+
+	public Set<CartItems> getCartItems() {
+		return cartItems;
+	}
+
+	public void setCartItems(Set<CartItems> cartItems) {
+		this.cartItems = cartItems;
+	}
 
 	@Override
 	public String toString() {
