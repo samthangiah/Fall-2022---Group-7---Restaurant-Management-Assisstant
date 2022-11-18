@@ -2722,11 +2722,15 @@ public class RestaurantController {
 					}
 				}
 				getCurrentSession().setAttribute("cartItems", newCart);
+				cartItemsRepo.delete(item);
+			} else {
+				cartItemsRepo.delete(item);
+				//Update any rewards objects already redeemed
+				updateRewards();
 			}
-			cartItemsRepo.delete(item);
 			
 			//Recalculate tax price after removing item
-			//AddTaxes();
+			AddTaxes();
 			
 			return "redirect:/Customer-cart-view";
 		}
@@ -2740,9 +2744,11 @@ public class RestaurantController {
 		public String editCartFromMenu(@PathVariable("id") long id, Model model) {
 			Menu menu = menuRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid menu Id:" + id));
 			CartItems cartItem = null;
+			boolean rwflag = false;
 			
 			if (getLoggedInUser() != null) {
 				cartItem = cartItemsRepo.findByCustMenuId(id, getUserUID());
+				rwflag = true;
 			} else if (getCurrentSession().getAttribute("cartItems") != null) {
 				List<CartItems> cartItems = (List<CartItems>) getCurrentSession().getAttribute("cartItems");
 				List<CartItems> newCart = new ArrayList<CartItems>();
@@ -2760,10 +2766,14 @@ public class RestaurantController {
 			
 			if (cartItem != null) {
 				cartItemsRepo.delete(cartItem);
+				if (rwflag == true) {
+					//Update any rewards objects already redeemed
+					updateRewards();
+				}
 			}
 			
 			//Recalculate tax price after removing item
-			//AddTaxes();
+			AddTaxes();
 			
 			return "redirect:/Customer-ordertype-view";
 		}
@@ -2811,8 +2821,10 @@ public class RestaurantController {
 			if (result.hasErrors()) {
 				return "redirect:/Customer-ordertype-view";
 			}
+			boolean rwflag = false;
 			
 			if (getLoggedInUser() != null) {
+				rwflag = true;
 				cartItem = cartItemsRepo.findByCustMenuId(id, getUserUID());
 				if (cartItem == null) {
 					cartItem = createNewOrder(id, cartItem);
@@ -2847,12 +2859,15 @@ public class RestaurantController {
 				}
 			}
 			
-			//Calculate order taxes after adding item
-			//AddTaxes();
-			
 			//cartItemsRepo is saved regardless of logged in status for deleteCartItem() to work
 			try {
 				cartItemsRepo.save(cartItem);
+				if (rwflag == true) {
+					//Update any rewards objects already redeemed
+					updateRewards();
+				}
+				//Calculate order taxes after adding item
+				AddTaxes();
 			} catch(Exception e) {
 				e.printStackTrace();
 				return "redirect:/Customer-ordertype-view";
@@ -2864,9 +2879,6 @@ public class RestaurantController {
 		/**
 		 * Create new sales tax menu object based on cartItems total price
 		 * Append to price of existing tax object if order exists
-		 * TODO not updating existing tax object, setId not giving it a negative number as expected, need to come up with logic for removing last item in cart
-		 * 
-		 * This isnt done yet I only wanted to commit today since I made a lot of other changes unrelated to this
 		 */
 		private void AddTaxes() {
 			List<CartItems> items = new ArrayList<CartItems>();
@@ -2891,60 +2903,21 @@ public class RestaurantController {
 				}
 				
 				if (items.size() == 1) {
-					//If new cart, create tax object
-					Menu salesTax = new Menu();
-					long id = salesTax.getId();
-					salesTax.setId(0 - id);
-					salesTax.setName("Sales Tax");
-					salesTax.setAvailability(false);
-					
-					totalPrice = items.get(0).getMenu_id().getPrice();
-					taxPrice = Math.round((totalPrice * (salesPercent / 100)) * 100.0) / 100.0F;
-					salesTax.setPrice(taxPrice);
-					
-					menuRepo.save(salesTax);
-					cartItemsRepo.save(new CartItems(salesTax, user, 1));
-				} else {
-					//If existing cart, update existing tax object
-					Menu taxObj = null;
-					
-					for (CartItems i : items) {
-						if (i.getMenu_id().getId() > (long) 0) {
-							totalPrice += i.getMenu_id().getPrice() * i.getQuantity();
-						} else {
-							if (i.getMenu_id().getName().equals("Sales Tax")) {
-								taxObj = i.getMenu_id();
-							}
-						}
-					}
-					
-					if (taxObj != null) {
-						//New object is created with properties of old obj to move it to the bottom of the cartItems list
-						Menu newTaxObj = taxObj;
-						long id = newTaxObj.getId();
-						newTaxObj.setId(0 - id);
-						taxPrice = Math.round((totalPrice * (salesPercent / 100)) * 100.0) / 100.0F;
-						newTaxObj.setPrice(taxPrice);
-						menuRepo.save(newTaxObj);
-						menuRepo.delete(taxObj);
-					}
-				}
-			} else {
-				//Guest user tax info
-				if (getCurrentSession().getAttribute("cartItems") == null) {
-					//If its null no tax info will be added, cart is empty
-				} else {
-					items = (List<CartItems>) getCurrentSession().getAttribute("cartItems");
-					//Assume its PA since IDK what to do otherwise, guests dont have a location
-					//All our locations are in PA regardless so it should be fine for now
-					StateTax tax = stateTaxRepo.findByState("Pennsylvania");
-					salesPercent = tax.getSalesPercent();
-					
-					if (items.size() == 1) {
-						//If new cart, create tax object
+					//If cart size is 1 after deleting items, tax obj will be only item, remove tax obj
+					if (items.get(0).getMenu_id().getName().equals("Sales Tax")) {
+						System.out.println("------------------- DELETING TAX OBJ ----------------------");
+						
+						CartItems item = items.get(0);
+						menuRepo.delete(item.getMenu_id());
+						cartItemsRepo.delete(item);
+						
+						System.out.println("------------------- TAX OBJ DELETED ----------------------");
+					} else {
+						//If cart size is 1 after adding item, new cart, create tax object
+						System.out.println("------------------- CREATING TAX OBJ ----------------------");
+						
 						Menu salesTax = new Menu();
-						long id = salesTax.getId();
-						salesTax.setId(0 - id);
+						salesTax.setId(-1);
 						salesTax.setName("Sales Tax");
 						salesTax.setAvailability(false);
 						
@@ -2953,14 +2926,89 @@ public class RestaurantController {
 						salesTax.setPrice(taxPrice);
 						
 						menuRepo.save(salesTax);
+						cartItemsRepo.save(new CartItems(salesTax, user, 1));
 						
-						CartItems item = new CartItems(salesTax, getGuestCust(), 1);
-						cartItemsRepo.save(item);
-						items.add(item);
+						System.out.println("------------------- TAX OBJ CREATED ----------------------");
+					}
+				} else {
+					//If existing cart, update existing tax object
+					System.out.println("------------------- UPDATING TAX OBJ ----------------------");
+					
+					Menu taxObj = null;
+					CartItems toRemove = null;
+					
+					for (CartItems i : items) {
+						if (i.getMenu_id().getId() > (long) 0) {
+							totalPrice += i.getMenu_id().getPrice() * i.getQuantity();
+						} else {
+							if (i.getMenu_id().getName().equals("Sales Tax")) {
+								taxObj = i.getMenu_id();
+								toRemove = i;
+							}
+						}
+					}
+					
+					if (taxObj != null) {
+						taxPrice = Math.round((totalPrice * (salesPercent / 100)) * 100.0) / 100.0F;
+						taxObj.setPrice(taxPrice);
+						menuRepo.save(taxObj);
 						
-						getCurrentSession().setAttribute("cartItems", items);
+						CartItems c = new CartItems(taxObj, user, 1);
+						cartItemsRepo.delete(toRemove);
+						cartItemsRepo.save(c);
+						
+						System.out.println("------------------- TAX OBJ UPDATED ----------------------");
+					}
+				}
+			} else {
+				//Guest user tax info
+				if (getCurrentSession().getAttribute("cartItems") == null) {
+					//If its null no tax info will be added, cart is empty
+				} else {
+					items = (List<CartItems>) getCurrentSession().getAttribute("cartItems");
+					//Assume guest location is PA since IDK what to do otherwise, guests dont have a location
+					//All our locations are in PA regardless so it should be fine for now
+					StateTax tax = stateTaxRepo.findByState("Pennsylvania");
+					salesPercent = tax.getSalesPercent();
+					
+					if (items.size() == 1) {
+						//If cart size is 1 after deleting items, tax obj will be only item, remove tax obj
+						if (items.get(0).getMenu_id().getName().equals("Sales Tax")) {
+							System.out.println("------------------- DELETING TAX OBJ ----------------------");
+							
+							CartItems item = items.get(0);
+							getCurrentSession().setAttribute("cartItems", null);
+							menuRepo.delete(item.getMenu_id());
+							cartItemsRepo.delete(item);
+							
+							System.out.println("------------------- TAX OBJ DELETED ----------------------");
+						} else {
+							//If cart size is 1 after adding item, new cart, create tax object
+							System.out.println("------------------- CREATING TAX OBJ ----------------------");
+							
+							Menu salesTax = new Menu();
+							salesTax.setId(-1);
+							salesTax.setName("Sales Tax");
+							salesTax.setAvailability(false);
+							
+							totalPrice = items.get(0).getMenu_id().getPrice();
+							taxPrice = Math.round((totalPrice * (salesPercent / 100)) * 100.0) / 100.0F;
+							salesTax.setPrice(taxPrice);
+							
+							menuRepo.save(salesTax);
+							
+							CartItems item = new CartItems(salesTax, getGuestCust(), 1);
+							cartItemsRepo.save(item);
+							items.add(item);
+							
+							getCurrentSession().setAttribute("cartItems", items);
+							
+							System.out.println("------------------- TAX OBJ CREATED ----------------------");
+						}
 					} else {
 						//If existing cart, update existing tax object
+						System.out.println("------------------- UPDATING TAX OBJ ----------------------");
+						
 						Menu taxObj = null;
 						CartItems toRemove = null;
 						
@@ -2976,19 +3024,18 @@ public class RestaurantController {
 						}
 						
 						if (taxObj != null) {
-							Menu newTaxObj = taxObj;
-							long id = newTaxObj.getId();
-							newTaxObj.setId(0 - id);
 							taxPrice = Math.round((totalPrice * (salesPercent / 100)) * 100.0) / 100.0F;
-							newTaxObj.setPrice(taxPrice);
-							menuRepo.save(newTaxObj);
-							menuRepo.delete(taxObj);
+							taxObj.setPrice(taxPrice);
+							menuRepo.save(taxObj);
 							
-							CartItems c = cartItemsRepo.findByCustMenuId(newTaxObj.getId(), -1);
+							CartItems c = new CartItems(taxObj, getGuestCust(), 1);
 							items.remove(toRemove);
+							cartItemsRepo.delete(toRemove);
 							items.add(c);
 							
 							getCurrentSession().setAttribute("cartItems", items);
+							
+							System.out.println("------------------- TAX OBJ UPDATED ----------------------");
 						}
 					}
 				}
@@ -3138,7 +3185,7 @@ public class RestaurantController {
 		/**
 		 * Customer redeem rewards button
 		 * Redeems 5 rewards points at a time
-		 * Discount is 10% of order
+		 * Discount is 10% of order (not including tax)
 		 * Creates new discount menu object to be added as a cartItem
 		 */
 		@RequestMapping({"/redeem"})
@@ -3156,7 +3203,6 @@ public class RestaurantController {
 					if (items.isEmpty()) {
 						return "redirect:/Customer-cart-view";
 					}
-					user.setRewardsAvailable(rewards - 5);
 					
 					float price = 0.00F;
 					for (CartItems i : items) {
@@ -3165,21 +3211,57 @@ public class RestaurantController {
 						}
 					}
 					//Discount is 10% of order, rounded to 2 decimal places
-					float discountPrice = Math.round((price / 10) * 100.0) / 100.0F;
+					//Price is negative so that it is subtracted
+					float discountPrice = Math.round((0 - price / 10) * 100.0) / 100.0F;
 					
 					Menu discount = new Menu();
-					long id = discount.getId();
-					discount.setId(0 - id);
+					discount.setId(0 - user.getRewardsAvailable());
 					discount.setName("Rewards discount");
 					discount.setAvailability(false);
-					//Price set to negative so that it is subtracted
-					discount.setPrice(0 - discountPrice);
+					discount.setPrice(discountPrice);
 					menuRepo.save(discount);
 					cartItemsRepo.save(new CartItems(discount, user, 1));
+					
+					user.setRewardsAvailable(rewards - 5);
+					customerRepo.save(user);
 				}
 		}
 
 		return "redirect:/Customer-cart-view";
+		}
+		
+		/**
+		 * Updates already redeemed rewards if the customer changes order after redeeming
+		 */
+		public void updateRewards() {
+			Customers user = getLoggedInUser();
+			if (user.getRewardsMember() == true) {
+				List<CartItems> items = cartItemsRepo.findByCustomer(user);
+				List<CartItems> toUpdate = new ArrayList<CartItems>();
+				float price = 0.00F;
+				
+				//Check for discount already redeemed in order
+				for (CartItems c : items) {
+					if (c.getMenu_id().getId() > (long) 0) {
+						price += c.getMenu_id().getPrice() * c.getQuantity();
+					} else if (c.getMenu_id().getName().equals("Rewards discount")) {
+						toUpdate.add(c);
+					}
+				}
+				if (toUpdate.isEmpty() == false) {
+					//Discount is 10% of order, rounded to 2 decimal places
+					//Price is negative so that it is subtracted
+					float discountPrice = Math.round((0 - price / 10) * 100.0) / 100.0F;
+					for (CartItems u : toUpdate) {
+						u.getMenu_id().setPrice(discountPrice);
+						menuRepo.save(u.getMenu_id());
+						
+						//New cart item used to show rewards at the bottom of the cart
+						cartItemsRepo.save(new CartItems(u.getMenu_id(), user, 1));
+						cartItemsRepo.delete(u);
+					}
+				}
+			}
 		}
 	
 		/**
