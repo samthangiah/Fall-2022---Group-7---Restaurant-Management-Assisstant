@@ -3,6 +3,8 @@ package edu.sru.group7.restaurantmanager.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -46,6 +48,7 @@ import edu.sru.group7.restaurantmanager.repository.InventoryRepository;
 import edu.sru.group7.restaurantmanager.repository.OfficeRepository;
 import edu.sru.group7.restaurantmanager.repository.RestaurantRepository;
 import edu.sru.group7.restaurantmanager.repository.WarehouseRepository;
+import edu.sru.group7.restaurantmanager.security.PasswordConfig;
 import edu.sru.group7.restaurantmanager.repository.ManagerRepository;
 import edu.sru.group7.restaurantmanager.repository.ServerRepository;
 import edu.sru.group7.restaurantmanager.repository.ShippingRepository;
@@ -148,8 +151,6 @@ public class RestaurantController {
 	
 	private final String taxInfo = "src/main/resources/US-Tax-Info-By-State.xlsx";
 
-	private FakeApplicationUserDaoService fakeApplicationUserDaoService;
-
 	/**
 	 * Create a repository instance - instantiation (new) is done by Spring
 	 */
@@ -179,6 +180,8 @@ public class RestaurantController {
 		this.logRepo = logRepo;
 		isLoggedIn = false;
 	}
+	
+	private FakeApplicationUserDaoService fakeApplicationUserDaoService;
     
     /**
      * @return Current HttpSession object to be used for guest users
@@ -204,17 +207,19 @@ public class RestaurantController {
 		this.isLoggedIn = isLoggedIn;
 	}
 
-	static String checkStringType(XSSFCell testCell) {
+	public static String checkStringType(XSSFCell testCell) {
 		if (testCell.getCellType() == CellType.NUMERIC) {
 			return Integer.toString((int) testCell.getNumericCellValue());
 		}
 		if (testCell.getCellType() == CellType.BLANK) {
-			return null;
+			//For the IntType and FloatType blanks I can understand why it would return null but I don't
+			//know why this one was supposed to return null, it should just be an empty string in my opinion
+			return "";
 		}
 		return testCell.getStringCellValue();
 	}
 
-	static int checkIntType(XSSFCell testCell) {
+	public static int checkIntType(XSSFCell testCell) {
 		if (testCell.getCellType() == CellType.STRING) {
 			return Integer.parseInt(testCell.getStringCellValue());
 		}
@@ -224,9 +229,9 @@ public class RestaurantController {
 		return (int) testCell.getNumericCellValue();
 	}
 
-	static float checkFloatType(XSSFCell testCell) {
+	public static float checkFloatType(XSSFCell testCell) {
 		if (testCell.getCellType() == CellType.STRING) {
-			return Integer.parseInt(testCell.getStringCellValue());
+			return Float.parseFloat(testCell.getStringCellValue());
 		}
 		if (testCell.getCellType() == CellType.BLANK) {
 			return (Float) null;
@@ -279,7 +284,7 @@ public class RestaurantController {
 			menus.setQuantity(checkIntType(curRow.getCell(6)));
 			System.out.println("Got Quantity");
 			menuRepo.save(menus);
-
+			
 			try {
 				ingredient = ingredientsRepo.findById((long) count)
 						.orElseThrow(() -> new IllegalArgumentException("Invalid Ingredient Id:"));
@@ -323,6 +328,8 @@ public class RestaurantController {
 
 			inventoryRepo.save(inventory);
 
+			//For testing purposes
+			System.out.println("Inventory restaurant: " + inventory.getRestaurant_id());
 		}
 		wb.close();
 	}
@@ -359,6 +366,8 @@ public class RestaurantController {
 
 			inventoryRepo.save(inventory);
 
+			//For testing purposes
+			System.out.println("Inventory warehouse: " + inventory.getWarehouse_id());
 		}
 
 		wb.close();
@@ -600,6 +609,16 @@ public class RestaurantController {
 	 */
 	@PostMapping("/processcredentials")
 	public String processCredentials(String usernameParameter, String passwordParameter) {
+		
+		//TODO
+		//The calls to fakeApplicationUserDaoService should throw nullpointerexception errors since it's not initialized 
+		//They do in the test class but not in the main class so it seems like this method is just not being called 
+		//Even though I have it defined as the loginprocessingurl In ApplicationSecurityConfig line 91 
+		//When I had the loginprocessingurl as default, there was an error that registering new users wouldn't create a 
+		//new ApplicationUser object, which this method was supposed to fix, and setting it to this method fixed that bug
+		//So looking at it from one angle makes it look like this is never called, but it also seems like it does get called
+		//but just doesn't throw any errors for some reason except for in the test class
+		
 		Optional<ApplicationUser> user = fakeApplicationUserDaoService
 				.selectApplicationUserByUsername(usernameParameter);
 		if (user == null) {
@@ -631,6 +650,10 @@ public class RestaurantController {
 	 * @return Customer object of currently logged in user, null if user is not logged in
 	 */
 	public Customers getLoggedInUser() {
+		//For bug fixes with testing
+		if (SecurityContextHolder.getContext().getAuthentication() == null) {
+			return null;
+		}
 		//Principal will be anonymousUser if not authenticated through login page
 		if (SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString()
 				.startsWith("anonymousUser")) {
@@ -710,14 +733,14 @@ public class RestaurantController {
 		if (user.getAuthorities().toString().contains("ROLE_MANAGER")) {
 			return "redirect:/logview";
 		}
+		if (user.getAuthorities().toString().contains("ROLE_WAREHOUSEMANAGER")) {
+			return "redirect:/warehouseman-shipment-view";
+		}
 		if (user.getAuthorities().toString().contains("ROLE_SERVER")) {
 			return "redirect:/servingstaffview";
 		}
 		if (user.getAuthorities().toString().contains("ROLE_CUSTOMER")) {
 			return "redirect:/loggedinhome";
-		}
-		if (user.getAuthorities().toString().contains("ROLE_WAREHOUSEMANAGER")) {
-			return "redirect:/warehouseman-shipment-view";
 		}
 		//Failsafe index redirect
 		return "redirect:/";
@@ -2002,14 +2025,13 @@ public class RestaurantController {
 	 */
 	@GetMapping("/serverviewcustinfo/{id}")
 	public String showCustInfo(@PathVariable("id") Customers orderCust, Model model) {
-		Customers customer = customerRepo.findByEmail(orderCust.getEmail());
-		if (customer == null) {
+		if (orderCust == null) {
 			return "redirect:/servingstaffview";
 		}
 		else {
-			model.addAttribute("customers", customer);
+			model.addAttribute("customers", orderCust);
 		}
-				
+		
 		return "LocalServingStaff/server-cust-view";
 	}
 
@@ -2791,7 +2813,7 @@ public class RestaurantController {
 				for (CartItems c : cartItems) {
 					if (c.getMenu_id().getId() < (long) 0) {
 						//Deletes discount and tax objects from repo after order is payed
-						menuRepo.delete(c.getMenu_id());
+						//menuRepo.delete(c.getMenu_id());
 					}
 				}
 			}
@@ -3280,8 +3302,8 @@ public class RestaurantController {
 		//I would just do this instead of looping through the findAll() but it doesnt like the Optional<> type
 		//order.setCustomer_id(customerRepo.findById((long) -1));
 		for (Customers c : customerRepo.findAll()) {
-			//Guest user -1
-			if (c.getId() == (long) -1) {
+			//Guest user
+			if (c.getEmail().equals("Guest") && c.getLocation().equals("N/A")) {
 				return c;
 			}
 		}

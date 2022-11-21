@@ -76,7 +76,13 @@
 		<dependency>
     		<groupId>javax.validation</groupId>
     		<artifactId>validation-api</artifactId>
-    		</dependency>
+    	</dependency>
+    	
+    	<dependency>
+    		<groupId>org.springframework.security</groupId>
+    		<artifactId>spring-security-test</artifactId>
+    		<scope>test</scope>
+		</dependency>
 		
 	</dependencies>
 
