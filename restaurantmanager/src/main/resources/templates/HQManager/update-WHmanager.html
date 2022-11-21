@@ -5,11 +5,11 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
         <meta name="description" content="" />
         <meta name="author" content="" />
-        <title>HQ Manager</title>
+        <title>Update Manager</title>
         <!-- Favicon-->
         <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
         <!-- Core theme CSS (includes Bootstrap)-->
-        <link href="css/styles.css" rel="stylesheet" />
+        <link href="../css/styles.css" rel="stylesheet" />
 
     </head>
     <style>
@@ -62,7 +62,7 @@ input[type=text]:focus, input[type=password]:focus {
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Account</a>
                                     <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                        <a class="dropdown-item" href="/changeuserpass">Change Password (WIP)</a>
+                                        <a class="dropdown-item" href="/changeuserpass">Change Password</a>
                                         <div class="dropdown-divider"></div>
                                         <a class="dropdown-item" href="/logout">Sign-out</a>
                                     </div>
@@ -74,30 +74,38 @@ input[type=text]:focus, input[type=password]:focus {
                 <!-- Page content-->
                 <div class="container-fluid">
                     <div class="container mt-3">
-                    	<h2 class="h2">Add New Restaurant Manager</h2>
-						<form action="#" th:action="@{/addlfmanager}" th:object="${managers}" method="post">
-    						<label for="firstName">First Name</label>
-    						<input type="text" th:field="*{firstName}" id="firstName" placeholder="First Name" required>
-    						<label for="lastName">Last Name</label>
-    						<input type="text" th:field="*{lastName}" id="lastName" placeholder="Last Name" required>
-    						<br>
-    						<label for="email">Email</label>
-    						<input type="email" th:field="*{email}" id="email" placeholder="Email" required>
-    						<br>
-    						<label for="password">Password</label>
-    						<input type="password" th:field="*{password}" id="password" placeholder="Password" required>
-    						<br>
-    						<label class="label" for="hourlyRate">Hourly Rate</label>
-    						<input type="number" th:field="*{hourlyRate}" id="hourlyRate" placeholder="7.25" required>
-   							<br>
-    						<label class="label" for="restaurantid">Restaurant Location</label>
-    						<select id="restaurantid" th:field="*{restaurant}" class="form-control" required>
-    							<th:block th:each="restaurant : ${listRestaurants}">
-    							 <option th:value="${restaurant.id}" th:text="${restaurant.id} + ' ' + ${restaurant.address} + ' ' + ${restaurant.city} + ' ' + ${restaurant.state}"></option>
-    							 </th:block>
+                    	<h2 class="h2">Update Warehouse Manager</h2>
+						<form action="#" 
+  							th:action="@{/hqmanagerwhmanupdate/{id}(id=${warehouseManager.id})}" 
+  							th:object="${warehouseManager}" 
+  							method="post">
+  	  							<label for="firstname">First Name</label>
+    							<input type="text" th:field="*{firstName}" id="firstname" placeholder="First Name" required>
+    							<label for="lastname">Last Name</label>
+    							<input type="text" th:field="*{lastName}" id="lastname" placeholder="Last Name" required>
+    							<br>
+    							<label for="email">Email</label>
+    							<input type="email" th:field="*{email}" id="email" placeholder="Email" required>
+    							<br>
+    							<label class="label" for="hourlyRate">Hourly Rate</label>
+    							<input type="number" th:field="*{hourlyRate}" id="hourlyRate" placeholder="Hourly Rate" required>
+    							<br>
+    							<label class="label" for="warehouseid">Warehouse Location</label>
+    							<select id="warehouseid" th:field="*{warehouse}" class="form-control" required>
+    							<th:block th:each="warehouse : ${listWarehouses}">
+    							 <option th:value="${warehouse.id}" th:text="${warehouse.id} + ' ' + ${warehouse.address} + ' ' + ${warehouse.city} + ' ' + ${warehouse.state}"></option>
+    							</th:block>
     							</select>
-    						<input type="submit" value="Add Manager">   
-						</form>
+    							<br>
+    							<input type="hidden" th:field="*{password}" id="password" placeholder="Password" required>
+    							<input type="hidden" th:field="*{warehouse}" id="warehouse_id" placeholder="Warehouse" required>
+    							<input type="hidden" th:field="*{isOnDuty}" id="isOnDuty" required>
+    							<input type="hidden" th:field="*{lastClockedIn}" id="lastClockedIn" placeholder="yyyy-MM-dd HH:mm:ss" required>
+    							<input type="hidden" th:field="*{totalHours}" id="totalHours" placeholder="Total Hours" required>
+    							<input type="hidden" th:field="*{weekHours}" id="weekHours" placeholder="This Week's Hours" required>
+    							<br>
+    							<input type="submit" value="Update Manager">   
+							</form>
 						</div>
                     </div>
                 </div>

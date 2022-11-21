@@ -13,20 +13,18 @@
 
     </head>
     <style>
-table, th, td {
-	border: 1px solid black;
+input[type=text], input[type=password],input[type=email] {
+  width: 100%;
+  padding: 15px;
+  margin: 5px 0 22px 0;
+  display: inline-block;
+  border: none;
+  background: #f1f1f1;
 }
-.table-hover tbody tr:hover td {
-    background: #F1F1F1;
-}
-.table-striped>tbody>tr:nth-child(odd)>td, 
-.table-striped>tbody>tr:nth-child(odd)>th {
-   background-color: #00674E;
-   color: white; 
- }
- .table-striped>tbody>tr:nth-child(even)>td, 
-.table-striped>tbody>tr:nth-child(even)>th {
-	background-color: #FFFFFF;
+
+input[type=text]:focus, input[type=password]:focus {
+  background-color: #ddd;
+  outline: none;
 }
 .h2{
 	text-align: center;
@@ -35,15 +33,6 @@ table, th, td {
 .label{
 	color: white;
 	font-size: 1.5rem;
-}
-.mainmenuBtn{
-	margin: auto;
-	margin-left: auto;
-  	margin-right: auto;
-  	width: 100%;
- 	border: 3px black;
-  	padding: 5rem 0;
-  	text-align: center;
 }
 
 </style>
@@ -73,7 +62,7 @@ table, th, td {
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Account</a>
                                     <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                        <a class="dropdown-item" href="/changeuserpass">Change Password</a>
+                                        <a class="dropdown-item" href="/changeuserpass">Change Password (WIP)</a>
                                         <div class="dropdown-divider"></div>
                                         <a class="dropdown-item" href="/logout">Sign-out</a>
                                     </div>
@@ -85,13 +74,31 @@ table, th, td {
                 <!-- Page content-->
                 <div class="container-fluid">
                     <div class="container mt-3">
-                    	<h2 class="h2">HQ Manager Page</h2>
-						<div class="mainmenuBtn">
-  							<a href="/HQmanager-managers-view" class="btn btn-primary" role="button">View Managers</a>
-  							<a href="/HQmanager-location-view" class="btn btn-primary" role="button">View Locations</a>
-  							<a th:href="@{/logview/{id}(id=${1})}" class="btn btn-primary" role="button">View Action Log</a>
+                    	<h2 class="h2">Add New Warehouse Manager</h2>
+						<form action="#" th:action="@{/addwhmanager}" th:object="${warehouseManager}" method="post">
+    						<label for="firstName">First Name</label>
+    						<input type="text" th:field="*{firstName}" id="firstName" placeholder="First Name" required>
+    						<label for="lastName">Last Name</label>
+    						<input type="text" th:field="*{lastName}" id="lastName" placeholder="Last Name" required>
+    						<br>
+    						<label for="email">Email</label>
+    						<input type="email" th:field="*{email}" id="email" placeholder="Email" required>
+    						<br>
+    						<label for="password">Password</label>
+    						<input type="password" th:field="*{password}" id="password" placeholder="Password" required>
+    						<br>
+    						<label class="label" for="hourlyRate">Hourly Rate</label>
+    						<input type="number" th:field="*{hourlyRate}" id="hourlyRate" placeholder="7.25" required>
+   							<br>
+    						<label class="label" for="warehouseid">Warehouse Location</label>
+    						<select id="warehouseid" th:field="*{warehouse}" class="form-control" required>
+    							<th:block th:each="warehouse : ${listWarehouses}">
+    							 <option th:value="${warehouse.id}" th:text="${warehouse.id} + ' ' + ${warehouse.address} + ' ' + ${warehouse.city} + ' ' + ${warehouse.state}"></option>
+    							 </th:block>
+    							</select>
+    						<input type="submit" value="Add Manager">   
+						</form>
 						</div>
-					</div>
                     </div>
                 </div>
             </div>

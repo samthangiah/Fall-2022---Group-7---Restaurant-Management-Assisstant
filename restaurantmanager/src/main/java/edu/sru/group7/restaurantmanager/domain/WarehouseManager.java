@@ -28,6 +28,16 @@ public class WarehouseManager {
     
     private String password;
     
+    private float hourlyRate;
+    
+    private boolean isOnDuty;
+    
+    private String lastClockedIn;
+    
+    private float totalHours;
+    
+    private float weekHours;
+    
     @ManyToOne
 	@JoinColumn(name="warehouse_id")
 	private Warehouses warehouse;
@@ -35,13 +45,22 @@ public class WarehouseManager {
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "warehouse_id")
 	private List<Shipping> shipments = new ArrayList<>();
 
-	public WarehouseManager(String firstName, String lastName, String email, String password, Warehouses warehouse) {
+	public WarehouseManager(long id, String firstName, String lastName, String email, String password, float hourlyRate,
+			boolean isOnDuty, String lastClockedIn, float totalHours, float weekHours, Warehouses warehouse,
+			List<Shipping> shipments) {
 		super();
+		this.id = id;
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.email = email;
 		this.password = password;
+		this.hourlyRate = hourlyRate;
+		this.isOnDuty = isOnDuty;
+		this.lastClockedIn = lastClockedIn;
+		this.totalHours = totalHours;
+		this.weekHours = weekHours;
 		this.warehouse = warehouse;
+		this.shipments = shipments;
 	}
 
 	public WarehouseManager() {
@@ -102,6 +121,46 @@ public class WarehouseManager {
 
 	public void setShipments(List<Shipping> shipments) {
 		this.shipments = shipments;
+	}
+
+	public float getHourlyRate() {
+		return hourlyRate;
+	}
+
+	public void setHourlyRate(float hourlyRate) {
+		this.hourlyRate = hourlyRate;
+	}
+
+	public boolean getIsOnDuty() {
+		return isOnDuty;
+	}
+
+	public void setIsOnDuty(boolean isOnDuty) {
+		this.isOnDuty = isOnDuty;
+	}
+
+	public String getLastClockedIn() {
+		return lastClockedIn;
+	}
+
+	public void setLastClockedIn(String lastClockedIn) {
+		this.lastClockedIn = lastClockedIn;
+	}
+
+	public float getTotalHours() {
+		return totalHours;
+	}
+
+	public void setTotalHours(float totalHours) {
+		this.totalHours = totalHours;
+	}
+
+	public float getWeekHours() {
+		return weekHours;
+	}
+
+	public void setWeekHours(float weekHours) {
+		this.weekHours = weekHours;
 	}    
 }
 

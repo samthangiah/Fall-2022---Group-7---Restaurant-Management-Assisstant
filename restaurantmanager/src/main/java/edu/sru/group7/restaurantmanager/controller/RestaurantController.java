@@ -535,6 +535,11 @@ public class RestaurantController {
 		warehouseManager.setEmail("WHmanager@email.com");
 		warehouseManager.setPassword("pass");
 		warehouseManager.setWarehouse(warehouse);
+		warehouseManager.setHourlyRate(25);
+		warehouseManager.setIsOnDuty(false);
+		warehouseManager.setTotalHours(0);
+		warehouseManager.setLastClockedIn("Novemeber 20, 2022");
+		warehouseManager.setWeekHours(0);
 		warehouseManagerRepo.save(warehouseManager);
 		
 		restaurantRepo.save(restaurant2);
@@ -572,6 +577,9 @@ public class RestaurantController {
 		model.addAttribute("listAdmins", listadmins);
 		List<Offices> listoffices = (List<Offices>) officeRepo.findAll();
 		model.addAttribute("listOffices", listoffices);
+		List<Warehouses> listWarehouses = (List<Warehouses>) warehouseRepo.findAll();
+		model.addAttribute("listWarehouses", listWarehouses);
+		
 		List<Menu> listmenu = (List<Menu>) menuRepo.findAll();
 		// Only display menu items that are available
 		List<Menu> availablemenu = new ArrayList<Menu>();
@@ -734,7 +742,7 @@ public class RestaurantController {
 			return "redirect:/logview";
 		}
 		if (user.getAuthorities().toString().contains("ROLE_WAREHOUSEMANAGER")) {
-			return "redirect:/warehouseman-shipment-view";
+			return "redirect:/warehouseman-log-view";
 		}
 		if (user.getAuthorities().toString().contains("ROLE_SERVER")) {
 			return "redirect:/servingstaffview";
@@ -2120,6 +2128,23 @@ public class RestaurantController {
 
 		return "WarehouseManager/warehouseman-shipment-view";
 	}
+	
+	@RequestMapping({"warehouseman-log-view"})
+	public String showWarehouseLog(Model model) {
+		Customers cust = getLoggedInUser();
+		if (cust == null) {
+			return "redirect:/";
+		}
+		Iterable<Log> fullLog = logRepo.findAll();
+		List<Log> localLog = new ArrayList<Log>();
+		for (Log i : fullLog) {
+			if (i.getLocation() == cust.getLocation()) {
+				localLog.add(i);
+			}
+		}
+		model.addAttribute("log", (Iterable<Log>) localLog);
+		return "WarehouseManager/warehouseman-log-view";
+	}
 
 	/**
 	 * @param model
@@ -2454,6 +2479,70 @@ public class RestaurantController {
 	public String showLFManagerAddForm(Managers manager) {
 		return "HQManager/add-LFmanager";
 	}
+	
+	@GetMapping("/hqmanagerwhmanedit/{id}") 
+	public String showHQManUpdateWHManagerForm(@PathVariable("id") long id, Model model) {
+		WarehouseManager manager = warehouseManagerRepo.findById(id)
+				.orElseThrow(() -> new IllegalArgumentException("Invalid warehouse manager Id:" + id));
+
+		model.addAttribute("warehouseManager", manager);
+		return "HQManager/update-WHmanager";
+	}
+	
+	@PostMapping("/hqmanagerwhmanupdate/{id}")
+	public String hqManUpdateWHManager(@PathVariable("id") long id, @Validated WarehouseManager manager, BindingResult result,
+			Model model) {
+		if (result.hasErrors()) {
+			manager.setId(id);
+			return "HQManager/update-WHmanager";
+		}
+
+		Log log = new Log();
+		log.setDate(date.format(LocalDateTime.now()));
+		log.setTime(time.format(LocalDateTime.now()));
+		log.setLocation(getUserLocation());
+		log.setUserId(getUserUID());
+		log.setAction("Update Warehouse manager account");
+		log.setActionId(manager.getId());
+		logRepo.save(log);
+
+		warehouseManagerRepo.save(manager);
+		return "redirect:/HQmanager-WHmanagers-view";
+	}
+	
+	@GetMapping("/HQmanagerwhmandelete/{id}")
+	public String hqManDeleteWHManager(@PathVariable("id") long id, Model model) {
+		WarehouseManager manager = warehouseManagerRepo.findById(id)
+				.orElseThrow(() -> new IllegalArgumentException("Invalid warehouse manager Id:" + id));
+
+		Log log = new Log();
+		log.setDate(date.format(LocalDateTime.now()));
+		log.setTime(time.format(LocalDateTime.now()));
+		log.setLocation(getUserLocation());
+		log.setUserId(getUserUID());
+		log.setAction("Delete warehouse manager account");
+		log.setActionId(manager.getId());
+		logRepo.save(log);
+
+		warehouseManagerRepo.delete(manager);
+		return "redirect:/HQmanager-managers-view";
+	}
+	
+	@RequestMapping({ "/HQmanageraddWHmanager" })
+	public String showWHManagerAddForm(WarehouseManager manager, Model model) {
+		model.addAttribute("manager", warehouseManagerRepo.findAll());
+		return "HQManager/add-WHmanager";
+	}
+	
+	/**
+	 * @param model
+	 * @return HQManager-WHmanagers-view. View list of Warehouse managers
+	 */
+	@RequestMapping({ "/HQmanager-WHmanagers-view" })
+	public String hqManShowWHManagers(Model model) {
+		model.addAttribute("warehouseManager", warehouseManagerRepo.findAll());
+		return "HQManager/HQManager-WHmanagers-view";
+	}
 
 	/**
 	 * @param manager
@@ -2478,6 +2567,25 @@ public class RestaurantController {
 
 		managerRepo.save(manager);
 		return "redirect:/HQmanager-managers-view";
+	}
+	
+	@RequestMapping("/addwhmanager")
+	public String addWHManager(@Validated WarehouseManager warehouseManager, BindingResult result, Model model) {
+		if (result.hasErrors()) {
+			return "HQManager/add-WHmanager";
+		}
+
+		Log log = new Log();
+		log.setDate(date.format(LocalDateTime.now()));
+		log.setTime(time.format(LocalDateTime.now()));
+		log.setLocation(getUserLocation());
+		log.setUserId(getUserUID());
+		log.setAction("Create new WH manager");
+		log.setActionId(warehouseManager.getId());
+		logRepo.save(log);
+
+		warehouseManagerRepo.save(warehouseManager);
+		return "redirect:/HQmanager-WHmanagers-view";
 	}
 
 	/**
