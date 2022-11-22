@@ -5,11 +5,11 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
         <meta name="description" content="" />
         <meta name="author" content="" />
-        <title>Update Customer</title>
+        <title>Add employee</title>
         <!-- Favicon-->
         <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
         <!-- Core theme CSS (includes Bootstrap)-->
-        <link href="../css/styles.css" rel="stylesheet" />
+        <link href="css/styles.css" rel="stylesheet" />
 
     </head>
     <style>
@@ -45,7 +45,7 @@ input[type=text]:focus, input[type=password]:focus {
                 	<a class="list-group-item list-group-item-action list-group-item-light p-3" href="/logadminview">View Local Action Log</a>
                 	<a class="list-group-item list-group-item-action list-group-item-light p-3" href="/admin-cust-view">View Customers</a>
                     <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/admin-man-view">View Managers</a>
-                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/admin-server-view">View Servers</a>
+                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/admin-employee-view">View employees</a>
                     <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/admin-employee-view">View Employees</a>
                 </div>
             </div>
@@ -74,8 +74,8 @@ input[type=text]:focus, input[type=password]:focus {
                 <!-- Page content-->
                 <div class="container-fluid">
                     <div class="container mt-3">
-                    	<h2 class="h2">Update Customer</h2>
-						<form action="#" th:action="@{/localadmincustupdate/{id}(id=${customer.id})}" th:object="${customer}" method="post">
+                    	<h2 class="h2">Add New Employee</h2>
+						<form action="#" th:action="@{/addemployee}" th:object="${warehouseEmployees}" method="post">
     						<label class="label" for="firstname">First Name:</label>
     						<input type="text" th:field="*{firstName}" id="firstname" placeholder="First Name" required>
     						<label class="label" for="lastname">Last Name:</label>
@@ -85,12 +85,19 @@ input[type=text]:focus, input[type=password]:focus {
     						<input type="email" th:field="*{email}" id="email" placeholder="Email" required>
     						<br>
     						<label class="label" for="password">Password:</label>
-    						<input type="text" th:field="*{password}" id="password" placeholder="Password" required>
-   							 <br>
-    						<label for="rewardspoints">Rewards Points</label>
-    						<input type="text" th:field="*{rewardsAvailable}" id="rewardspoints" placeholder="Rewards Points">
+    						<input type="password" th:field="*{password}" id="password" placeholder="Password" required>
     						<br>
-    						<input type="submit" value="Update Customer">   
+    						<label class="label" for="hourlyRate">Hourly Rate:</label>
+    						<input type="number" th:field="*{hourlyRate}" id="hourlyRate" placeholder="7.25" required>
+   							<br>
+   							<label class="label" for="warehouseid">Warehouse Location:</label>
+    						<select id="warehouseid" th:field="*{warehouse}" class="form-control" required>
+    							<th:block th:each="warehouse : ${listWarehouses}">
+    							 <option th:value="${warehouse.id}" th:text="${warehouse.id} + ' ' + ${warehouse.address} + ' ' + ${warehouse.city} + ' ' + ${warehouse.state}"></option>
+    							 </th:block>
+    						</select>
+    						<br>
+    						<input type="submit" value="Add Employee">   
 						</form>
 	</div>
                     </div>

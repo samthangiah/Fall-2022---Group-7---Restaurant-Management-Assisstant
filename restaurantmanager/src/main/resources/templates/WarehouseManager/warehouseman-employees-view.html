@@ -44,7 +44,7 @@ table, th, td {
                 	<a class="list-group-item list-group-item-action list-group-item-light p-3" href="/servingstaffviewview">View Serving Staff Pages</a>
                 	<a class="list-group-item list-group-item-action list-group-item-light p-3" href="/manager-cust-view">View Customers</a>
                     <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/manager-menu-view">View Menu</a>
-                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/manager-server-view">View Servers</a>
+                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/manager-employee-view">View employees</a>
                     <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/manager-inventory-view">View Inventory</a>
                 </div>
             </div>
@@ -73,7 +73,7 @@ table, th, td {
                 <!-- Page content-->
                 <div class="container-fluid">
                     <div class="container mt-3">
-						<h2 class="h2">Servers</h2>
+						<h2 class="h2">Employees</h2>
 						<table class = "table table-striped table-hover">
 						<thead class="table-dark">
 							<tr>
@@ -90,17 +90,17 @@ table, th, td {
 							</tr>
 						</thead>
 		<tbody>
-			<tr th:each="server : ${servers}">
-                    <td th:text="${server.firstName}"></td>
-                    <td th:text="${server.lastName}"></td>
-                    <td th:text="${server.email}"></td>
-                    <td th:text="${server.hourlyRate}"></td>
-                    <td th:text="${server.isOnDuty}"></td>
-                    <td th:text="${server.lastClockedIn}"></td>
-                    <td th:text="${server.weekHours}"></td>
-                    <td th:text="${server.totalHours}"></td>
-                    <td><a th:href="@{/localmanagerserveredit/{id}(id=${server.id})}">Edit</a></td>
-                    <td><a th:href="@{/localmanagerserverdelete/{id}(id=${server.id})}">Delete</a></td>
+			<tr th:each="employee : ${employees}">
+                    <td th:text="${employee.firstName}"></td>
+                    <td th:text="${employee.lastName}"></td>
+                    <td th:text="${employee.email}"></td>
+                    <td th:text="${employee.hourlyRate}"></td>
+                    <td th:text="${employee.isOnDuty}"></td>
+                    <td th:text="${employee.lastClockedIn}"></td>
+                    <td th:text="${employee.weekHours}"></td>
+                    <td th:text="${employee.totalHours}"></td>
+                    <td><a th:href="@{/warehousemanageremployeeedit/{id}(id=${employee.id})}">Edit</a></td>
+                    <td><a th:href="@{/warehousemanageremployeedelete/{id}(id=${employee.id})}">Delete</a></td>
                 </tr>
 		</tbody>
 		

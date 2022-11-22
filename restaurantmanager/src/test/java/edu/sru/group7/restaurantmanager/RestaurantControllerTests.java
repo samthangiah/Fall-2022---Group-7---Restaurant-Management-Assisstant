@@ -49,6 +49,7 @@ import edu.sru.group7.restaurantmanager.repository.RestaurantRepository;
 import edu.sru.group7.restaurantmanager.repository.ServerRepository;
 import edu.sru.group7.restaurantmanager.repository.ShippingRepository;
 import edu.sru.group7.restaurantmanager.repository.StateTaxRepository;
+import edu.sru.group7.restaurantmanager.repository.WarehouseEmployeeRepository;
 import edu.sru.group7.restaurantmanager.repository.WarehouseManagerRepository;
 import edu.sru.group7.restaurantmanager.repository.WarehouseRepository;
 
@@ -109,11 +110,14 @@ class RestaurantControllerTests {
 	@Autowired
 	private PaypalRepository paypalRepo;
 	
+	@Autowired 
+	private WarehouseEmployeeRepository warehouseEmployeeRepo;
+	
 	@Autowired
 	private RestaurantController controller = new RestaurantController(warehouseManagerRepo, ingredientsRepo, restaurantRepo, warehouseRepo,
 			cartItemsRepo, inventoryRepo, officeRepo, customerRepo, managerRepo,
 			serverRepo, orderRepo, menuRepo, logRepo, adminRepo, paymentDetailsRepo,
-			stateTaxRepo, shippingRepo, paypalRepo);
+			stateTaxRepo, shippingRepo, paypalRepo, warehouseEmployeeRepo);
 	
 	@Mock
 	private Model model;

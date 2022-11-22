@@ -9,6 +9,8 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
 @Entity
@@ -35,18 +37,26 @@ public class Warehouses extends Locations {
 	@OneToMany(cascade=CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "warehouse")
     private List<WarehouseManager> manager = new ArrayList<>();
 	
-	public Warehouses(String address, String zipcode, String city, String state) {
+	@OneToMany(cascade=CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "warehouse")
+    private List<WarehouseEmployees> employees = new ArrayList<>();
+	
+	@ManyToOne
+	@JoinColumn(name="admin_id")
+	private Admins admin;
+	
+	public Warehouses(String address, String zipcode, String city, String state, Admins admin) {
 		super();
 		this.address = address;
 		this.zipcode = zipcode;
 		this.city = city;
 		this.state = state;
+		this.admin = admin;
 	}
 
 	public Warehouses() {
 		super();
 	}
-	
+
 	@Override
 	public long getId() {
 		return id;
@@ -99,6 +109,38 @@ public class Warehouses extends Locations {
 
 	public void setShipments(List<Shipping> shipments) {
 		this.shipments = shipments;
+	}
+
+	public List<Inventory> getInventory() {
+		return inventory;
+	}
+
+	public void setInventory(List<Inventory> inventory) {
+		this.inventory = inventory;
+	}
+
+	public List<WarehouseManager> getManager() {
+		return manager;
+	}
+
+	public void setManager(List<WarehouseManager> manager) {
+		this.manager = manager;
+	}
+
+	public List<WarehouseEmployees> getEmployees() {
+		return employees;
+	}
+
+	public void setEmployees(List<WarehouseEmployees> employees) {
+		this.employees = employees;
+	}
+
+	public Admins getAdmin() {
+		return admin;
+	}
+
+	public void setAdmin(Admins admin) {
+		this.admin = admin;
 	}
 
 	@Override

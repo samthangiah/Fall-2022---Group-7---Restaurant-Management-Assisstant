@@ -38,6 +38,9 @@ public class Admins {
     @OneToMany(cascade=CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "admin")
     private List<Restaurants> restaurant = new ArrayList<>();
     
+    @OneToMany(cascade=CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "admin")
+    private List<Warehouses> warehouse = new ArrayList<>();
+    
     @ManyToOne
     @JoinColumn(name = "office_id")
 	private Offices office;
@@ -50,6 +53,7 @@ public class Admins {
      * @param email
      * @param password
      * @param office
+     * @param warehouse 
      */
 	public Admins(String firstName, String lastName, String email, String password,  Offices office) {
 		super();
@@ -157,6 +161,14 @@ public class Admins {
 		this.office = office;
 	}
 	
+
+	public List<Warehouses> getWarehouse() {
+		return warehouse;
+	}
+
+	public void setWarehouse(List<Warehouses> warehouse) {
+		this.warehouse = warehouse;
+	}
 
 	@Override
 	public String toString() {

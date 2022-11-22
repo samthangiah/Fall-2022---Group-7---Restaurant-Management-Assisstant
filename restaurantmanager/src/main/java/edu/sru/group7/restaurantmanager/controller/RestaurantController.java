@@ -31,6 +31,7 @@ import edu.sru.group7.restaurantmanager.domain.Managers;
 import edu.sru.group7.restaurantmanager.domain.Servers;
 import edu.sru.group7.restaurantmanager.domain.Shipping;
 import edu.sru.group7.restaurantmanager.domain.StateTax;
+import edu.sru.group7.restaurantmanager.domain.WarehouseEmployees;
 import edu.sru.group7.restaurantmanager.domain.WarehouseManager;
 import edu.sru.group7.restaurantmanager.domain.Orders;
 import edu.sru.group7.restaurantmanager.domain.PaymentDetails_Form;
@@ -53,6 +54,7 @@ import edu.sru.group7.restaurantmanager.repository.ManagerRepository;
 import edu.sru.group7.restaurantmanager.repository.ServerRepository;
 import edu.sru.group7.restaurantmanager.repository.ShippingRepository;
 import edu.sru.group7.restaurantmanager.repository.StateTaxRepository;
+import edu.sru.group7.restaurantmanager.repository.WarehouseEmployeeRepository;
 import edu.sru.group7.restaurantmanager.repository.WarehouseManagerRepository;
 import edu.sru.group7.restaurantmanager.repository.OrderRepository;
 import edu.sru.group7.restaurantmanager.repository.PaymentDetailsRepository;
@@ -143,6 +145,9 @@ public class RestaurantController {
 	
 	@Autowired
 	private WarehouseManagerRepository warehouseManagerRepo;
+	
+	@Autowired
+	private WarehouseEmployeeRepository warehouseEmployeeRepo;
 
 	//Filepaths for loading data
 	private final String menuFP = "src/main/resources/Menu.xlsx";
@@ -153,13 +158,16 @@ public class RestaurantController {
 
 	/**
 	 * Create a repository instance - instantiation (new) is done by Spring
+	 * @param warehouseEmployeeRepo 
 	 */
 	public RestaurantController(WarehouseManagerRepository warehouseManagerRepo, IngredientsRepository ingredientsRepo, 
 			RestaurantRepository restaurantRepo,WarehouseRepository warehouseRepo, CartItemsRepository cartItemsRepo, 
 			InventoryRepository inventoryRepo,OfficeRepository officeRepo, CustomerRepository customerRepo, 
 			ManagerRepository managerRepo,ServerRepository serverRepo, OrderRepository orderRepo, MenuRepository menuRepo, 
 			LogRepository logRepo, AdminRepository adminRepo, PaymentDetailsRepository paymentDetailsRepo, 
-			StateTaxRepository stateTaxRepo, ShippingRepository shippingRepo, PaypalRepository paypalRepo) {
+			StateTaxRepository stateTaxRepo, ShippingRepository shippingRepo, PaypalRepository paypalRepo, 
+			WarehouseEmployeeRepository warehouseEmployeeRepo) {
+		this.warehouseEmployeeRepo = warehouseEmployeeRepo;
 		this.warehouseManagerRepo = warehouseManagerRepo;
 		this.paymentDetailsRepo = paymentDetailsRepo;
 		this.ingredientsRepo = ingredientsRepo;
@@ -472,9 +480,7 @@ public class RestaurantController {
 		
 		Offices office = new Offices("100 Central Loop", "16057", "Slippery Rock", "Pennsylvania");
 		Offices office2 = new Offices("1620 East Maiden", "16057", "Slippery Rock", "Pennsylvania", listadmins);
-		Warehouses warehouse = new Warehouses("150 Branchton Road", "16057", "Slippery Rock", "Pennsylvania");
 		officeRepo.save(office);
-		warehouseRepo.save(warehouse);
 		
 		Admins admin = new Admins("Darth", "Vader", "Administrator@email.com", "pass", office);
 		Admins admin2 = new Admins("Kylo", "Ren", "Administrator2@email.com", "pass", office);
@@ -482,8 +488,10 @@ public class RestaurantController {
 		listadmins.add(admin2);
 		adminRepo.save(admin);
 		adminRepo.save(admin2);
-		
 		officeRepo.save(office2);
+		
+		Warehouses warehouse = new Warehouses("150 Branchton Road", "16057", "Slippery Rock", "Pennsylvania", admin);
+		warehouseRepo.save(warehouse);
 
 		Restaurants restaurant = new Restaurants("100 Arrowhead Drive", "16057", "Slippery Rock", "Pennsylvania", admin2);
 		Restaurants restaurant2 = new Restaurants("1 Vineyard Circle", "16057", "Slippery Rock", "Pennsylvania", admin);
@@ -997,33 +1005,6 @@ public class RestaurantController {
 	}
 
 	/**
-	 * @param customer
-	 * @return add-customer. Shows add customer page to Local Admin
-	 */
-	@RequestMapping({ "/custsignup" })
-	public String showCustSignUpForm(Customers customer) {
-		return "LocalAdmin/add-customer";
-	}
-
-	/**
-	 * @param server
-	 * @return add-server. Shows add server page to Local Admin
-	 */
-	@RequestMapping({ "/serversignup" })
-	public String showServerSignUpForm(Servers server) {
-		return "LocalAdmin/add-server";
-	}
-
-	/**
-	 * @param manager
-	 * @return add-LFmanager. Shows add Local Manager page to Local Admin
-	 */
-	@RequestMapping({ "/mansignup" })
-	public String showManagerSignUpForm(Managers manager) {
-		return "LocalAdmin/add-LFmanager";
-	}
-
-	/**
 	 * @param admin
 	 * @return add-LFadmin. Shows add Local Admin page to HQ Admin
 	 */
@@ -1057,6 +1038,115 @@ public class RestaurantController {
 	@RequestMapping({ "/warehousesignup" })
 	public String showWarehouseSignUpForm(Warehouses warehouse) {
 		return "HQAdmin/add-warehouse";
+	}
+	
+	/**
+	 * @param customer
+	 * @return add-customer. Shows add customer page to Local Admin
+	 */
+	@RequestMapping({ "/custsignup" })
+	public String showCustSignUpForm(Customers customer) {
+		return "LocalAdmin/add-customer";
+	}
+
+	/**
+	 * @param server
+	 * @return add-server. Shows add server page to Local Admin
+	 */
+	@RequestMapping({ "/serversignup" })
+	public String showServerSignUpForm(Servers server) {
+		return "LocalAdmin/add-server";
+	}
+	
+	@RequestMapping({"/localadmin-employee-signup"})
+	public String showEmployeeSignUpForm(WarehouseEmployees employees) {
+		return "LocalAdmin/add-warehouse-employee";
+	}
+	
+	@GetMapping("/admin-employee-view")
+	public String showAdminEmployeesView(Model model) {
+		List<WarehouseManager> managers = null;
+		Admins admin = adminRepo.findById(getUserUID())
+				.orElseThrow(() -> new IllegalArgumentException("Invalid admin Id:" + getUserUID()));
+		List<Warehouses> warehouses = warehouseRepo.findByAdmin(admin.getId());
+		Iterator<Warehouses> it = warehouses.iterator();
+		while (it.hasNext()){
+			
+			Warehouses warehouse = it.next();
+			managers.add(warehouseManagerRepo.findByWarehouse(warehouse.getId()));
+		};
+		
+		model.addAttribute("warehouseEmployees", managers);
+		return "LocalAdmin/admin-warehouse-employee-view";
+	}
+	
+	@RequestMapping({ "/addemployee" })
+	public String addEmployee(@Validated WarehouseEmployees employee, BindingResult result, Model model) {
+		if (result.hasErrors()) {
+			return "LocalAdmin/add-warehouse-employee";
+		}
+
+		try {
+			Log log = new Log();
+			log.setDate(date.format(LocalDateTime.now()));
+			log.setTime(time.format(LocalDateTime.now()));
+			log.setLocation(getUserLocation());
+			log.setUserId(getUserUID());
+			log.setAction("Create new employee account");
+			log.setActionId(employee.getId());
+			logRepo.save(log);
+
+			warehouseEmployeeRepo.save(employee);
+
+		} catch (Exception e) {
+			result.rejectValue("email", null, "There is already an account registered with the same email");
+			return "LocalAdmin/add-employee";
+		}
+		return "redirect:/admin-employee-view";
+	}
+	
+	@GetMapping("/localadminemployeeedit/{id}")
+	public String showUpdateEmployeeForm(@PathVariable("id") long id, Model model) {
+		WarehouseEmployees employee = warehouseEmployeeRepo.findById(id)
+				.orElseThrow(() -> new IllegalArgumentException("Invalid employee Id:" + id));
+
+		model.addAttribute("employee", employee);
+		return "LocalAdmin/update-warehouse-employee";
+	}
+	
+	@PostMapping("/localadminemployeeupdate/{id}")
+	public String updateEmployee(@PathVariable("id") long id, @Validated WarehouseEmployees employee, BindingResult result,
+			Model model) {
+		if (result.hasErrors()) {
+			employee.setId(id);
+			return "LocalAdmin/update-warehouse-employee";
+		}
+
+		try {
+			Log log = new Log();
+			log.setDate(date.format(LocalDateTime.now()));
+			log.setTime(time.format(LocalDateTime.now()));
+			log.setLocation(getUserLocation());
+			log.setUserId(getUserUID());
+			log.setAction("Update server account");
+			log.setActionId(employee.getId());
+			logRepo.save(log);
+
+			warehouseEmployeeRepo.save(employee);
+		} catch (Exception e) {
+			result.rejectValue("email", null, "There is already an account registered with the same email");
+			return "LocalAdmin/update-warehouse-employee";
+		}
+		return "redirect:/admin-warehouse-employee-view";
+	}
+
+	/**
+	 * @param manager
+	 * @return add-LFmanager. Shows add Local Manager page to Local Admin
+	 */
+	@RequestMapping({ "/mansignup" })
+	public String showManagerSignUpForm(Managers manager) {
+		return "LocalAdmin/add-LFmanager";
 	}
 
 	/**
@@ -2135,15 +2225,46 @@ public class RestaurantController {
 		if (cust == null) {
 			return "redirect:/";
 		}
-		Iterable<Log> fullLog = logRepo.findAll();
+		
+		List<Log> localLog = logRepo.findByID(cust);
+		/*Iterable<Log> fullLog = logRepo.findAll();
 		List<Log> localLog = new ArrayList<Log>();
 		for (Log i : fullLog) {
 			if (i.getLocation() == cust.getLocation()) {
 				localLog.add(i);
 			}
-		}
-		model.addAttribute("log", (Iterable<Log>) localLog);
+		}*/
+		model.addAttribute("log", localLog);
 		return "WarehouseManager/warehouseman-log-view";
+	}
+	
+	@RequestMapping({"warehouseman-inventory-view"})
+	public String showWarehouseInventory(Model model) {
+		WarehouseManager manager = warehouseManagerRepo.findById(getUserUID())
+				.orElseThrow(() -> new IllegalArgumentException("Invalid warehouse manager Id:" + getUserUID()));
+
+		model.addAttribute("inventoryList", inventoryRepo.findInventoryWarehouse(manager.getWarehouse().getId()));
+
+		return "WarehouseManager/warehouseman-inventory-view";
+	}
+	
+	@RequestMapping({"warehouseman-employees-view"})
+	public String showWarehouseEmployees(Model model) {
+		WarehouseManager manager = warehouseManagerRepo.findById(getUserUID())
+				.orElseThrow(() -> new IllegalArgumentException("Invalid warehouse manager Id:" + getUserUID()));
+
+		model.addAttribute("employees", warehouseEmployeeRepo.findByWarehouse(manager.getWarehouse().getId()));
+
+		return "WarehouseManager/warehouseman-employees-view";
+	}
+	
+	@GetMapping("/warehouseman-employee-edit/{id}")
+	public String warehouseManShowUpdateEmployee(@PathVariable("id") long id, Model model) {
+		WarehouseEmployees employee = warehouseEmployeeRepo.findById(id)
+			.orElseThrow(() -> new IllegalArgumentException("Invalid warehouse employee Id:" + id));
+
+		model.addAttribute("employee", employee);
+		return "WarehouseManager/update-employee";
 	}
 
 	/**
@@ -2312,6 +2433,7 @@ public class RestaurantController {
 	public String localManShowServers(Model model) {
 		Restaurants rest = null;
 		for (Restaurants r : restaurantRepo.findAll()) {
+			//optimize this
 			if (r.toString().equals(getUserLocation())) {
 				rest = r;
 			}

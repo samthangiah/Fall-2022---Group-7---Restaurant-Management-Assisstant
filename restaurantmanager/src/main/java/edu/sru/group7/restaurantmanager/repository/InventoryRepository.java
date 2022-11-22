@@ -13,6 +13,9 @@ public interface InventoryRepository extends CrudRepository<Inventory, Long> {
 
 	@Query(value="SELECT * FROM restaurantmanagerdb.inventory WHERE restaurant_id = :id", nativeQuery=true)
 	public List<Inventory> findInventoryRestaurant(long id);
+
+	@Query(value="SELECT * FROM restaurantmanagerdb.inventory WHERE warehouse_id = :id", nativeQuery=true)
+	public List<Inventory> findInventoryWarehouse(long id);
 	
 	
 }

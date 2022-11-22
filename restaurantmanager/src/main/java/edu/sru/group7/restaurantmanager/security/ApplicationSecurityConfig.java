@@ -45,7 +45,7 @@ WebSecurityConfigurerAdapter {
 					ApplicationUserRole.HQMANAGER.name(), ApplicationUserRole.SERVER.name())
 			
 			/* Pages accessible to only users with the HQADMIN role */
-			.antMatchers("/HQ-admin-view", "/HQadmin-locations-view", "/HQadmin-admin-view", "/HQadmin-offices-view",
+			.antMatchers( "/HQadmin-locations-view", "/HQadmin-admin-view", "/HQadmin-offices-view",
 					"/HQadmin-restaurants-view", "/HQadmin-warehouses-view", "/adminsignup", "/officesignup",
 					"/restaurantsignup", "/warehousesignup", "/addadmin", "/addoffice", "/addrestaurant",
 					"/addwarehouse", "/HQadminadminedit/*", "/HQadminofficeedit/*", "/HQadminrestaurantedit/*",
@@ -54,7 +54,7 @@ WebSecurityConfigurerAdapter {
 					"/HQadminwarehousedelete/*", "/HQadminadmindelete/*", "/hqlogadminview").hasAnyRole(ApplicationUserRole.HQADMIN.name())
 			
 			/* Pages accessible to only users with the ADMIN or HQADMIN role */
-			.antMatchers("/local-admin-view", "/order-placement/cust-order", "/admin-man-view", "/admin-server-view",
+			.antMatchers("/order-placement/cust-order", "/admin-man-view", "/admin-server-view",
 					"/admin-cust-view", "/custsignup", "/serversignup", "/mansignup", "/addcustomer",
 					"/addserver", "/addmanager", "/localadmincustedit/*", "/localadminserveredit/*",
 					"/localadminmanedit/*", "/localadmincustupdate/*", "/localadminserverupdate/*",
@@ -76,13 +76,14 @@ WebSecurityConfigurerAdapter {
 							ApplicationUserRole.HQMANAGER.name(), ApplicationUserRole.ADMIN.name(), ApplicationUserRole.HQADMIN.name())
 			
 			/* Pages accessible to only HQ staff */
-			.antMatchers("/hqlogview", "/HQ-manager-view", "/HQmanager-managers-view",
+			.antMatchers("/hqlogview", "/HQmanager-managers-view",
 					"/HQmanagermanedit/*", "/HQmanagermanupdate/*", "/HQmanagermandelete/*", "/HQmanageraddmanager",
 					"/addlfmanager", "/HQmanager-restaurants-view", "/HQmanager-offices-view", 
 					"/HQmanager-warehouses-view").hasAnyRole(ApplicationUserRole.HQMANAGER.name(), ApplicationUserRole.HQADMIN.name())
 			
 			/* Pages accessible to only users with WAREHOUSEMANAGER role */
-			.antMatchers("warehouseman-shipment-view").hasAnyRole(ApplicationUserRole.WAREHOUSEMANAGER.name())
+			.antMatchers("/warehouseman-shipment-view", "/warehouseman-log-view", "/warehouseman-employees-view", 
+					"warehouseman-inventory-view").hasAnyRole(ApplicationUserRole.WAREHOUSEMANAGER.name())
 			
 			.anyRequest() 
 			.authenticated() 

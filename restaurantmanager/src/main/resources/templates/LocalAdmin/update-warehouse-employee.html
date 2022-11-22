@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
         <meta name="description" content="" />
         <meta name="author" content="" />
-        <title>Update Customer</title>
+        <title>Update employee</title>
         <!-- Favicon-->
         <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
         <!-- Core theme CSS (includes Bootstrap)-->
@@ -74,8 +74,8 @@ input[type=text]:focus, input[type=password]:focus {
                 <!-- Page content-->
                 <div class="container-fluid">
                     <div class="container mt-3">
-                    	<h2 class="h2">Update Customer</h2>
-						<form action="#" th:action="@{/localadmincustupdate/{id}(id=${customer.id})}" th:object="${customer}" method="post">
+                    	<h2 class="h2">Update Employee</h2>
+						<form action="#" th:action="@{/localadminemployeeupdate/{id}(id=${employee.id})}" th:object="${employee}" method="post">
     						<label class="label" for="firstname">First Name:</label>
     						<input type="text" th:field="*{firstName}" id="firstname" placeholder="First Name" required>
     						<label class="label" for="lastname">Last Name:</label>
@@ -83,14 +83,29 @@ input[type=text]:focus, input[type=password]:focus {
    							 <br>
     						<label class="label" for="email">Email:</label>
     						<input type="email" th:field="*{email}" id="email" placeholder="Email" required>
-    						<br>
     						<label class="label" for="password">Password:</label>
     						<input type="text" th:field="*{password}" id="password" placeholder="Password" required>
-   							 <br>
-    						<label for="rewardspoints">Rewards Points</label>
-    						<input type="text" th:field="*{rewardsAvailable}" id="rewardspoints" placeholder="Rewards Points">
     						<br>
-    						<input type="submit" value="Update Customer">   
+    						<label class="label" for="hourlyRate">Hourly Rate:</label>
+    						<input type="number" th:field="*{hourlyRate}" id="hourlyRate" placeholder="Hourly Rate" required>
+   							<br>
+    						<input type="checkbox" th:field="*{isOnDuty}" id="isOnDuty"> Currently clocked In?<br>
+    						<label class="label" for="lastClockedIn">Last Clocked In:</label>
+    						<input type="text" th:field="*{lastClockedIn}" id="lastClockedIn" placeholder="yyyy-MM-dd HH:mm:ss">
+    						<br>
+    						<label class="label" for="totalHours">Total Hours:</label>
+    						<input type="number" th:field="*{totalHours}" id="totalHours" placeholder="0">
+    						<label class="label" for="weekHours">This Week's Hours:</label>
+    						<input type="number" th:field="*{weekHours}" id="weekHours" placeholder="0">
+    						<br>
+   							<label class="label" for="warehouseid">warehouse Location:</label>
+    						<select id="warehouseid" th:field="*{warehouse}" class="form-control" required>
+    							<th:block th:each="warehouse : ${listWarehouses}">
+    							 <option th:value="${warehouse.id}" th:text="${warehouse.id} + ' ' + ${warehouse.address} + ' ' + ${warehouse.city} + ' ' + ${warehouse.state}"></option>
+    							 </th:block>
+    						</select>
+    						<br>
+    						<input type="submit" value="Update employee">   
 						</form>
 	</div>
                     </div>
