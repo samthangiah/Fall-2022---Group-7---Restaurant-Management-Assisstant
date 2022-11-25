@@ -65,6 +65,10 @@ public class WarehouseManager {
 
 	public WarehouseManager() {
 		super();
+		this.isOnDuty = false;
+		this.lastClockedIn = "N/A";
+		this.totalHours = 0;
+		this.weekHours = 0;
 	}
 
 	public long getId() {

@@ -215,34 +215,49 @@ public class RestaurantController {
 		this.isLoggedIn = isLoggedIn;
 	}
 
+	/**
+	 * @return String value of cell's value, empty string if blank
+	 */
 	public static String checkStringType(XSSFCell testCell) {
 		if (testCell.getCellType() == CellType.NUMERIC) {
 			return Integer.toString((int) testCell.getNumericCellValue());
 		}
 		if (testCell.getCellType() == CellType.BLANK) {
-			//For the IntType and FloatType blanks I can understand why it would return null but I don't
-			//know why this one was supposed to return null, it should just be an empty string in my opinion
 			return "";
 		}
 		return testCell.getStringCellValue();
 	}
 
+	/**
+	 * @return int value of cell's value, if it can be parsed as int. If blank or non-integer, returns 0
+	 */
 	public static int checkIntType(XSSFCell testCell) {
 		if (testCell.getCellType() == CellType.STRING) {
-			return Integer.parseInt(testCell.getStringCellValue());
+			try {
+				return Integer.parseInt(testCell.getStringCellValue());
+			} catch (Exception e) {
+				return 0;
+			}
 		}
 		if (testCell.getCellType() == CellType.BLANK) {
-			return (Integer) null;
+			return 0;
 		}
 		return (int) testCell.getNumericCellValue();
 	}
 
+	/**
+	 * @return float value of cell's value, if it can be parsed as float. If blank or non-float, returns 0
+	 */
 	public static float checkFloatType(XSSFCell testCell) {
 		if (testCell.getCellType() == CellType.STRING) {
-			return Float.parseFloat(testCell.getStringCellValue());
+			try {
+				return Float.parseFloat(testCell.getStringCellValue());
+			} catch (Exception e) {
+				return 0;
+			}
 		}
 		if (testCell.getCellType() == CellType.BLANK) {
-			return (Float) null;
+			return 0;
 		}
 		return (float) testCell.getNumericCellValue();
 	}
@@ -335,9 +350,6 @@ public class RestaurantController {
 			inventory.setRestaurant_id(id);
 
 			inventoryRepo.save(inventory);
-
-			//For testing purposes
-			System.out.println("Inventory restaurant: " + inventory.getRestaurant_id());
 		}
 		wb.close();
 	}
@@ -373,9 +385,6 @@ public class RestaurantController {
 			inventory.setWarehouse_id(id);
 
 			inventoryRepo.save(inventory);
-
-			//For testing purposes
-			System.out.println("Inventory warehouse: " + inventory.getWarehouse_id());
 		}
 
 		wb.close();
@@ -415,7 +424,6 @@ public class RestaurantController {
 			ingredient.setIngredient(ingredientsList);
 
 			ingredientsRepo.save(ingredient);
-
 		}
 		wb.close();
 	}
@@ -470,6 +478,8 @@ public class RestaurantController {
 		warehouseManagerRepo.deleteAll();
 		shippingRepo.deleteAll();
 		stateTaxRepo.deleteAll();
+		warehouseEmployeeRepo.deleteAll();
+		logRepo.deleteAll();
 
 		//Hardcoded guest customer with ID -1, this one isnt sample data it is necessary in the code
 		Customers guest = new Customers("Guest", "", "Guest", "", false, 0, "N/A");
@@ -537,6 +547,18 @@ public class RestaurantController {
 
 		customerRepo.save(cust);
 		
+		Orders order = new Orders();
+		
+		order.setCustomer_id(cust);
+		order.setDate(date.format(LocalDateTime.now()));
+		order.setInstructions("");
+		order.setItems(null);
+		order.setPrice(10.00F);
+		order.setRestaurant(restaurant);
+		order.setStatus("Completed");
+		
+		orderRepo.save(order);
+		
 		WarehouseManager warehouseManager = new WarehouseManager();
 		warehouseManager.setFirstName("Emperor");
 		warehouseManager.setLastName("Palpatine");
@@ -544,10 +566,6 @@ public class RestaurantController {
 		warehouseManager.setPassword("pass");
 		warehouseManager.setWarehouse(warehouse);
 		warehouseManager.setHourlyRate(25);
-		warehouseManager.setIsOnDuty(false);
-		warehouseManager.setTotalHours(0);
-		warehouseManager.setLastClockedIn("Novemeber 20, 2022");
-		warehouseManager.setWeekHours(0);
 		warehouseManagerRepo.save(warehouseManager);
 		
 		restaurantRepo.save(restaurant2);
@@ -562,6 +580,8 @@ public class RestaurantController {
 		shipment.setWarehousemanager_id(warehouseManager);
 		shippingRepo.save(shipment);
 		
+		WarehouseEmployees whemployee = new WarehouseEmployees("Jabba", "Thehutt", "whemployee@email.com", "pass", 15.00F, warehouse);
+		warehouseEmployeeRepo.save(whemployee);
 		
 		System.out.println(
 				"---------------------------------------------------------------------------------------------------------------------------");
@@ -612,44 +632,11 @@ public class RestaurantController {
 	 * Used for Home button on all pages requiring customer authorities
 	 * @return Home page for logged in customer accounts
 	 */
-	@GetMapping("/loggedinhome")
+	@RequestMapping("/loggedinhome")
 	public String loggedIn() {
 		return "Customer/loggedinhome";
 	}
-
-	/**
-	 * Manual credential processing to allow user registration
-	 * Used in ApplicationSecurityConfig as login processing URL
-	 * @param usernameParameter Email entered from form
-	 * @param passwordParameter Password entered from form
-	 */
-	@PostMapping("/processcredentials")
-	public String processCredentials(String usernameParameter, String passwordParameter) {
-		
-		//TODO
-		//The calls to fakeApplicationUserDaoService should throw nullpointerexception errors since it's not initialized 
-		//They do in the test class but not in the main class so it seems like this method is just not being called 
-		//Even though I have it defined as the loginprocessingurl In ApplicationSecurityConfig line 91 
-		//When I had the loginprocessingurl as default, there was an error that registering new users wouldn't create a 
-		//new ApplicationUser object, which this method was supposed to fix, and setting it to this method fixed that bug
-		//So looking at it from one angle makes it look like this is never called, but it also seems like it does get called
-		//but just doesn't throw any errors for some reason except for in the test class
-		
-		Optional<ApplicationUser> user = fakeApplicationUserDaoService
-				.selectApplicationUserByUsername(usernameParameter);
-		if (user == null) {
-			return "/login?error";
-		}
-		try {
-			ApplicationUser credentials = user.get();
-			if (credentials.getPassword() == fakeApplicationUserDaoService.encode(passwordParameter)) {
-				return "redirect:/loggedinredirect";
-			}
-		} catch (Exception e) {
-		}
-		return "/login?error";
-	}
-
+	
 	/**
 	 * Logout success URL mapping for ApplicationSecurityConfig
 	 * Redirects to login form by default
@@ -1065,11 +1052,12 @@ public class RestaurantController {
 	
 	@GetMapping("/admin-employee-view")
 	public String showAdminEmployeesView(Model model) {
-		List<WarehouseManager> managers = null;
 		Admins admin = adminRepo.findById(getUserUID())
 				.orElseThrow(() -> new IllegalArgumentException("Invalid admin Id:" + getUserUID()));
 		List<Warehouses> warehouses = warehouseRepo.findByAdmin(admin.getId());
 		Iterator<Warehouses> it = warehouses.iterator();
+		
+		List<WarehouseManager> managers = new ArrayList<WarehouseManager>();
 		while (it.hasNext()){
 			
 			Warehouses warehouse = it.next();
@@ -1100,7 +1088,7 @@ public class RestaurantController {
 
 		} catch (Exception e) {
 			result.rejectValue("email", null, "There is already an account registered with the same email");
-			return "LocalAdmin/add-employee";
+			return "LocalAdmin/add-warehouse-employee";
 		}
 		return "redirect:/admin-employee-view";
 	}
@@ -1816,6 +1804,13 @@ public class RestaurantController {
 		Offices office = officeRepo.findById(id)
 				.orElseThrow(() -> new IllegalArgumentException("Invalid office Id:" + id));
 
+		//Remove constraints
+		List<Admins> admins = office.getAdmin();
+		for (Admins a : admins) {
+			a.setOffice(null);
+			adminRepo.save(a);
+		}
+		
 		Log log = new Log();
 		log.setDate(date.format(LocalDateTime.now()));
 		log.setTime(time.format(LocalDateTime.now()));
@@ -2637,6 +2632,21 @@ public class RestaurantController {
 		WarehouseManager manager = warehouseManagerRepo.findById(id)
 				.orElseThrow(() -> new IllegalArgumentException("Invalid warehouse manager Id:" + id));
 
+		//Remove constraints
+		List<Shipping> shipments = shippingRepo.findWarehouseManShipment(id);
+		for (Shipping s : shipments) {
+			s.setManager_id(null);
+			shippingRepo.save(s);
+		}
+		List<Warehouses> warehouses = (List<Warehouses>) warehouseRepo.findAll();
+		List<WarehouseManager> temp = new ArrayList<WarehouseManager>();
+		for (Warehouses w : warehouses) {
+			temp = w.getManager();
+			temp.remove(manager);
+			w.setManager(temp);
+			warehouseRepo.save(w);
+		}
+		
 		Log log = new Log();
 		log.setDate(date.format(LocalDateTime.now()));
 		log.setTime(time.format(LocalDateTime.now()));
@@ -2842,6 +2852,7 @@ public class RestaurantController {
 			}
 			PaymentDetails details = new PaymentDetails();
 			details.buildFromForm(form);
+			//paymentDetailsRepo.save(details);
 			Orders order;
 			
 			if (getLoggedInUser() != null) {
@@ -2850,6 +2861,7 @@ public class RestaurantController {
 				List<Orders> orderHistory = getLoggedInUser().getOrderHistory();
 				orderHistory.add(order);
 				getLoggedInUser().setOrderHistory(orderHistory);
+				customerRepo.save(getLoggedInUser());
 			} else {
 				order = (Orders) getCurrentSession().getAttribute("order");
 			}
@@ -2878,6 +2890,7 @@ public class RestaurantController {
 			}
 			Paypal paypal = new Paypal();
 			paypal.buildFromForm(form);
+			//paypalRepo.save(paypal);
 			Orders order;
 			
 			if (getLoggedInUser() != null) {
@@ -2886,6 +2899,7 @@ public class RestaurantController {
 				List<Orders> orderHistory = getLoggedInUser().getOrderHistory();
 				orderHistory.add(order);
 				getLoggedInUser().setOrderHistory(orderHistory);
+				customerRepo.save(getLoggedInUser());
 			} else {
 				order = (Orders) getCurrentSession().getAttribute("order");
 			}
@@ -2945,12 +2959,11 @@ public class RestaurantController {
 		 * @param order
 		 * Append to sales and profits for restaurant corresponding to order
 		 */
-		private void addToSales(Orders order) {
+		public void addToSales(Orders order) {
 			Restaurants restaurant = order.getRestaurant();
 			restaurant.setSales(restaurant.getSales() + order.getPrice());
 			restaurant.setProfits(restaurant.getProfits() + order.getPrice());
 			restaurantRepo.save(restaurant);
-			
 		}
     
 		/**
@@ -3043,6 +3056,7 @@ public class RestaurantController {
 				for (CartItems c : cartItems) {
 					if (c.getMenu_id().getId() < (long) 0) {
 						//Deletes discount and tax objects from repo after order is payed
+						//TODO fix error from orderrepo keeping the menu id reference of deleted discount/tax menu objects
 						//menuRepo.delete(c.getMenu_id());
 					}
 				}
@@ -3132,7 +3146,7 @@ public class RestaurantController {
 		 * Create new sales tax menu object based on cartItems total price
 		 * Append to price of existing tax object if order exists
 		 */
-		private void AddTaxes() {
+		public void AddTaxes() {
 			List<CartItems> items = new ArrayList<CartItems>();
 			Customers user = getLoggedInUser();
 			float totalPrice = 0.00F;
@@ -3300,7 +3314,7 @@ public class RestaurantController {
 		 * Populate new cartItem or create cartItems attribute
 		 * @return cartItem
 		 */
-		private CartItems createNewOrder(long id, CartItems cartItem) {
+		public CartItems createNewOrder(long id, CartItems cartItem) {
 			Menu menu = menuRepo.findById(id)
 				.orElseThrow(() -> new IllegalArgumentException("Invalid menu Id:" + id));
 			cartItem = new CartItems();
@@ -3392,12 +3406,8 @@ public class RestaurantController {
 			Set<Menu> items = order.getItems();
 			Iterator<Menu> it = items.iterator();
 			
-			//finds restaurant corresponding to order
-			Restaurants restaurant = new Restaurants();
-			restaurant.setId(order.getRestaurant().getId());
-			
-			//find inventory corresponding to restaurant
-			List<Inventory> inventoryList = inventoryRepo.findInventoryRestaurant(restaurant.getId());
+			//find inventory corresponding to restaurant which order was placed from
+			List<Inventory> inventoryList = inventoryRepo.findInventoryRestaurant(order.getRestaurant().getId());
 			
 			//iterate over all menu ID's for order
 			while(it.hasNext()) {
