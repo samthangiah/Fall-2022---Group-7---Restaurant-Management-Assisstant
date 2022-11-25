@@ -89,7 +89,7 @@ WebSecurityConfigurerAdapter {
 			.authenticated() 
 			.and() 
 			.formLogin()
-			.loginProcessingUrl("/processcredentials")
+			.successForwardUrl("/loggedinredirect")
 			.and()
 			.logout()
 				.logoutSuccessUrl("/showlogout")
