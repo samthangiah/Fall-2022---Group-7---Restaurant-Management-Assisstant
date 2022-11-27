@@ -927,43 +927,6 @@ class RestaurantControllerTests {
 	}
 	
 	@Test
-	public void addAdminRestaurantTest() {
-		//Setup
-		Admins admin = new Admins();
-		admin = adminRepo.save(admin);
-		List<Restaurants> r = new ArrayList<Restaurants>();
-		Restaurants rest = new Restaurants();
-		rest.setAdmin(admin);
-		rest = restaurantRepo.save(rest);
-		r.add(rest);
-		admin.setRestaurant(r);
-		admin = adminRepo.save(admin);
-		
-		controller.addAdminRestaurant(admin);
-		Restaurants restaurant = restaurantRepo.findByAdmin(admin.getId());
-		assertEquals(admin.toString(), restaurant.getAdmin().toString(), "Restaurant admin should be set to admin");
-		
-	}
-	
-	@Test
-	public void removeAdminRestaurantTest() {
-		//Setup
-		Admins admin = new Admins();
-		admin = adminRepo.save(admin);
-		List<Restaurants> r = new ArrayList<Restaurants>();
-		Restaurants rest = new Restaurants();
-		rest.setAdmin(admin);
-		rest = restaurantRepo.save(rest);
-		r.add(rest);
-		admin.setRestaurant(r);
-		admin = adminRepo.save(admin);
-		
-		controller.removeAdminRestaurant(admin);
-		Restaurants restaurant = restaurantRepo.findByAdmin(admin.getId());
-		assertNull(restaurant, "No restaurant should be assigned to admin");
-	}
-	
-	@Test
 	public void deleteCustTest() {
 		List<Customers> customers = (List<Customers>) customerRepo.findAll();
 		String ret = controller.deleteCust(customers.get(0).getId(), model);

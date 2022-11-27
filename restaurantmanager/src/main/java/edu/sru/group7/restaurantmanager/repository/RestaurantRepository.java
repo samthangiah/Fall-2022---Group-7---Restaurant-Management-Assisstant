@@ -12,7 +12,7 @@ import edu.sru.group7.restaurantmanager.domain.Restaurants;
 public interface RestaurantRepository extends CrudRepository<Restaurants, Long> {
 	
 	@Query(value="SELECT * FROM restaurantmanagerdb.restaurants WHERE admin_id = :id", nativeQuery=true)
-	public Restaurants findByAdmin(long id);
+	public List<Restaurants> findByAdmin(long id);
 
 	@Query(value="SELECT * FROM restaurantmanagerdb.restaurants WHERE admin_id IS NULL", nativeQuery=true)
 	public List<Restaurants> findMissingAdmin();

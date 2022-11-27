@@ -42,11 +42,10 @@ input[type=text]:focus, input[type=password]:focus {
             <div class="border-end bg-white" id="sidebar-wrapper">
                 <div class="sidebar-heading border-bottom bg-light">The Gazebo</div>
                 <div class="list-group list-group-flush">
-                	<a class="list-group-item list-group-item-action list-group-item-light p-3" href="/logadminview">View Local Action Log</a>
-                	<a class="list-group-item list-group-item-action list-group-item-light p-3" href="/admin-cust-view">View Customers</a>
-                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/admin-man-view">View Managers</a>
-                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/admin-server-view">View Servers</a>
-                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/admin-employee-view">View Employees</a>
+                	<a class="list-group-item list-group-item-action list-group-item-light p-3" href="/warehouseman-log-view">View Log</a>
+                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/warehouseman-shipment-view">View Shipments</a>
+                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/warehouseman-inventory-view">View Inventory</a>
+                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/warehouseman-employees-view">View Employees</a>
                 </div>
             </div>
             <!-- Page content wrapper-->
@@ -87,12 +86,14 @@ input[type=text]:focus, input[type=password]:focus {
     						<label class="label" for="hourlyRate">Hourly Rate:</label>
     						<input type="number" th:field="*{hourlyRate}" id="hourlyRate" placeholder="Hourly Rate" required>
    							<br>
+   							<label class="label" for="hourlyRate">Weekly Hours:</label>
+   							<input type="number" th:field="*{weekHours}" id="weekHours" placeholder="This Week's Hours" required>
     						<input type="hidden" th:field="*{password}" id="password" placeholder="Password" required>
     						<input type="hidden" th:field="*{warehouse}" id="warehouse_id" placeholder="Warehouse" required>
     						<input type="hidden" th:field="*{isOnDuty}" id="isOnDuty" required>
     						<input type="hidden" th:field="*{lastClockedIn}" id="lastClockedIn" placeholder="yyyy-MM-dd HH:mm:ss" required>
     						<input type="hidden" th:field="*{totalHours}" id="totalHours" placeholder="Total Hours" required>
-    						<input type="hidden" th:field="*{weekHours}" id="weekHours" placeholder="This Week's Hours" required>
+    						
     						<br>
     						<input type="submit" value="Update employee">   
 						</form>
