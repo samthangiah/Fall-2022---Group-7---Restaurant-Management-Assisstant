@@ -722,7 +722,7 @@ public class RestaurantController {
 	/**
 	 * @return Redirect for home page corresponding to highest authority granted
 	 */
-	@PostMapping("/loggedinredirect")
+	@RequestMapping("/loggedinredirect")
 	public String authorityCheckForLoginRedirects() {
 		ApplicationUser user = (ApplicationUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		// Redirect user to staff page of highest authority or customer page
@@ -3179,13 +3179,6 @@ public class RestaurantController {
 			List<CartItems> cartItems;
 			if (customer != null) {
 				cartItems = cartItemsRepo.findByCustomer(customer);
-				for (CartItems c : cartItems) {
-					if (c.getMenu_id().getId() < (long) 0) {
-						//Deletes discount and tax objects from repo after order is payed
-						//TODO fix error from orderrepo keeping the menu id reference of deleted discount/tax menu objects
-						//menuRepo.delete(c.getMenu_id());
-					}
-				}
 			}
 			else {
 				//cartItems either retrieved from HttpSession attribute or set to empty list if no cart items were set
@@ -3194,6 +3187,15 @@ public class RestaurantController {
 					getCurrentSession().removeAttribute("cartItems");
 				} else {
 					cartItems = new ArrayList<CartItems>();
+				}
+			}
+			for (CartItems c : cartItems) {
+				if (c.getMenu_id().getId() < (long) 0) {
+					//Deletes discount and tax objects from repo after order is payed
+					Menu m = c.getMenu_id();
+					c.setMenu_id(null);
+					cartItemsRepo.save(c);
+					menuRepo.delete(m);
 				}
 			}
 			
@@ -3370,7 +3372,10 @@ public class RestaurantController {
 							
 							CartItems item = items.get(0);
 							getCurrentSession().setAttribute("cartItems", null);
-							menuRepo.delete(item.getMenu_id());
+							Menu m = item.getMenu_id();
+							item.setMenu_id(null);
+							cartItemsRepo.save(item);
+							menuRepo.delete(m);
 							cartItemsRepo.delete(item);
 							
 							System.out.println("------------------- TAX OBJ DELETED ----------------------");

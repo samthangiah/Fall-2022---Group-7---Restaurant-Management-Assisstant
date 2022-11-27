@@ -68,6 +68,11 @@ import edu.sru.group7.restaurantmanager.repository.WarehouseEmployeeRepository;
 import edu.sru.group7.restaurantmanager.repository.WarehouseManagerRepository;
 import edu.sru.group7.restaurantmanager.repository.WarehouseRepository;
 
+/**
+ * Test class for RestaurantController methods
+ * Methods commented out and marked with //TODO have bugs that only occur in test class, 
+ * Each one I have thoroughly tested on the website itself 
+ */
 @SpringBootTest
 class RestaurantControllerTests {
 	
@@ -923,34 +928,39 @@ class RestaurantControllerTests {
 	
 	@Test
 	public void addAdminRestaurantTest() {
-		//TODO this throws PersistentObjectException when trying to save admin
-		/*
 		//Setup
 		Admins admin = new Admins();
-		List<Restaurants> r = (List<Restaurants>) restaurantRepo.findAll();
-		admin.setRestaurant(r.subList(0, 1));
-		adminRepo.save(admin);
+		admin = adminRepo.save(admin);
+		List<Restaurants> r = new ArrayList<Restaurants>();
+		Restaurants rest = new Restaurants();
+		rest.setAdmin(admin);
+		rest = restaurantRepo.save(rest);
+		r.add(rest);
+		admin.setRestaurant(r);
+		admin = adminRepo.save(admin);
 		
 		controller.addAdminRestaurant(admin);
 		Restaurants restaurant = restaurantRepo.findByAdmin(admin.getId());
-		assertEquals(admin, restaurant.getAdmin(), "Restaurant admin should be set to admin");
-		*/
+		assertEquals(admin.toString(), restaurant.getAdmin().toString(), "Restaurant admin should be set to admin");
+		
 	}
 	
 	@Test
 	public void removeAdminRestaurantTest() {
-		//TODO this throws PersistentObjectException when trying to save admin
-		/*
 		//Setup
 		Admins admin = new Admins();
-		List<Restaurants> r = (List<Restaurants>) restaurantRepo.findAll();
-		admin.setRestaurant(r.subList(0, 1));
-		adminRepo.save(admin);
+		admin = adminRepo.save(admin);
+		List<Restaurants> r = new ArrayList<Restaurants>();
+		Restaurants rest = new Restaurants();
+		rest.setAdmin(admin);
+		rest = restaurantRepo.save(rest);
+		r.add(rest);
+		admin.setRestaurant(r);
+		admin = adminRepo.save(admin);
 		
 		controller.removeAdminRestaurant(admin);
 		Restaurants restaurant = restaurantRepo.findByAdmin(admin.getId());
 		assertNull(restaurant, "No restaurant should be assigned to admin");
-		*/
 	}
 	
 	@Test
@@ -1541,7 +1551,7 @@ class RestaurantControllerTests {
 		Orders order = new Orders();
 		order.setStatus("Pending Payment");
 		order.setCustomer_id(cust);
-		orderRepo.save(order);
+		order = orderRepo.save(order);
 		
 		String ret = controller.processPayment(pd_f, bindingResult, model);
 		assertEquals("redirect:/ordersuccessful", ret, "Processing should return ordersuccess page");
@@ -1552,8 +1562,8 @@ class RestaurantControllerTests {
 		*/
 	}
 	
-	//TODO these 2 next methods specifically throw errors because of the WithUserDetails annotation
-	//Even though the same annotation with the same params is used like a bunch of other times and it works fine
+	//TODO The following two methods processPaypalTest and viewCartTest throw errors because of the WithUserDetails 
+	//Annotation even though the same annotation with the same params is used for several other methods and works fine
 	/*
 	@Test
 	@WithUserDetails(value = "customer@email.com")
@@ -1567,7 +1577,7 @@ class RestaurantControllerTests {
 		Orders order = new Orders();
 		order.setStatus("Pending Payment");
 		order.setCustomer_id(cust);
-		orderRepo.save(order);
+		order = orderRepo.save(order);
 		
 		String ret = controller.processPaypal(pp_f, bindingResult, model);
 		assertEquals("redirect:/ordersuccessful", ret, "Processing should return ordersuccess page");
@@ -1585,8 +1595,7 @@ class RestaurantControllerTests {
 		verify(model, times(1)).addAttribute(eq("listCart"), ArgumentMatchers.anyIterable());
 		verify(model, times(1)).addAttribute(eq("totalprice"), ArgumentMatchers.anyString());
 		verify(model, times(1)).addAttribute(eq("Order"), ArgumentMatchers.isA(Orders.class));
-	}
-	*/
+	}*/
 	
 	@Test
 	public void viewCartTest2() {
@@ -1617,7 +1626,7 @@ class RestaurantControllerTests {
 		Customers cust = customerRepo.findByEmail("customer@email.com");
 		List<Menu> items = (List<Menu>) menuRepo.findAll();
 		CartItems item = new CartItems(items.get(0), cust, 1);
-		cartItemsRepo.save(item);
+		item = cartItemsRepo.save(item);
 		
 		String ret = controller.deleteCartItem(item.getId(), model);
 		assertEquals("redirect:/Customer-cart-view", ret, "deleteCartItem should return redirect to cart page");
@@ -1632,7 +1641,7 @@ class RestaurantControllerTests {
 		Customers cust = customerRepo.findByEmail("Guest");
 		List<Menu> items = (List<Menu>) menuRepo.findAll();
 		CartItems item = new CartItems(items.get(0), cust, 1);
-		cartItemsRepo.save(item);
+		item = cartItemsRepo.save(item);
 		List<CartItems> cartAttribute = new ArrayList<CartItems>();
 		cartAttribute.add(item);
 		HttpSession session = controller.getCurrentSession();
@@ -1651,7 +1660,7 @@ class RestaurantControllerTests {
 		Customers cust = customerRepo.findByEmail("customer@email.com");
 		List<Menu> items = (List<Menu>) menuRepo.findAll();
 		CartItems item = new CartItems(items.get(0), cust, 1);
-		cartItemsRepo.save(item);
+		item = cartItemsRepo.save(item);
 		
 		String ret = controller.editCartFromMenu(items.get(0).getId(), model);
 		assertEquals("redirect:/Customer-ordertype-view", ret, "deleteCartItem should return redirect to order page");
@@ -1666,7 +1675,7 @@ class RestaurantControllerTests {
 		Customers cust = customerRepo.findByEmail("Guest");
 		List<Menu> items = (List<Menu>) menuRepo.findAll();
 		CartItems item = new CartItems(items.get(0), cust, 1);
-		cartItemsRepo.save(item);
+		item = cartItemsRepo.save(item);
 		List<CartItems> cartAttribute = new ArrayList<CartItems>();
 		cartAttribute.add(item);
 		HttpSession session = controller.getCurrentSession();
@@ -1690,7 +1699,7 @@ class RestaurantControllerTests {
 		cartItemsRepo.save(item);
 		cartItemsRepo.save(item2);
 		cartItemsRepo.save(item3);
-		customerRepo.save(cust);
+		cust = customerRepo.save(cust);
 		List<CartItems> oldCartItems = cartItemsRepo.findByCustomer(cust);
 		
 		controller.deleteCartItems();
@@ -1709,47 +1718,39 @@ class RestaurantControllerTests {
 	
 	@Test
 	@WithUserDetails(value = "customer@email.com")
-	public void custAddToOrderTest() {
-		//TODO flag never turns true
-		/*
+	public void custAddToOrderTest() {		
 		List<Menu> items = (List<Menu>) menuRepo.findAll();
 		Customers cust = customerRepo.findByEmail("customer@email.com");
 		
-		String ret = controller.custAddToOrder(items.get(0).getId(), new CartItems(), bindingResult, model);
+		String ret = controller.custAddToOrder(items.get(5).getId(), new CartItems(), bindingResult, model);
 		assertEquals("redirect:/Customer-ordertype-view", ret, "custAddToOrder should return redirect to order page");
 		List<CartItems> cartItems = cartItemsRepo.findByCustomer(cust);
 		boolean flag = false;
 		for (CartItems c : cartItems) {
-			if (c.getMenu_id().equals(items.get(0))) {
+			if (c.getMenu_id().toString().equals(items.get(5).toString())) {
 				flag = true;
 			}
 		}
 		assertTrue(flag, "Cart should contain cartItem with specified menu item");
-		*/
 	}
 	
 	@Test
 	public void custAddToOrderTest2() {
-		//TODO flag never turns true
-		/*
 		//Not authenticated test
 		List<Menu> items = (List<Menu>) menuRepo.findAll();
-		//List<CartItems> cartAttribute = new ArrayList<CartItems>();
-		//controller.getCurrentSession().setAttribute("cartItems", cartAttribute);
 		
-		String ret = controller.custAddToOrder(items.get(0).getId(), new CartItems(), bindingResult, model);
+		String ret = controller.custAddToOrder(items.get(5).getId(), new CartItems(), bindingResult, model);
 		assertEquals("redirect:/Customer-ordertype-view", ret, "custAddToOrder should return redirect to order page");
 		List<CartItems> cartItems = (List<CartItems>) controller.getCurrentSession().getAttribute("cartItems");
 		boolean flag = false;
 		if (cartItems != null) {
 			for (CartItems c : cartItems) {
-				if (c.getMenu_id().equals(items.get(0))) {
+				if (c.getMenu_id().toString().equals(items.get(5).toString())) {
 					flag = true;
 				}
 			}
 		}
 		assertTrue(flag, "Cart should contain cartItem with specified menu item");
-		*/
 	}
 	
 	@Test
@@ -1761,7 +1762,7 @@ class RestaurantControllerTests {
 		Customers cust = controller.getLoggedInUser();
 		List<Menu> items = (List<Menu>) menuRepo.findAll();
 		CartItems item = new CartItems(items.get(0), cust, 1);
-		cartItemsRepo.save(item);
+		item = cartItemsRepo.save(item);
 		Set<CartItems> oldCartItems = cust.getCartItems();
 		Float price = 0.00F;
 		
@@ -1782,7 +1783,7 @@ class RestaurantControllerTests {
 		
 		//Updating existing tax object test
 		CartItems item2 = new CartItems(items.get(1), cust, 1);
-		cartItemsRepo.save(item2);
+		item = cartItemsRepo.save(item2);
 		oldCartItems = cust.getCartItems();
 		controller.AddTaxes();
 		newCartItems = cust.getCartItems();
@@ -1807,22 +1808,22 @@ class RestaurantControllerTests {
 	
 	@Test
 	public void addTaxesTest2() {
-		//TODO session attributes not set
+		//TODO this throws LazyInitializationException for Customers.cartItems
 		/*
 		//Not authenticated tests
 		//Setup
 		Customers cust = controller.getGuestCust();
 		List<Menu> items = (List<Menu>) menuRepo.findAll();
 		CartItems item = new CartItems(items.get(0), cust, 1);
-		cartItemsRepo.save(item);
+		item = cartItemsRepo.save(item);
 		List<CartItems> oldCartItems = new ArrayList<CartItems>();
 		oldCartItems.add(item);
-		controller.getCurrentSession().setAttribute("cartItems", oldCartItems);
 		Float price = 0.00F;
 		
 		//New tax object test
 		controller.AddTaxes();
-		List<CartItems> newCartItems = (List<CartItems>) controller.getCurrentSession().getAttribute("cartItems");
+		List<CartItems> newCartItems = new ArrayList<CartItems>(cust.getCartItems());
+		assertNotNull(newCartItems, "cartItems attribute should be set");
 		assertFalse(newCartItems.equals(oldCartItems), "Tax cartItem should be added to guest's cart");
 		boolean flag = false;
 		for (CartItems c : newCartItems) {
@@ -1837,10 +1838,11 @@ class RestaurantControllerTests {
 		
 		//Updating existing tax object test
 		CartItems item2 = new CartItems(items.get(1), cust, 1);
-		cartItemsRepo.save(item2);
+		item = cartItemsRepo.save(item2);
 		oldCartItems.add(item2);
 		controller.AddTaxes();
-		newCartItems = (List<CartItems>) controller.getCurrentSession().getAttribute("cartItems");
+		newCartItems = new ArrayList<CartItems>(cust.getCartItems());
+		assertNotNull(newCartItems, "cartItems attribute should be set");
 		assertFalse(newCartItems.equals(oldCartItems), "Tax cartItem should be updated");
 		flag = false;
 		for (CartItems c : newCartItems) {
@@ -1856,9 +1858,9 @@ class RestaurantControllerTests {
 		oldCartItems.remove(item2);
 		cartItemsRepo.delete(item);
 		cartItemsRepo.delete(item2);
-		controller.getCurrentSession().setAttribute("cartItems", oldCartItems);
 		controller.AddTaxes();
-		newCartItems = (List<CartItems>) controller.getCurrentSession().getAttribute("cartItems");
+		newCartItems = new ArrayList<CartItems>(cust.getCartItems());
+		assertNotNull(newCartItems, "cartItems attribute should be set");
 		assertTrue(newCartItems.isEmpty(), "Tax object should be deleted if it is the only item left in cart");
 		*/
 	}
@@ -1868,7 +1870,7 @@ class RestaurantControllerTests {
 	public void createNewOrderTest() {
 		List<Menu> items = (List<Menu>) menuRepo.findAll();
 		CartItems item = controller.createNewOrder(items.get(0).getId(), new CartItems());
-		cartItemsRepo.save(item);
+		item = cartItemsRepo.save(item);
 		assertEquals(items.get(0).toString(), item.getMenu_id().toString(), "CartItem Menu item should be set");
 		assertEquals(controller.getLoggedInUser().toString(), item.getCustomer_id().toString(), "CartItem customer should be set");
 		assertEquals(1, item.getQuantity(), "CartItem quantity should be 1");
@@ -1879,7 +1881,7 @@ class RestaurantControllerTests {
 		//Not authenticated test
 		List<Menu> items = (List<Menu>) menuRepo.findAll();
 		CartItems item = controller.createNewOrder(items.get(0).getId(), new CartItems());
-		cartItemsRepo.save(item);
+		item = cartItemsRepo.save(item);
 		assertEquals(items.get(0).toString(), item.getMenu_id().toString(), "CartItem Menu item should be set");
 		assertEquals(controller.getGuestCust().toString(), item.getCustomer_id().toString(), "CartItem customer should be set");
 		assertEquals(1, item.getQuantity(), "CartItem quantity should be 1");
@@ -1935,7 +1937,7 @@ class RestaurantControllerTests {
 		Orders order = new Orders();
 		order.setItems(items);
 		order.setRestaurant(rest.get(0));
-		orderRepo.save(order);
+		order = orderRepo.save(order);
 		List<Inventory> oldInventory = inventoryRepo.findInventoryRestaurant(rest.get(0).getId());
 		
 		controller.removeFromInventory(order);
