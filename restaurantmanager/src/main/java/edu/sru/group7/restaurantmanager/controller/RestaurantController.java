@@ -29,6 +29,7 @@ import edu.sru.group7.restaurantmanager.domain.Restaurants;
 import edu.sru.group7.restaurantmanager.domain.Warehouses;
 import edu.sru.group7.restaurantmanager.domain.Managers;
 import edu.sru.group7.restaurantmanager.domain.Servers;
+import edu.sru.group7.restaurantmanager.domain.Shipment;
 import edu.sru.group7.restaurantmanager.domain.Shipping;
 import edu.sru.group7.restaurantmanager.domain.StateTax;
 import edu.sru.group7.restaurantmanager.domain.WarehouseEmployees;
@@ -578,6 +579,7 @@ public class RestaurantController {
 		shipment.setWarehouse_id(warehouse);
 		shipment.setRestaurant_id(restaurant);
 		shipment.setWarehousemanager_id(warehouseManager);
+		shipment.setDate(date.format(LocalDateTime.now()));
 		shippingRepo.save(shipment);
 		
 		WarehouseEmployees whemployee = new WarehouseEmployees("Jabba", "Thehutt", "whemployee@email.com", "pass", 15.00F, warehouse);
@@ -996,7 +998,10 @@ public class RestaurantController {
 	 * @return add-LFadmin. Shows add Local Admin page to HQ Admin
 	 */
 	@RequestMapping({ "/adminsignup" })
-	public String showAdminSignUpForm(Admins admin) {
+	public String showAdminSignUpForm(Admins admin, Model model) {
+		List<Restaurants> restaurants = restaurantRepo.findMissingAdmin();
+		model.addAttribute("listAdminRestaurant", restaurants);
+		
 		return "HQAdmin/add-LFadmin";
 	}
 
@@ -1057,14 +1062,14 @@ public class RestaurantController {
 		List<Warehouses> warehouses = warehouseRepo.findByAdmin(admin.getId());
 		Iterator<Warehouses> it = warehouses.iterator();
 		
-		List<WarehouseManager> managers = new ArrayList<WarehouseManager>();
+		List<WarehouseEmployees> employees = new ArrayList<WarehouseEmployees>();
 		while (it.hasNext()){
 			
 			Warehouses warehouse = it.next();
-			managers.add(warehouseManagerRepo.findByWarehouse(warehouse.getId()));
+			employees.addAll(warehouseEmployeeRepo.findByWarehouse(warehouse.getId()));
 		};
 		
-		model.addAttribute("warehouseEmployees", managers);
+		model.addAttribute("warehouseEmployees", employees);
 		return "LocalAdmin/admin-warehouse-employee-view";
 	}
 	
@@ -1125,7 +1130,25 @@ public class RestaurantController {
 			result.rejectValue("email", null, "There is already an account registered with the same email");
 			return "LocalAdmin/update-warehouse-employee";
 		}
-		return "redirect:/admin-warehouse-employee-view";
+		return "redirect:/admin-employee-view";
+	}
+	
+	@GetMapping("/localadminemployeedelete/{id}")
+	public String deleteEmployee(@PathVariable("id") long id, Model model) {
+		WarehouseEmployees employee = warehouseEmployeeRepo.findById(id)
+				.orElseThrow(() -> new IllegalArgumentException("Invalid employee Id:" + id));
+
+		Log log = new Log();
+		log.setDate(date.format(LocalDateTime.now()));
+		log.setTime(time.format(LocalDateTime.now()));
+		log.setLocation(getUserLocation());
+		log.setUserId(getUserUID());
+		log.setAction("Delete customer account");
+		log.setActionId(employee.getId());
+		logRepo.save(log);
+
+		warehouseEmployeeRepo.delete(employee);
+		return "redirect:/admin-employee-view";
 	}
 
 	/**
@@ -2243,6 +2266,36 @@ public class RestaurantController {
 		return "WarehouseManager/warehouseman-inventory-view";
 	}
 	
+	@GetMapping("/warehouseman-inventory-edit/{id}")
+	public String warehouseManShowUpdateInventory(@PathVariable("id") long id, Model model) {
+		Inventory inventory = inventoryRepo.findById(id)
+			.orElseThrow(() -> new IllegalArgumentException("Invalid Inventory Id:" + id));
+
+		model.addAttribute("inventory", inventory);
+		return "WarehouseManager/update-employee";
+	}
+	
+	@PostMapping("/warehouseman-inventory-update/{id}")
+	public String warehouseManUpdateInventory(@PathVariable("id") long id, @Validated Inventory inventory,
+			BindingResult result, Model model) {
+		if (result.hasErrors()) {
+			inventory.setId(id);
+			return "WarehouseManager/update-inventory";
+		}
+
+		Log log = new Log();
+		log.setDate(date.format(LocalDateTime.now()));
+		log.setTime(time.format(LocalDateTime.now()));
+		log.setLocation(getUserLocation());
+		log.setUserId(getUserUID());
+		log.setAction("Update Inventory");
+		log.setActionId(inventory.getId());
+		logRepo.save(log);
+
+		inventoryRepo.save(inventory);
+		return "redirect:/warehouseman-inventory-view";
+	}
+	
 	@RequestMapping({"warehouseman-employees-view"})
 	public String showWarehouseEmployees(Model model) {
 		WarehouseManager manager = warehouseManagerRepo.findById(getUserUID())
@@ -2260,6 +2313,32 @@ public class RestaurantController {
 
 		model.addAttribute("employee", employee);
 		return "WarehouseManager/update-employee";
+	}
+	
+	@PostMapping("/warehouseman-employee-update/{id}")
+	public String warehouseManUpdateEmployee(@PathVariable("id") long id, @Validated WarehouseEmployees employee, BindingResult result,
+			Model model) {
+		if (result.hasErrors()) {
+			employee.setId(id);
+			return "WarehouseManager/update-employee";
+		}
+
+		try {
+			Log log = new Log();
+			log.setDate(date.format(LocalDateTime.now()));
+			log.setTime(time.format(LocalDateTime.now()));
+			log.setLocation(getUserLocation());
+			log.setUserId(getUserUID());
+			log.setAction("Update server account");
+			log.setActionId(employee.getId());
+			logRepo.save(log);
+
+			warehouseEmployeeRepo.save(employee);
+		} catch (Exception e) {
+			result.rejectValue("email", null, "There is already an account registered with the same email");
+			return "WarehouseManager/update-employee";
+		}
+		return "redirect:/warehouseman-employees-view";
 	}
 
 	/**
@@ -2504,7 +2583,54 @@ public class RestaurantController {
 		serverRepo.delete(server);
 		return "redirect:/manager-server-view";
 	}
-
+	
+	@RequestMapping({ "/manager-add-shipment/{id}" })
+	public String localManAddShipmentForm(@PathVariable("id") long id, Model model) {
+		Warehouses warehouse = warehouseRepo.findById(id)
+				.orElseThrow(() -> new IllegalArgumentException("Invalid warehouse Id:" + id));
+		
+		Shipment shipment = new Shipment();
+		for (int i = 1; i <= warehouse.getInventory().size(); i++) {
+			
+			Shipping shipping = new Shipping();
+			shipping.setWarehouse_id(warehouse);
+			shipment.addShipping(shipping);
+	    }
+		
+		model.addAttribute("warehouseInventory", inventoryRepo.findInventoryWarehouse(warehouse.getId()));
+		model.addAttribute("shipments", shipment);
+		
+		return "LocalManager/add-shipment";
+	}
+	
+	@PostMapping("/add-shipment")
+	public String saveShipping(@ModelAttribute Shipment shipment, Model model) {
+		Managers manager = managerRepo.findById(getUserUID())
+				.orElseThrow(() -> new IllegalArgumentException("Invalid manager Id:" + getUserUID()));
+		
+		Iterator<Shipping> shippingItInit = shipment.getShipping().iterator();
+		Shipping shipping = shippingItInit.next();
+		Iterator<Inventory> inventoryIt = shipping.getWarehouse_id().getInventory().iterator();
+		Iterator<Shipping> shippingIt = shipment.getShipping().iterator();
+		while (shippingIt.hasNext()) {
+			shipping = shippingIt.next();
+			Inventory inventory = inventoryIt.next();
+			//Objects wont be saved when trying to combine two objects so most has to be hardcoded
+			shipping.setDate(date.format(LocalDateTime.now()));
+			shipping.setManager_id(manager);
+			shipping.setRestaurant_id(manager.getRestaurant());
+			shipping.setIngredient(inventory.getIngredient());
+			shipping.setStatus("Pending");
+			System.out.println("------------------------------------------------------------------------------------------------");
+			System.out.println(shipping.getIngredient());
+			System.out.println(shipping.getQuantity());
+		};
+		
+		shippingRepo.saveAll(shipment.getShipping());
+		
+	    return "redirect:/manager-shipment-view";
+	}
+	
 	/**
 	 * @return HQ Manager home page
 	 */

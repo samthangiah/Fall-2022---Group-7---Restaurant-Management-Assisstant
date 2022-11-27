@@ -93,8 +93,14 @@ table, th, td {
         			<td th:text="${shipment.status}"></td>
     			</tr>
 		</tbody>
-		
 	</table>
+	
+	<th:block th:each="warehouse : ${listWarehouses}">
+	<select id="warehouseid" class="form-control">
+    			<option th:value="${warehouse.id}" th:text="${warehouse.id} + ' ' + ${warehouse.address} + ' ' + ${warehouse.city} + ' ' + ${warehouse.state}"></option>
+    	</select>  
+    <a th:href="@{/manager-add-shipment/{id}(id = ${warehouse.id})}" class="btn btn-primary">Request New Shipment</a>
+	</th:block>
 	<div class="btn-group">
 	</div>
 	</div>

@@ -78,6 +78,7 @@ table, th, td {
         						<th>Ingredient</th>
         						<th>Quantity</th>
         						<th>Status</th>
+        						<th>Edit</th>
     						</tr>
 						</thead>
 		<tbody>
@@ -87,6 +88,7 @@ table, th, td {
         			<td th:text="${shipment.ingredient}"></td>
         			<td th:text="${shipment.quantity}"></td>
         			<td th:text="${shipment.status}"></td>
+        			<td><a th:href="@{/warehouseman-shipment-edit/{id}(id=${shipment.id})}">Edit</a></td>
     			</tr>
 		</tbody>
 		
