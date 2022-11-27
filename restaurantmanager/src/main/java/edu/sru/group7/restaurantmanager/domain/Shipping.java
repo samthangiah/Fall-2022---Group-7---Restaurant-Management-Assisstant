@@ -37,6 +37,8 @@ public class Shipping {
 	private Integer quantity;
 	
 	private String explanation;
+	
+	private String date;
 
 	public Shipping(long id, Warehouses warehouse_id, Restaurants restaurant_id, String status, Managers manager_id,
 			WarehouseManager warehousemanager_id, String ingredient, Integer quantity, String explanation) {
@@ -126,6 +128,14 @@ public class Shipping {
 
 	public void setExplanation(String explanation) {
 		this.explanation = explanation;
+	}
+
+	public String getDate() {
+		return date;
+	}
+
+	public void setDate(String date) {
+		this.date = date;
 	}
 	
 	

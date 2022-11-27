@@ -88,8 +88,8 @@ input[type=text]:focus, input[type=password]:focus {
     						<input type="password" th:field="*{password}" id="password" placeholder="Password" required>
    							 <br>
    							 <label class="label" for="restaurantid">Restaurant Location:</label>
-    						<select id="restaurantid" th:field="*{restaurant}" class="form-control" multiple="multiple" required>
-    							<th:block th:each="restaurant : ${listRestaurants}">
+    						<select id="restaurantid" th:field="*{restaurant}" class="form-control" multiple="multiple">
+    							<th:block th:each="restaurant : ${listAdminRestaurant}">
     							 <option th:value="${restaurant.id}" th:text="${restaurant.id} + ' ' + ${restaurant.address} + ' ' + ${restaurant.city} + ' ' + ${restaurant.state}"></option>
     							 </th:block>
     						</select>  

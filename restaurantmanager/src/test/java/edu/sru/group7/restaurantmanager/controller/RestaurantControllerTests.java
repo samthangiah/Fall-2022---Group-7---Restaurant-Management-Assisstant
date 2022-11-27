@@ -724,7 +724,7 @@ class RestaurantControllerTests {
 	
 	@Test
 	public void showAdminSignUpFormTest() {
-		String ret = controller.showAdminSignUpForm(new Admins());
+		String ret = controller.showAdminSignUpForm(new Admins(), model);
 		assertEquals("HQAdmin/add-LFadmin", ret, "showAdminSignUpForm should return add-admin form");
 	}
 	
