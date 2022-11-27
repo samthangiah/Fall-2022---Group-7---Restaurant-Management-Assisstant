@@ -83,9 +83,8 @@ table, th, td {
 				<th>ZIP Code</th>
 				<th>Edit</th>
 				<th>Delete</th>
-				
 			</tr>
-						</thead>
+		</thead>
 		<tbody>
 			<tr th:each="restaurant : ${restaurants}">
 				<td th:text="${restaurant.id}"></td>
@@ -95,7 +94,6 @@ table, th, td {
 				<td th:text="${restaurant.zipcode}"></td>
 				<td><a th:href="@{/HQadminrestaurantedit/{id}(id=${restaurant.id})}">Edit</a></td>
 				<td><a th:href="@{/HQadminrestaurantdelete/{id}(id=${restaurant.id})}">Delete</a></td>
-				
 			</tr>
 		</tbody>
 		
