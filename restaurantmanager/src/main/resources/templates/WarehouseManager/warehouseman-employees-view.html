@@ -40,8 +40,8 @@ table, th, td {
             <div class="border-end bg-white" id="sidebar-wrapper">
                 <div class="sidebar-heading border-bottom bg-light">The Gazebo</div>
                 <div class="list-group list-group-flush">
-                	<a class="list-group-item list-group-item-action list-group-item-light p-3" href="/warehouseman-shipment-view">View Shipments</a>
-                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/warehouseman-log-view">View Log</a>
+          			<a class="list-group-item list-group-item-action list-group-item-light p-3" href="/warehouseman-log-view">View Log</a>
+                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/warehouseman-shipment-view">View Shipments</a>
                     <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/warehouseman-inventory-view">View Inventory</a>
                     <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/warehouseman-employees-view">View Employees</a>
                 </div>
@@ -84,7 +84,6 @@ table, th, td {
 								<th>Hours Past Week</th>
 								<th>Total Hours</th>
 								<th>Edit</th>
-								<th>Delete</th>
 							</tr>
 						</thead>
 		<tbody>
@@ -97,8 +96,7 @@ table, th, td {
                     <td th:text="${employee.lastClockedIn}"></td>
                     <td th:text="${employee.weekHours}"></td>
                     <td th:text="${employee.totalHours}"></td>
-                    <td><a th:href="@{/warehousemanageremployeeedit/{id}(id=${employee.id})}">Edit</a></td>
-                    <td><a th:href="@{/warehousemanageremployeedelete/{id}(id=${employee.id})}">Delete</a></td>
+                    <td><a th:href="@{/warehouseman-employee-edit/{id}(id=${employee.id})}">Edit</a></td>
                 </tr>
 		</tbody>
 		

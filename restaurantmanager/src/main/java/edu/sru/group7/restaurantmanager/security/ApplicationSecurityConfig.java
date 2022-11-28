@@ -59,7 +59,8 @@ WebSecurityConfigurerAdapter {
 					"/addserver", "/addmanager", "/localadmincustedit/*", "/localadminserveredit/*",
 					"/localadminmanedit/*", "/localadmincustupdate/*", "/localadminserverupdate/*",
 					"/localadminmanupdate/*", "/localadmincustdelete/*", "/localadminserverdelete/*",
-					"/localadminmandelete/*", "/logadminview").hasAnyRole(ApplicationUserRole.ADMIN.name(), 
+					"/localadminmandelete/*", "/logadminview", "/addemployee", "/localadminemployeeedit/*",
+					"/localadminemployeeupdate/*", "/localadminemployeedelete/*").hasAnyRole(ApplicationUserRole.ADMIN.name(), 
 							ApplicationUserRole.HQADMIN.name())
 			
 			/* Pages accessible to any staff users */
@@ -83,7 +84,9 @@ WebSecurityConfigurerAdapter {
 			
 			/* Pages accessible to only users with WAREHOUSEMANAGER role */
 			.antMatchers("/warehouseman-shipment-view", "/warehouseman-log-view", "/warehouseman-employees-view", 
-					"warehouseman-inventory-view").hasAnyRole(ApplicationUserRole.WAREHOUSEMANAGER.name())
+					"/warehouseman-inventory-view", "/warehouseman-shipment-edit/*", "/warehouseman-shipment-update/*",
+					"/warehouseman-employees-update/*", "/warehouseman-inventory-update/*", "/warehouseman-employees-edit/*",
+					"/warehouseman-inventory-edit/*").hasAnyRole(ApplicationUserRole.WAREHOUSEMANAGER.name())
 			
 			.anyRequest() 
 			.authenticated() 

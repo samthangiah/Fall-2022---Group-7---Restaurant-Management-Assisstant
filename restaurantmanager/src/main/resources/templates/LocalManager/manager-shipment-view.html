@@ -46,6 +46,7 @@ table, th, td {
                     <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/manager-menu-view">View Menu</a>
                     <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/manager-server-view">View Servers</a>
                     <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/manager-inventory-view">View Inventory</a>
+                	<a class="list-group-item list-group-item-action list-group-item-light p-3" href="/manager-shipment-view">View Shipments</a>
                 </div>
             </div>
             <!-- Page content wrapper-->
@@ -91,10 +92,17 @@ table, th, td {
         			<td th:text="${shipment.ingredient}"></td>
         			<td th:text="${shipment.quantity}"></td>
         			<td th:text="${shipment.status}"></td>
+        			<td th:if="${shipment.status} == 'In Progress'"><a th:href="@{/manager-receive-shipment/{id}(id = ${shipment.id})}" class="btn btn-primary"></a></td>
     			</tr>
 		</tbody>
-		
 	</table>
+	
+	<th:block th:each="warehouse : ${listWarehouses}">
+	<select id="warehouseid" class="form-control">
+    			<option th:value="${warehouse.id}" th:text="${warehouse.id} + ' ' + ${warehouse.address} + ' ' + ${warehouse.city} + ' ' + ${warehouse.state}"></option>
+    	</select>  
+    <a th:href="@{/manager-add-shipment/{id}(id = ${warehouse.id})}" class="btn btn-primary">Request New Shipment</a>
+	</th:block>
 	<div class="btn-group">
 	</div>
 	</div>

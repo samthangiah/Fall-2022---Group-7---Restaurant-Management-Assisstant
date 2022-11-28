@@ -48,6 +48,7 @@ input[type=text]:focus, input[type=password]:focus {
                     <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/manager-menu-view">View Menu</a>
                     <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/manager-server-view">View Servers</a>
                     <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/manager-inventory-view">View Inventory</a>
+                	<a class="list-group-item list-group-item-action list-group-item-light p-3" href="/manager-shipment-view">View Shipments</a>
                 </div>
             </div>
             <!-- Page content wrapper-->
@@ -91,12 +92,13 @@ input[type=text]:focus, input[type=password]:focus {
     							<label class="label" for="hourlyRate">Hourly Rate</label>
     							<input type="number" th:field="*{hourlyRate}" id="hourlyRate" placeholder="Hourly Rate" required>
     							<br>
+    							<label class="label" for="hourlyRate">Weekly Hours:</label>
+   								<input type="number" th:field="*{weekHours}" id="weekHours" placeholder="This Week's Hours" required>
     							<input type="hidden" th:field="*{password}" id="password" placeholder="Password" required>
     							<input type="hidden" th:field="*{restaurant}" id="restaurant_id" placeholder="Restaurant" required>
     							<input type="hidden" th:field="*{isOnDuty}" id="isOnDuty" required>
     							<input type="hidden" th:field="*{lastClockedIn}" id="lastClockedIn" placeholder="yyyy-MM-dd HH:mm:ss" required>
     							<input type="hidden" th:field="*{totalHours}" id="totalHours" placeholder="Total Hours" required>
-    							<input type="hidden" th:field="*{weekHours}" id="weekHours" placeholder="This Week's Hours" required>
     							<br>
     							<input type="submit" value="Update Server">   
 							</form>
