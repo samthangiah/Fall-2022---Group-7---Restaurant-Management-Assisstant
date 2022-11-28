@@ -5,5 +5,8 @@ import org.springframework.stereotype.Service;
 
 import edu.sru.group7.restaurantmanager.domain.Menu;
 
+/**
+ * Menu Repository
+ */
 @Service
 public interface MenuRepository extends CrudRepository<Menu, Long> {}

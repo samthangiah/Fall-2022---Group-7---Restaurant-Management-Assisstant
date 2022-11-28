@@ -7,6 +7,9 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
+/**
+ * Servers POJO
+ */
 @Entity
 public class Servers {
 
@@ -36,6 +39,15 @@ public class Servers {
 	@JoinColumn(name="restaurant_id")
 	private Restaurants restaurant;
 
+    /**
+     * Parameterized Constructor
+     * @param firstName
+     * @param lastName
+     * @param email
+     * @param password
+     * @param hourlyRate
+     * @param restaurant
+     */
     public Servers(String firstName, String lastName, String email, String password, float hourlyRate, Restaurants restaurant) {
 		super();
 		this.firstName = firstName;
@@ -50,6 +62,9 @@ public class Servers {
 		this.restaurant = restaurant;
 	}
 
+    /**
+     * Default Constructor
+     */
 	public Servers() {
 		super();
 	}

@@ -455,7 +455,7 @@ public class RestaurantController {
 		}
 		wb.close();
 	}
-
+	
 	@PostConstruct
 	public void loadData() {
 
@@ -597,6 +597,9 @@ public class RestaurantController {
 		return "Guest/index";
 	}
 	
+	/**
+	 * @param model Loads Global attributes for Thymeleaf implementation
+	 */
 	@ModelAttribute
 	public void addAttributes(Model model) {
 		List<Restaurants> listrestaurants = (List<Restaurants>) restaurantRepo.findAll();
@@ -1062,11 +1065,19 @@ public class RestaurantController {
 		return "LocalAdmin/add-server";
 	}
 	
+	/**
+	 * @param employees Warehouse Employees
+	 * @return add-warehouse-employee page. Shows the employee creation form to a local admin
+	 */
 	@RequestMapping({"/localadmin-employee-signup"})
 	public String showEmployeeSignUpForm(WarehouseEmployees employees) {
 		return "LocalAdmin/add-warehouse-employee";
 	}
 	
+	/**
+	 * @param model
+	 * @return admin-warehouse-employee-view. Shows all employees from every warehouse an Admin is assigned.
+	 */
 	@GetMapping("/admin-employee-view")
 	public String showAdminEmployeesView(Model model) {
 		Admins admin = adminRepo.findById(getUserUID())
@@ -1085,6 +1096,10 @@ public class RestaurantController {
 		return "LocalAdmin/admin-warehouse-employee-view";
 	}
 	
+	/**
+	 * @param model
+	 * @return admin-warehouse-employee-view. Shows all shipments from all warehouses that the localadmin is assigned
+	 */
 	@GetMapping("/admin-shipment-view")
 	public String showAdminShipmentView(Model model) {
 		Admins admin = adminRepo.findById(getUserUID())
@@ -1103,6 +1118,12 @@ public class RestaurantController {
 		return "LocalAdmin/admin-warehouse-employee-view";
 	}
 	
+	/**
+	 * @param employee WarehouseEmployee
+	 * @param result
+	 * @param model
+	 * @return admin-employee-view. Adds employee created from local admin
+	 */
 	@RequestMapping({ "/addemployee" })
 	public String addEmployee(@Validated WarehouseEmployees employee, BindingResult result, Model model) {
 		if (result.hasErrors()) {
@@ -1128,6 +1149,11 @@ public class RestaurantController {
 		return "redirect:/admin-employee-view";
 	}
 	
+	/**
+	 * @param id WarehouseEmployee id
+	 * @param model
+	 * @return update-warehouse-employee. Shows the update employee page based on employee selected from admin-employee-view
+	 */
 	@GetMapping("/localadminemployeeedit/{id}")
 	public String showUpdateEmployeeForm(@PathVariable("id") long id, Model model) {
 		WarehouseEmployees employee = warehouseEmployeeRepo.findById(id)
@@ -1137,6 +1163,13 @@ public class RestaurantController {
 		return "LocalAdmin/update-warehouse-employee";
 	}
 	
+	/**
+	 * @param id Warehouse Employee
+	 * @param employee Warehouse Employee
+	 * @param result
+	 * @param model
+	 * @return admin-employee-view. Saves updated information from update-warehouse-employee.
+	 */
 	@PostMapping("/localadminemployeeupdate/{id}")
 	public String updateEmployee(@PathVariable("id") long id, @Validated WarehouseEmployees employee, BindingResult result,
 			Model model) {
@@ -1163,6 +1196,11 @@ public class RestaurantController {
 		return "redirect:/admin-employee-view";
 	}
 	
+	/**
+	 * @param id Warehouse Employee
+	 * @param model
+	 * @return admin-employee-view. Deletes the warehouse employee selected.
+	 */
 	@GetMapping("/localadminemployeedelete/{id}")
 	public String deleteEmployee(@PathVariable("id") long id, Model model) {
 		WarehouseEmployees employee = warehouseEmployeeRepo.findById(id)
@@ -2266,6 +2304,10 @@ public class RestaurantController {
 		return "HQAdmin/hq-admin-log-view";
 	}
 	
+	/**
+	 * @param model
+	 * @return warehouseman-shipment-view. Returns selected shipments from the warehouse belonging to currently logged in warehouse manager.
+	 */
 	@RequestMapping({"warehouseman-shipment-view"})
 	public String showWarehouseShipments(Model model) {
 		WarehouseManager manager = warehouseManagerRepo.findById(getUserUID())
@@ -2275,6 +2317,11 @@ public class RestaurantController {
 		return "WarehouseManager/warehouseman-shipment-view";
 	}
 	
+	/**
+	 * @param id Shipping id
+	 * @param model
+	 * @return warehouseman-shipment-view. Changes status of currently selected shipment from 'Pending' to 'In Progress'.
+	 */
 	@GetMapping("/warehouseman-shipment-accept/{id}")
 	public String warehouseManAcceptShipment(@PathVariable("id") long id, Model model) {
 		Shipping shipment = shippingRepo.findById(id)
@@ -2290,6 +2337,11 @@ public class RestaurantController {
 		return "redirect:/warehouseman-shipment-view";
 	}
 	
+	/**
+	 * @param id Shipping id
+	 * @param model
+	 * @return warehouseman-shipment-view. Changes status of currently selected shipment from 'Pending' to 'Declined'.
+	 */
 	@GetMapping("/warehouseman-shipment-deny/{id}")
 	public String warehouseManDenyShipment(@PathVariable("id") long id, Model model) {
 		Shipping shipment = shippingRepo.findById(id)
@@ -2304,6 +2356,10 @@ public class RestaurantController {
 		return "redirect:/warehouseman-shipment-view";
 	}
 	
+	/**
+	 * @param model
+	 * @return warehouseman-log-view. Shows the log belonging to that warehouse manager
+	 */
 	@RequestMapping({"warehouseman-log-view"})
 	public String showWarehouseLog(Model model) {
 		Customers cust = getLoggedInUser();
@@ -2323,6 +2379,10 @@ public class RestaurantController {
 		return "WarehouseManager/warehouseman-log-view";
 	}
 	
+	/**
+	 * @param model
+	 * @return warehouseman-inventory-view. Shows the current inventory for the warehouse of the warehousemanager that is logged in.
+	 */
 	@RequestMapping({"warehouseman-inventory-view"})
 	public String showWarehouseInventory(Model model) {
 		WarehouseManager manager = warehouseManagerRepo.findById(getUserUID())
@@ -2333,6 +2393,11 @@ public class RestaurantController {
 		return "WarehouseManager/warehouseman-inventory-view";
 	}
 	
+	/**
+	 * @param id
+	 * @param model
+	 * @return update-inventory.Shows the update inventory page for the selected inventory item to the warehouse manager.
+	 */
 	@GetMapping("/warehouseman-inventory-edit/{id}")
 	public String warehouseManShowUpdateInventory(@PathVariable("id") long id, Model model) {
 		Inventory inventory = inventoryRepo.findById(id)
@@ -2342,6 +2407,13 @@ public class RestaurantController {
 		return "WarehouseManager/update-inventory";
 	}
 	
+	/**
+	 * @param id Inventory id
+	 * @param inventory
+	 * @param result
+	 * @param model
+	 * @return warehouseman-inventory-view. Saves data entered by warehouse manager in the update-inventory page
+	 */
 	@PostMapping("/warehouseman-inventory-update/{id}")
 	public String warehouseManUpdateInventory(@PathVariable("id") long id, @Validated Inventory inventory,
 			BindingResult result, Model model) {
@@ -2363,6 +2435,10 @@ public class RestaurantController {
 		return "redirect:/warehouseman-inventory-view";
 	}
 	
+	/**
+	 * @param model
+	 * @return warehouseman-employees-view. Shows all employees belonging to warehouse that the logged in warehouse manager is assigned.
+	 */
 	@RequestMapping({"warehouseman-employees-view"})
 	public String showWarehouseEmployees(Model model) {
 		WarehouseManager manager = warehouseManagerRepo.findById(getUserUID())
@@ -2373,6 +2449,11 @@ public class RestaurantController {
 		return "WarehouseManager/warehouseman-employees-view";
 	}
 	
+	/**
+	 * @param id Employee id
+	 * @param model
+	 * @return update-employee. Shows update form for selected employee to the warehouse manager.
+	 */
 	@GetMapping("/warehouseman-employee-edit/{id}")
 	public String warehouseManShowUpdateEmployee(@PathVariable("id") long id, Model model) {
 		WarehouseEmployees employee = warehouseEmployeeRepo.findById(id)
@@ -2382,6 +2463,13 @@ public class RestaurantController {
 		return "WarehouseManager/update-employee";
 	}
 	
+	/**
+	 * @param id Employee id
+	 * @param employee 
+	 * @param result
+	 * @param model
+	 * @return warehouseman-employees-view. Saves data entered by warehouse manager in update-employee page
+	 */
 	@PostMapping("/warehouseman-employee-update/{id}")
 	public String warehouseManUpdateEmployee(@PathVariable("id") long id, @Validated WarehouseEmployees employee, BindingResult result,
 			Model model) {
@@ -2651,6 +2739,11 @@ public class RestaurantController {
 		return "redirect:/manager-server-view";
 	}
 	
+	/**
+	 * @param id
+	 * @param model
+	 * @return add-shipment. Displays the add shipment form to the current Restaurant Manager. Lists the warehouses inventory items/quantity. 
+	 */
 	@RequestMapping({ "/manager-add-shipment/{id}" })
 	public String localManAddShipmentForm(@PathVariable("id") long id, Model model) {
 		Warehouses warehouse = warehouseRepo.findById(id)
@@ -2670,6 +2763,11 @@ public class RestaurantController {
 		return "LocalManager/add-shipment";
 	}
 	
+	/**
+	 * @param shipment Shipment
+	 * @param model
+	 * @return manager-shipment-view. Saves quantities entered in add-shipment and supplmenets additional unentered data.
+	 */
 	@PostMapping("/add-shipment")
 	public String saveShipping(@ModelAttribute Shipment shipment, Model model) {
 		Managers manager = managerRepo.findById(getUserUID())
@@ -2791,6 +2889,11 @@ public class RestaurantController {
 		return "HQManager/add-LFmanager";
 	}
 	
+	/**
+	 * @param id WarehouseManager
+	 * @param model
+	 * @return update-manager. Shows the WH manager update form to HQ manager.
+	 */
 	@GetMapping("/hqmanagerwhmanedit/{id}") 
 	public String showHQManUpdateWHManagerForm(@PathVariable("id") long id, Model model) {
 		WarehouseManager manager = warehouseManagerRepo.findById(id)
@@ -2800,6 +2903,13 @@ public class RestaurantController {
 		return "HQManager/update-WHmanager";
 	}
 	
+	/**
+	 * @param id WarehouseManager
+	 * @param manager
+	 * @param result
+	 * @param model
+	 * @return HQmanager-WHmanagers-view. Saves data entered by HQmanager in update-WHmanager form.
+	 */
 	@PostMapping("/hqmanagerwhmanupdate/{id}")
 	public String hqManUpdateWHManager(@PathVariable("id") long id, @Validated WarehouseManager manager, BindingResult result,
 			Model model) {
@@ -2821,6 +2931,11 @@ public class RestaurantController {
 		return "redirect:/HQmanager-WHmanagers-view";
 	}
 	
+	/**
+	 * @param id WarehouseManager
+	 * @param model
+	 * @return HQ-managers-view. Deletes the currently selected warehouse manager.
+	 */
 	@GetMapping("/HQmanagerwhmandelete/{id}")
 	public String hqManDeleteWHManager(@PathVariable("id") long id, Model model) {
 		WarehouseManager manager = warehouseManagerRepo.findById(id)
@@ -2854,6 +2969,11 @@ public class RestaurantController {
 		return "redirect:/HQmanager-managers-view";
 	}
 	
+	/**
+	 * @param manager
+	 * @param model
+	 * @return add-WHmanager. Shows the add WH manager form to the HQ manager.
+	 */
 	@RequestMapping({ "/HQmanageraddWHmanager" })
 	public String showWHManagerAddForm(WarehouseManager manager, Model model) {
 		model.addAttribute("manager", warehouseManagerRepo.findAll());
@@ -2895,6 +3015,12 @@ public class RestaurantController {
 		return "redirect:/HQmanager-managers-view";
 	}
 	
+	/**
+	 * @param warehouseManager
+	 * @param result
+	 * @param model
+	 * @return HQmanager-WHmanagers-view. Saves the data entered by HQmanager to WarehouseManager
+	 */
 	@RequestMapping("/addwhmanager")
 	public String addWHManager(@Validated WarehouseManager warehouseManager, BindingResult result, Model model) {
 		if (result.hasErrors()) {

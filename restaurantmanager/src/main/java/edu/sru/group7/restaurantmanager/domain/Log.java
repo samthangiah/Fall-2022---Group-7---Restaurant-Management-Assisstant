@@ -5,6 +5,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+/**
+ * Log POJO
+ */
 @Entity
 public class Log {
 
@@ -24,10 +27,23 @@ public class Log {
 
 	private long actionId;
 	
+	/**
+	 * Default Constructor
+	 */
 	public Log() {
 		super();
 	}
-
+	
+	/**
+	 * Parameterized Constructor
+	 * @param id
+	 * @param location
+	 * @param date
+	 * @param time
+	 * @param userId
+	 * @param action
+	 * @param actionId
+	 */
 	public Log(long id, String location, String date, String time, long userId, String action, long actionId) {
 		super();
 		this.id = id;

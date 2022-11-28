@@ -7,6 +7,9 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
+/**
+ * Shipping POJO
+ */
 @Entity
 public class Shipping {
 	
@@ -42,6 +45,18 @@ public class Shipping {
 	
 	private String time;
 
+	/**
+	 * Parameterized Constructor
+	 * @param id
+	 * @param warehouse_id
+	 * @param restaurant_id
+	 * @param status
+	 * @param manager_id
+	 * @param warehousemanager_id
+	 * @param ingredient
+	 * @param quantity
+	 * @param explanation
+	 */
 	public Shipping(long id, Warehouses warehouse_id, Restaurants restaurant_id, String status, Managers manager_id,
 			WarehouseManager warehousemanager_id, String ingredient, Integer quantity, String explanation) {
 		super();
@@ -56,6 +71,9 @@ public class Shipping {
 		this.explanation = explanation;
 	}
 
+	/**
+	 * Default Constructor
+	 */
 	public Shipping() {
 		super();
 	}

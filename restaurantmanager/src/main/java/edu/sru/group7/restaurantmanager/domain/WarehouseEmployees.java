@@ -7,6 +7,9 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
+/**
+ * WarehouseEmployees POJO
+ */
 @Entity
 public class WarehouseEmployees {
 
@@ -36,6 +39,15 @@ public class WarehouseEmployees {
 	@JoinColumn(name="warehouse_id")
 	private Warehouses warehouse;
 
+    /**
+     * Parameterized Constructor
+     * @param firstName
+     * @param lastName
+     * @param email
+     * @param password
+     * @param hourlyRate
+     * @param warehouse
+     */
     public WarehouseEmployees(String firstName, String lastName, String email, String password, float hourlyRate, Warehouses warehouse) {
 		super();
 		this.firstName = firstName;
@@ -50,6 +62,9 @@ public class WarehouseEmployees {
 		this.warehouse = warehouse;
 	}
 
+    /**
+     * Default Constructor
+     */
 	public WarehouseEmployees() {
 		super();
 	}

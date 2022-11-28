@@ -13,6 +13,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
+/**
+ * WarehouseManager POJO
+ */
 @Entity
 public class WarehouseManager {
 
@@ -45,6 +48,21 @@ public class WarehouseManager {
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "warehouse_id")
 	private List<Shipping> shipments = new ArrayList<>();
 
+    /**
+     * @param id
+     * @param firstName
+     * @param lastName
+     * @param email
+     * @param password
+     * @param hourlyRate
+     * @param isOnDuty
+     * @param lastClockedIn
+     * @param totalHours
+     * @param weekHours
+     * @param warehouse
+     * @param shipments
+     * Parameterized Constructor
+     */
 	public WarehouseManager(long id, String firstName, String lastName, String email, String password, float hourlyRate,
 			boolean isOnDuty, String lastClockedIn, float totalHours, float weekHours, Warehouses warehouse,
 			List<Shipping> shipments) {
@@ -63,6 +81,9 @@ public class WarehouseManager {
 		this.shipments = shipments;
 	}
 
+	/**
+	 * Default Constructor.
+	 */
 	public WarehouseManager() {
 		super();
 		this.isOnDuty = false;

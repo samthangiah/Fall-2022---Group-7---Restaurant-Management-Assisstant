@@ -13,6 +13,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
+/**
+ * Restaurants POJO
+ */
 @Entity
 public class Restaurants extends Locations {
 	
@@ -54,6 +57,14 @@ public class Restaurants extends Locations {
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "restaurant_id")
 	private List<Shipping> shipments = new ArrayList<>();
 	
+	/**
+	 * Parameterized Constructor
+	 * @param address
+	 * @param zipcode
+	 * @param city
+	 * @param state
+	 * @param admin
+	 */
 	public Restaurants(String address, String zipcode, String city, String state, Admins admin) {
 		super();
 		this.address = address;
@@ -65,6 +76,9 @@ public class Restaurants extends Locations {
 		this.profits = 0.00F;
 	}
 
+	/**
+	 * Default Constructor
+	 */
 	public Restaurants() {
 		super();
 	}

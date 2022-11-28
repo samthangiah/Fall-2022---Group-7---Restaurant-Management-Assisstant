@@ -6,6 +6,9 @@ import edu.sru.group7.restaurantmanager.billing.PaymentDetails;
 
 //PaymentDetails code provided by Cody Kuntz from the WebShopping group project
 
+/**
+ * PaymentDetails Repository
+ */
 public interface PaymentDetailsRepository extends CrudRepository<PaymentDetails, Long> {
 
 }

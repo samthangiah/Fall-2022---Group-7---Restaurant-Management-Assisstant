@@ -11,6 +11,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
+/**
+ * Offices POJO
+ */
 @Entity
 public class Offices extends Locations {
 	
@@ -29,10 +32,20 @@ public class Offices extends Locations {
 	@OneToMany(cascade=CascadeType.MERGE, fetch = FetchType.LAZY, mappedBy = "office")
     private List<Admins> admin = new ArrayList<>();
 
+	/**
+	 * Default Constructor
+	 */
 	public Offices() {
 		super();
 	}
 	
+	/**
+	 * Parameterized Constructor excluding List<Admins>
+	 * @param address
+	 * @param zipcode
+	 * @param city
+	 * @param state
+	 */
 	public Offices(String address, String zipcode, String city, String state) {
 		super();
 		this.address = address;
@@ -41,6 +54,14 @@ public class Offices extends Locations {
 		this.state = state;
 	}
 	
+	/**
+	 * Parameterized Constructor.
+	 * @param address
+	 * @param zipcode
+	 * @param city
+	 * @param state
+	 * @param admin
+	 */
 	public Offices(String address, String zipcode, String city, String state, List<Admins> admin) {
 		super();
 		this.address = address;

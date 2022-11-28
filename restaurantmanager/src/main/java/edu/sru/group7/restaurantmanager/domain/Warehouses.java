@@ -13,6 +13,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
+/**
+ * Warehuose POJO
+ */
 @Entity
 public class Warehouses extends Locations {
 	
@@ -44,6 +47,14 @@ public class Warehouses extends Locations {
 	@JoinColumn(name="admin_id")
 	private Admins admin;
 	
+	/**
+	 * Parameterized Constructor
+	 * @param address
+	 * @param zipcode
+	 * @param city
+	 * @param state
+	 * @param admin
+	 */
 	public Warehouses(String address, String zipcode, String city, String state, Admins admin) {
 		super();
 		this.address = address;
@@ -53,6 +64,9 @@ public class Warehouses extends Locations {
 		this.admin = admin;
 	}
 
+	/**
+	 * Default Constructor
+	 */
 	public Warehouses() {
 		super();
 	}

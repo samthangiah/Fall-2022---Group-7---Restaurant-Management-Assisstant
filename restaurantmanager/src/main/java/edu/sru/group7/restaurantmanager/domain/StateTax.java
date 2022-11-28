@@ -5,6 +5,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+/**
+ * StateTax POJO
+ */
 @Entity
 public class StateTax {
 	
@@ -18,10 +21,19 @@ public class StateTax {
 	
 	private float salesPercent;
 	
+	/**
+	 * Default Constructor
+	 */
 	public StateTax() {
 		
 	}
 	
+	/**
+	 * Parameterized Constructor
+	 * @param state
+	 * @param incomePercent
+	 * @param salesPercent
+	 */
 	public StateTax(String state, float incomePercent, float salesPercent) {
 		this.state = state;
 		this.incomePercent = incomePercent;

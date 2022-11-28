@@ -6,6 +6,9 @@ import org.springframework.stereotype.Service;
 
 import edu.sru.group7.restaurantmanager.domain.StateTax;
 
+/**
+ * StateTax Repository
+ */
 @Service
 public interface StateTaxRepository extends CrudRepository<StateTax, Long> {
 	
