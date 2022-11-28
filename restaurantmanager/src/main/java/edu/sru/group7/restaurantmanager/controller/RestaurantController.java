@@ -16,7 +16,6 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import edu.sru.group7.restaurantmanager.authentication.ApplicationUser;
-import edu.sru.group7.restaurantmanager.authentication.FakeApplicationUserDaoService;
 import edu.sru.group7.restaurantmanager.domain.Admins;
 import edu.sru.group7.restaurantmanager.domain.CartItems;
 import edu.sru.group7.restaurantmanager.domain.Customers;
@@ -186,9 +185,7 @@ public class RestaurantController {
 		this.logRepo = logRepo;
 		isLoggedIn = false;
 	}
-	
-	private FakeApplicationUserDaoService fakeApplicationUserDaoService;
-    
+	    
     /**
      * @return Current HttpSession object to be used for guest users
      */
@@ -1096,6 +1093,7 @@ public class RestaurantController {
 		return "LocalAdmin/admin-warehouse-employee-view";
 	}
 	
+	//Is this used? It returns warehouse-employee-view and shipments attribute isnt anywhere on that page
 	/**
 	 * @param model
 	 * @return admin-warehouse-employee-view. Shows all shipments from all warehouses that the localadmin is assigned
@@ -2798,14 +2796,6 @@ public class RestaurantController {
 	}
 	
 	/**
-	 * @return HQ Manager home page
-	 */
-	@RequestMapping({ "/HQ-manager-view" })
-	public String showHQManagerPage() {
-		return "HQManager/HQ-manager-view";
-	}
-
-	/**
 	 * @param model
 	 * @return hqmanager-managers-view. View list of managers
 	 */
@@ -3038,14 +3028,6 @@ public class RestaurantController {
 
 		warehouseManagerRepo.save(warehouseManager);
 		return "redirect:/HQmanager-WHmanagers-view";
-	}
-
-	/**
-	 * @return hqmanager-locations-view. View restaurants, warehouses, offices
-	 */
-	@RequestMapping({ "/HQmanager-location-view" })
-	public String showHQManagerLocationPage() {
-		return "HQManager/HQManager-locations-view";
 	}
 
 	/**

@@ -23,6 +23,7 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.TestExecutionEvent;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -697,6 +698,14 @@ class RestaurantControllerTests {
 	}
 	
 	@Test
+	@WithUserDetails(value = "Administrator@email.com")
+	public void showAdminShipmentViewTest() {
+		String ret = controller.showAdminShipmentView(model);
+		assertEquals("LocalAdmin/admin-warehouse-employee-view", ret, "showAdminShipmentView should return shipment list page");
+		verify(model, times(1)).addAttribute(eq("shipments"), ArgumentMatchers.anyIterable());
+	}
+	
+	@Test
 	public void addEmployeeTest() {
 		String ret = controller.addEmployee(new WarehouseEmployees(), bindingResult, model);
 		assertEquals("redirect:/admin-employee-view", ret, "addEmployee should redirect to employee-view page");
@@ -716,7 +725,7 @@ class RestaurantControllerTests {
 	public void updateEmployeeTest() {
 		List<WarehouseEmployees> whEmployees = (List<WarehouseEmployees>) warehouseEmployeeRepo.findAll();
 		String ret = controller.updateEmployee(whEmployees.get(0).getId(), whEmployees.get(0), bindingResult, model);
-		assertEquals("redirect:/admin-warehouse-employee-view", ret, "updateEmployee should return redirect to employee-view page");
+		assertEquals("redirect:/admin-employee-view", ret, "updateEmployee should return redirect to employee-view page");
 		List<Log> logs = (List<Log>) logRepo.findAll();
 		assertFalse(logs.isEmpty(), "updateEmployee should be logged");
 	}
@@ -1179,6 +1188,26 @@ class RestaurantControllerTests {
 	}
 	
 	@Test
+	@WithUserDetails(value = "WHmanager@email.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+	public void warehouseManAcceptShipmentTest() {
+		List<Shipping> shipments = (List<Shipping>) shippingRepo.findAll();
+		String ret = controller.warehouseManAcceptShipment(shipments.get(0).getId(), model);
+		assertEquals("redirect:/warehouseman-shipment-view", ret, "warehouseManAcceptShipment should return redirect to warehouse shipments page");
+		shipments = (List<Shipping>) shippingRepo.findAll();
+		assertEquals("In Progress", shipments.get(0).getStatus(), "Shipment status should be set to In Progress");
+	}
+	
+	@Test
+	@WithUserDetails(value = "WHmanager@email.com")
+	public void warehouseManDenyShipmentTest() {
+		List<Shipping> shipments = (List<Shipping>) shippingRepo.findAll();
+		String ret = controller.warehouseManDenyShipment(shipments.get(0).getId(), model);
+		assertEquals("redirect:/warehouseman-shipment-view", ret, "warehouseManDenyShipment should return redirect to warehouse shipments page");
+		shipments = (List<Shipping>) shippingRepo.findAll();
+		assertEquals("Declined", shipments.get(0).getStatus(), "Shipment status should be set to Declined");
+	}
+	
+	@Test
 	@WithUserDetails(value = "WHmanager@email.com")
 	public void showWarehouseLogTest() {
 		String ret = controller.showWarehouseLog(model);
@@ -1318,12 +1347,6 @@ class RestaurantControllerTests {
 	}
 	
 	@Test
-	public void showHQManagerPageTest() {
-		String ret = controller.showHQManagerPage();
-		assertEquals("HQManager/HQ-manager-view", ret, "showHQManagerPage should return HQ Manager home page");
-	}
-	
-	@Test
 	public void hqManShowManagersTest() {
 		String ret = controller.hqManShowManagers(model);
 		assertEquals("HQManager/HQManager-managers-view", ret, "hqManShowManagers should return managers list page");
@@ -1418,12 +1441,6 @@ class RestaurantControllerTests {
 		assertEquals("redirect:/HQmanager-WHmanagers-view", ret, "addWHManager should redirect to WHmanager-view page");
 		List<Log> logs = (List<Log>) logRepo.findAll();
 		assertFalse(logs.isEmpty(), "addWHManager should be logged");
-	}
-	
-	@Test
-	public void showHQManagerLocationPageTest() {
-		String ret = controller.showHQManagerLocationPage();
-		assertEquals("HQManager/HQManager-locations-view", ret, "showHQManagerLocationPage should return locations page");
 	}
 	
 	@Test
@@ -1525,13 +1542,11 @@ class RestaurantControllerTests {
 		*/
 	}
 	
-	//TODO The following two methods processPaypalTest and viewCartTest throw errors because of the WithUserDetails 
-	//Annotation even though the same annotation with the same params is used for several other methods and works fine
-	/*
 	@Test
-	@WithUserDetails(value = "customer@email.com")
+	@WithUserDetails(value = "customer@email.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
 	public void processPaypalTest() {
 		//TODO this throws LazyInitializationException for Customers.orderhistory
+		/*
 		//Setup
 		Customers cust = customerRepo.findByEmail("customer@email.com");
 		Paypal_Form pp_f = new Paypal_Form();
@@ -1548,17 +1563,18 @@ class RestaurantControllerTests {
 		assertTrue(order.getStatus().equals("Paid"), "Order status should be set to paid");
 		List<Paypal> details = (List<Paypal>) paypalRepo.findAll();
 		assertTrue(details.isEmpty(), "Paypal details should not be saved to the repository");
+		*/
 	}
 	
 	@Test
-	@WithUserDetails(value = "customer@email.com")
+	@WithUserDetails(value = "customer@email.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
 	public void viewCartTest() {
 		String ret = controller.viewCart(model);
 		assertEquals("Customer/cart", ret, "viewCart should return cart page");
 		verify(model, times(1)).addAttribute(eq("listCart"), ArgumentMatchers.anyIterable());
 		verify(model, times(1)).addAttribute(eq("totalprice"), ArgumentMatchers.anyString());
 		verify(model, times(1)).addAttribute(eq("Order"), ArgumentMatchers.isA(Orders.class));
-	}*/
+	}
 	
 	@Test
 	public void viewCartTest2() {
