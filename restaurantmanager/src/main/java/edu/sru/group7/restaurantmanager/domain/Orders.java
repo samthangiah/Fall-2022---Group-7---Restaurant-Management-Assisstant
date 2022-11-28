@@ -145,6 +145,14 @@ public class Orders {
 		this.status = status;
 	}
 
-	
+	public void removeMenuItem(Menu item) {
+		for (Menu m : items) {
+			if (m.toString().equals(item.toString())) {
+				items.remove(m);
+				System.out.println("--------------ITEM REMOVED--------------");
+				break;
+			}
+		}
+	}
     
 }
