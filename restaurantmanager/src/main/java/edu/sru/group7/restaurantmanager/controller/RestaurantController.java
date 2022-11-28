@@ -3,8 +3,6 @@ package edu.sru.group7.restaurantmanager.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -50,7 +48,6 @@ import edu.sru.group7.restaurantmanager.repository.InventoryRepository;
 import edu.sru.group7.restaurantmanager.repository.OfficeRepository;
 import edu.sru.group7.restaurantmanager.repository.RestaurantRepository;
 import edu.sru.group7.restaurantmanager.repository.WarehouseRepository;
-import edu.sru.group7.restaurantmanager.security.PasswordConfig;
 import edu.sru.group7.restaurantmanager.repository.ManagerRepository;
 import edu.sru.group7.restaurantmanager.repository.ServerRepository;
 import edu.sru.group7.restaurantmanager.repository.ShippingRepository;
@@ -1987,7 +1984,13 @@ public class RestaurantController {
 			}
 		}
 		model.addAttribute("orders", orderRepo.findOrdersByLocation(rest));
-		model.addAttribute("menu", menuRepo.findAll());
+		List<Menu> menu = new ArrayList<Menu>();
+		for (Menu m : menuRepo.findAll()) {
+			if (m.getId() > 0) {
+				menu.add(m);
+			}
+		}
+		model.addAttribute("menu", menu);
 		Servers server = null;
 		for (Servers s : serverRepo.findAll()) { 
 			if (s.getEmail().equals(getLoggedInUser().getEmail())) {
@@ -3258,6 +3261,13 @@ public class RestaurantController {
 				if (c.getMenu_id().getId() < (long) 0) {
 					//Deletes discount and tax objects from repo after order is payed
 					Menu m = c.getMenu_id();
+					for (Orders o : orderRepo.findAll()) {
+						if (o.getItems().toString().contains(m.toString())) {
+							System.out.println("--------------REMOVING ITEM FROM ORDER HISTORY--------------");
+							o.removeMenuItem(m);
+							orderRepo.save(o);
+						}
+					}
 					c.setMenu_id(null);
 					cartItemsRepo.save(c);
 					menuRepo.delete(m);

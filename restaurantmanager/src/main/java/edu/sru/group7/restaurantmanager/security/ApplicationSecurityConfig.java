@@ -32,7 +32,7 @@ WebSecurityConfigurerAdapter {
 		http
 			.authorizeRequests() 
 			/* Pages accessible to any authority including guest users */
-			.antMatchers("/", "/index", "/css/*", "/js/*", "/img/*", "/assets/*", "/403", "/login", "/custsignin",
+			.antMatchers("/", "/index", "/css/*", "/js/*", "/img/*", "/assets/*", "/login", "/custsignin",
 					"/processcredentials", "/custregistrationpage", "/addregisteredcustomer", "/add-sample-order", 
 					"/showmenu", "/contact", "/Customer-ordertype-view", "/ordersuccessful", "/pay", "/processpayment",
 					"/processpaypal", "/addorder", "/redeem", "/addNewOrder", "/addtoorder/*", "/editcart/*",
