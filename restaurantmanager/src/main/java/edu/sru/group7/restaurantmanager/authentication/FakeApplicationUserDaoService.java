@@ -55,6 +55,9 @@ public class FakeApplicationUserDaoService implements ApplicationUserDao {
 				.findFirst();
 	}
 
+	/**
+	 * Creates ApplicationUsers loaded with information from repositories, as well as HQ staff accounts hardcoded
+	 */
 	private List<ApplicationUser> getApplicationUsers() {
 		List<ApplicationUser> applicationUsers = com.google.common.collect.Lists.newArrayList(
 				new ApplicationUser(
@@ -129,9 +132,4 @@ public class FakeApplicationUserDaoService implements ApplicationUserDao {
 		
 		return applicationUsers;
 	}
-	
-	public String encode(String password) {
-		return passwordEncoder.encode(password);
-	}
-
 }
