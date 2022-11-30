@@ -1058,7 +1058,11 @@ public class RestaurantController {
 	 * @return add-server. Shows add server page to Local Admin
 	 */
 	@RequestMapping({ "/serversignup" })
-	public String showServerSignUpForm(Servers server) {
+	public String showServerSignUpForm(Servers server, Model model) {
+		
+		List<Restaurants> restaurants = restaurantRepo.findByAdmin(getUserUID());
+		model.addAttribute("restaurantAdminList", restaurants);
+		
 		return "LocalAdmin/add-server";
 	}
 	
@@ -1067,7 +1071,11 @@ public class RestaurantController {
 	 * @return add-warehouse-employee page. Shows the employee creation form to a local admin
 	 */
 	@RequestMapping({"/localadmin-employee-signup"})
-	public String showEmployeeSignUpForm(WarehouseEmployees employees) {
+	public String showEmployeeSignUpForm(WarehouseEmployees employees, Model model) {
+		
+		List<Warehouses> warehouses = warehouseRepo.findByAdmin(getUserUID());
+		model.addAttribute("warehouseAdminList", warehouses);
+		
 		return "LocalAdmin/add-warehouse-employee";
 	}
 	
@@ -1222,7 +1230,11 @@ public class RestaurantController {
 	 * @return add-LFmanager. Shows add Local Manager page to Local Admin
 	 */
 	@RequestMapping({ "/mansignup" })
-	public String showManagerSignUpForm(Managers manager) {
+	public String showManagerSignUpForm(Managers manager, Model model) {
+		
+		List<Restaurants> restaurants = restaurantRepo.findByAdmin(getUserUID());
+		model.addAttribute("restaurantAdminList", restaurants);
+		
 		return "LocalAdmin/add-LFmanager";
 	}
 
@@ -2271,13 +2283,7 @@ public class RestaurantController {
 		if (cust == null) {
 			return "redirect:/";
 		}
-		Iterable<Log> fullLog = logRepo.findAll();
-		List<Log> localLog = new ArrayList<Log>();
-		for (Log i : fullLog) {
-			if (i.getLocation() == cust.getLocation()) {
-				localLog.add(i);
-			}
-		}
+		Iterable<Log> localLog = logRepo.findByID(cust);
 		model.addAttribute("log", (Iterable<Log>) localLog);
 		return "LocalAdmin/log-admin-view";
 	}

@@ -92,7 +92,7 @@ input[type=text]:focus, input[type=password]:focus {
    							<br>
    							<label class="label" for="warehouseid">Warehouse Location:</label>
     						<select id="warehouseid" th:field="*{warehouse}" class="form-control" required>
-    							<th:block th:each="warehouse : ${listWarehouses}">
+    							<th:block th:each="warehouse : ${warehouseAdminList}">
     							 <option th:value="${warehouse.id}" th:text="${warehouse.id} + ' ' + ${warehouse.address} + ' ' + ${warehouse.city} + ' ' + ${warehouse.state}"></option>
     							 </th:block>
     						</select>
