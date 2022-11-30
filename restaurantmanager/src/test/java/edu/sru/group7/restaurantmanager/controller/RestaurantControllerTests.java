@@ -679,14 +679,16 @@ class RestaurantControllerTests {
 	
 	@Test
 	public void showServerSignUpFormTest() {
-		String ret = controller.showServerSignUpForm(new Servers());
+		String ret = controller.showServerSignUpForm(new Servers(), model);
 		assertEquals("LocalAdmin/add-server", ret, "showServerSignUpForm should return add-server form");
+		verify(model, times(1)).addAttribute(eq("restaurantAdminList"), ArgumentMatchers.anyIterable());
 	}
 	
 	@Test
 	public void showEmployeeSignUpFormTest() {
-		String ret = controller.showEmployeeSignUpForm(new WarehouseEmployees());
+		String ret = controller.showEmployeeSignUpForm(new WarehouseEmployees(), model);
 		assertEquals("LocalAdmin/add-warehouse-employee", ret, "showEmployeeSignUpForm should return add-warehouse-employee form");
+		verify(model, times(1)).addAttribute(eq("warehouseAdminList"), ArgumentMatchers.anyIterable());
 	}
 	
 	@Test
@@ -732,14 +734,16 @@ class RestaurantControllerTests {
 	
 	@Test
 	public void showManagerSignUpFormTest() {
-		String ret = controller.showManagerSignUpForm(new Managers());
+		String ret = controller.showManagerSignUpForm(new Managers(), model);
 		assertEquals("LocalAdmin/add-LFmanager", ret, "showManagerSignUpForm should return add-manager form");
+		verify(model, times(1)).addAttribute(eq("restaurantAdminList"), ArgumentMatchers.anyIterable());
 	}
 	
 	@Test
 	public void showAdminSignUpFormTest() {
 		String ret = controller.showAdminSignUpForm(new Admins(), model);
 		assertEquals("HQAdmin/add-LFadmin", ret, "showAdminSignUpForm should return add-admin form");
+		verify(model, times(1)).addAttribute(eq("restaurantAdminList"), ArgumentMatchers.anyIterable());
 	}
 	
 	@Test
