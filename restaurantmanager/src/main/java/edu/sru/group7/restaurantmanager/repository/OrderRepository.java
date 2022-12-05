@@ -24,13 +24,6 @@ public interface OrderRepository extends CrudRepository<Orders, Long> {
 	public List<Orders> findOrdersByLocation(Restaurants rest);
 	
 	/**
-	 * @param id Order Id
-	 * @return Order and all Menu Id's for the Order parameter
-	 */
-	@Query(value="SELECT menu_id FROM restaurantmanagerdb.orders_items WHERE order_id = :id", nativeQuery=true)
-	public List<Orders> findMenuItems(long id);
-
-	/**
 	 * 
 	 * @param id Customer Id
 	 * @return Order of Customer parameter with status of 'Pending Payment'
