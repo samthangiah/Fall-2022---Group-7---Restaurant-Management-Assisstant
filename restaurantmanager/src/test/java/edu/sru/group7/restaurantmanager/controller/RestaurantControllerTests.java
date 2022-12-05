@@ -743,7 +743,7 @@ class RestaurantControllerTests {
 	public void showAdminSignUpFormTest() {
 		String ret = controller.showAdminSignUpForm(new Admins(), model);
 		assertEquals("HQAdmin/add-LFadmin", ret, "showAdminSignUpForm should return add-admin form");
-		verify(model, times(1)).addAttribute(eq("restaurantAdminList"), ArgumentMatchers.anyIterable());
+		verify(model, times(1)).addAttribute(eq("listAdminRestaurant"), ArgumentMatchers.anyIterable());
 	}
 	
 	@Test

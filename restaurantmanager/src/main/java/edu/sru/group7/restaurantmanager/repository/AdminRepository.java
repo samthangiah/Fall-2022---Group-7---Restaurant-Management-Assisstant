@@ -1,6 +1,5 @@
 package edu.sru.group7.restaurantmanager.repository;
 
-import java.util.Collection;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Service;
 
@@ -15,9 +14,9 @@ public interface AdminRepository extends CrudRepository<Admins, Long> {
 	/**
 	 * Finds admins by their email
 	 * @param email 
-	 * @return
+	 * @return admin
 	 */
-	public Collection<? extends String> findAdminByEmail(String email);
+	public Admins findAdminByEmail(String email);
 
 }
 
